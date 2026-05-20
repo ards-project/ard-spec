@@ -666,4 +666,12 @@ Validate a running Agent Registry REST API:
 ./bin/conformance-test registry http://localhost:9010/api
 ```
 
+#### One-Click Conformance Demo
+
+To instantly run a complete end-to-end verification suite utilizing a pre-bundled spec-compliant catalog manifest and a lightweight running mock Registry REST API server, run the automated demo script:
+```bash
+./bin/run-conformance-demo
+```
+This script performs manifest schema validation, launches a mock registry server in the background, executes live search and listing queries against it using the conformance tester, and gracefully terminates the server when finished.
+
 

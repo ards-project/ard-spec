@@ -11,13 +11,20 @@ This directory contains the official, zero-dependency **Conformance Testing CLI 
 The CLI is written in Python and is **completely zero-dependency**, running out-of-the-box on any machine with standard Python 3.
 
 ### 1. Make Executable
-First, ensure the script has execution permissions:
+Ensure the test and demo runner scripts have execution permissions:
 ```bash
-chmod +x bin/conformance-test
+chmod +x bin/conformance-test bin/run-conformance-demo
 ```
 
-### 2. Run Verification
-Run the tool without arguments to view the usage instructions:
+### 2. Run the Automated One-Click Demo
+You can instantly verify both manifest validation and Registry API probing using our pre-bundled mock assets. Run the automated demo:
+```bash
+./bin/run-conformance-demo
+```
+This script validates a mock spec-compliant `ai-catalog.json` manifest, starts a lightweight mock registry API server in the background, executes live conformance probes against it, and automatically cleans up on completion.
+
+### 3. Run Manual CLI Checks
+You can also run the tester directly without arguments to view its manual commands:
 ```bash
 ./bin/conformance-test
 ```

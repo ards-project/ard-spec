@@ -1,0 +1,39 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Acme Enterprise AI Test Host",
+    "identifier": "did:web:acme.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:ai:acme.com:agent:assistant",
+      "displayName": "Corporate Assistant (A2A)",
+      "type": "application/a2a-agent-card+json",
+      "url": "https://api.acme.com/agents/assistant.json",
+      "description": "General-purpose corporate A2A assistant for internal workflows.",
+      "representativeQueries": [
+        "help me draft an email to the security working group",
+        "summarize my unread messages from Todd"
+      ]
+    },
+    {
+      "identifier": "urn:ai:acme.com:server:weather",
+      "displayName": "Weather Data Node",
+      "type": "application/mcp-server+json",
+      "url": "https://api.acme.com/mcp/weather.json",
+      "capabilities": ["WeatherTool", "ForecastTool"],
+      "description": "Enterprise weather MCP server for live telemetry.",
+      "representativeQueries": [
+        "what is the current wind speed in Chicago",
+        "get the 5-day forecast for Seattle"
+      ]
+    },
+    {
+      "identifier": "urn:ai:acme.com:catalog:engineering",
+      "displayName": "Engineering Sub-Catalog Reference",
+      "type": "application/ai-catalog+json",
+      "url": "https://acme.com/catalogs/engineering.json",
+      "description": "Nested catalog containing CI/CD and internal deployment agents."
+    }
+  ]
+}
