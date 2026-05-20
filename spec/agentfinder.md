@@ -706,7 +706,7 @@ search-result-item = {
 
 The JSON representation of the capability manifest hosted at `/.well-known/ai-catalog.json` and individual catalog entries are formally defined using the **JSON Schema (Draft 2020-12)** standard. 
 
-* **Authoritative Schema File**: [`spec/schemas/ai-catalog.schema.json`](file:///Users/jbu/Development/agentfinder/spec/schemas/ai-catalog.schema.json)
+* **Authoritative Schema File**: [`spec/schemas/ai-catalog.schema.json`](spec/schemas/ai-catalog.schema.json)
 * **Key Validation Enforcements**:
   * Pattern matching URN compliance rules for the logical `identifier` format (`^urn:ai:...`).
   * Strict Value-or-Reference exclusion logic (`oneOf` matching either `url` or `data`, preventing duplicate definitions).
@@ -721,7 +721,7 @@ npx ajv-cli validate -s spec/schemas/ai-catalog.schema.json -d path/to/ai-catalo
 
 The HTTP query interfaces (`POST /search` and `GET /agents`) exposed by compliant Agent Registries are formally defined using the **OpenAPI 3.1.0 Specification** in YAML.
 
-* **Authoritative Specification File**: [`spec/schemas/openapi.yaml`](file:///Users/jbu/Development/agentfinder/spec/schemas/openapi.yaml)
+* **Authoritative Specification File**: [`spec/schemas/openapi.yaml`](spec/schemas/openapi.yaml)
 * **Key Integration Benefits**:
   * Integrates paths, queries, status responses, and paging logic directly.
   * References the JSON Schema `ai-catalog.schema.json` schema files to ensure search and list return types are statically bound to the specification's schema constraints.
