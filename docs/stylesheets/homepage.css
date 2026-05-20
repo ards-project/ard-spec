@@ -1,0 +1,444 @@
+/* =============================================================
+   Agent Finder Homepage Style - Scoped under .landing-page
+   Implements wowed-at-first-glance premium web design
+   ============================================================= */
+
+/* Hide default material columns for a full-width landing experience */
+.md-content:has(.landing-page) {
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.md-main__inner:has(.landing-page) {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.md-content__inner:has(.landing-page) {
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+  padding: 0 clamp(16px, 4vw, 48px) !important;
+}
+
+body:has(.landing-page) {
+  overflow-x: hidden !important;
+}
+
+/* Landing page base styles */
+.landing-page {
+  --accent-color: #6366f1;
+  --accent-color-2: #3b82f6;
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+  --glow-1: rgba(99, 102, 241, 0.15);
+  --glow-2: rgba(59, 130, 246, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.03);
+
+  position: relative;
+  font-family: "Outfit", sans-serif;
+  line-height: 1.6;
+  color: var(--md-default-fg-color);
+  padding: 40px 0 100px 0;
+}
+
+/* Adapt theme colors for slate (dark mode) */
+html[data-md-color-scheme="slate"] .landing-page {
+  --card-bg: rgba(17, 24, 39, 0.7);
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --glow-1: rgba(99, 102, 241, 0.25);
+  --glow-2: rgba(59, 130, 246, 0.2);
+}
+
+/* Ambient glow backgrounds (Disabled for a simpler, cleaner minimal aesthetic) */
+.landing-page .glow-sphere {
+  display: none !important;
+}
+
+/* Grid layout for hero */
+.landing-page .hero-container {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(24px, 5vw, 64px);
+  align-items: center;
+  padding: 60px 0 100px 0;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 960px) {
+  .landing-page .hero-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 40px 0 60px 0;
+  }
+}
+
+/* Hero Text */
+.landing-page .hero-text h1 {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  margin-bottom: 24px;
+}
+
+.landing-page .hero-title-gradient {
+  color: #4f46e5 !important;
+}
+
+html[data-md-color-scheme="slate"] .landing-page .hero-title-gradient {
+  color: #818cf8 !important;
+}
+
+.landing-page .hero-subtitle {
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 36px;
+  font-weight: 450;
+  line-height: 1.5;
+}
+
+.landing-page .hero-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 960px) {
+  .landing-page .hero-buttons {
+    justify-content: center;
+  }
+}
+
+/* Interactive/Stylized Buttons */
+.landing-page .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: none;
+}
+
+.landing-page .btn-primary {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.landing-page .btn-primary:hover {
+  background-color: #4338ca !important;
+  transform: translateY(-1px);
+}
+
+html[data-md-color-scheme="slate"] .landing-page .btn-primary {
+  background-color: #6366f1 !important;
+}
+
+html[data-md-color-scheme="slate"] .landing-page .btn-primary:hover {
+  background-color: #4f46e5 !important;
+}
+
+.landing-page .btn-secondary {
+  background-color: transparent !important;
+  color: var(--md-default-fg-color) !important;
+  border: 1.5px solid var(--md-default-fg-color) !important;
+  box-shadow: none !important;
+}
+
+.landing-page .btn-secondary:hover {
+  background-color: var(--md-default-fg-color--lightest) !important;
+  transform: translateY(-1px);
+}
+
+/* Mac Window Code Preview (Simplified & Flattened) */
+.landing-page .mac-window {
+  background: var(--md-code-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.landing-page .mac-window:hover {
+  transform: translateY(-4px);
+}
+
+.landing-page .window-header {
+  background-color: #e2e8f0;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+html[data-md-color-scheme="slate"] .landing-page .window-header {
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.landing-page .window-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.landing-page .dot-red { background-color: #ff5f56; }
+.landing-page .dot-yellow { background-color: #ffbd2e; }
+.landing-page .dot-green { background-color: #27c93f; }
+
+.landing-page .window-title {
+  flex-grow: 1;
+  text-align: center;
+  font-family: var(--md-code-font);
+  font-size: 0.85rem;
+  color: #475569;
+  margin-right: 60px; /* Align center */
+}
+
+html[data-md-color-scheme="slate"] .landing-page .window-title {
+  color: #cbd5e1;
+}
+
+.landing-page .window-body {
+  padding: 24px;
+  background-color: #0b0f19 !important;
+  overflow-x: auto;
+  border-radius: 0 0 16px 16px;
+}
+
+/* Force dark-themed high-contrast code coloring for mockup window */
+.landing-page .mac-window pre {
+  background-color: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #e2e8f0 !important;
+  font-family: var(--md-code-font) !important;
+  font-size: 0.85rem !important;
+  box-shadow: none !important;
+  line-height: 1.6 !important;
+}
+
+.landing-page .mac-window .kw {
+  color: #f472b6 !important; /* Light vibrant pink */
+  font-weight: 600 !important;
+}
+
+.landing-page .mac-window .str {
+  color: #34d399 !important; /* Vibrant emerald */
+}
+
+.landing-page .mac-window .fn {
+  color: #60a5fa !important; /* Vibrant blue */
+}
+
+
+/* Interactive Search Simulation Sandbox */
+.landing-page .sandbox-container {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: clamp(24px, 5vw, 48px);
+  box-shadow: var(--card-shadow);
+  margin-bottom: 80px;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.landing-page .sandbox-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.landing-page .sandbox-header h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.landing-page .sandbox-header p {
+  color: var(--md-default-fg-color--light);
+}
+
+.landing-page .search-bar-sim {
+  display: flex;
+  background: var(--md-code-bg-color);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 6px 8px 6px 16px;
+  align-items: center;
+  max-width: 640px;
+  margin: 0 auto 32px auto;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.landing-page .search-bar-sim input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 1.05rem;
+  color: var(--md-default-fg-color);
+  outline: none;
+}
+
+.landing-page .search-bar-sim button {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.landing-page .results-sim {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.landing-page .result-card {
+  background: var(--md-code-bg-color);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+
+.landing-page .result-card:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+.landing-page .result-badge {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent-color);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  align-self: flex-start;
+  margin-bottom: 12px;
+}
+
+.landing-page .result-card h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.landing-page .result-card p {
+  font-size: 0.88rem;
+  color: var(--md-default-fg-color--light);
+  margin: 0 0 16px 0;
+}
+
+.landing-page .result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--md-default-fg-color--lighter);
+}
+
+.landing-page .result-score {
+  font-weight: 700;
+  color: #10b981;
+}
+
+/* Core Features Grid */
+.landing-page .features-section {
+  padding: 60px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.landing-page .features-section-header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 48px auto;
+}
+
+.landing-page .features-section-header h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -0.03em;
+}
+
+.landing-page .features-section-header p {
+  color: var(--md-default-fg-color--light);
+  font-size: 1.1rem;
+}
+
+.landing-page .features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.landing-page .feature-card {
+  background: var(--md-code-bg-color) !important;
+  border: 1px solid var(--md-default-fg-color--lightest) !important;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: none !important;
+  transition: all 0.25s ease;
+}
+
+.landing-page .feature-card:hover {
+  transform: translateY(-2px);
+  border-color: #4f46e5 !important;
+}
+
+html[data-md-color-scheme="slate"] .landing-page .feature-card:hover {
+  border-color: #818cf8 !important;
+}
+
+.landing-page .feature-icon {
+  background-color: var(--md-default-fg-color--lightest) !important;
+  color: #4f46e5 !important;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  font-size: 1.35rem;
+  box-shadow: none !important;
+}
+
+html[data-md-color-scheme="slate"] .landing-page .feature-icon {
+  color: #818cf8 !important;
+}
+
+.landing-page .feature-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.landing-page .feature-card p {
+  color: var(--md-default-fg-color--light);
+  font-size: 0.95rem;
+  margin: 0;
+}

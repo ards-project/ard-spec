@@ -1,0 +1,80 @@
+# Project information
+site_name: Agent Finder
+site_url: https://agentfinder.dev
+site_description: Federated Discovery and Search for AI Agents and Capabilities
+
+# Configuration
+theme:
+  name: material
+  custom_dir: overrides
+  font:
+    text: Outfit
+    code: Fira Code
+  palette:
+    - scheme: default
+      primary: white
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.tooltips
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.path
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      dedent_subsections: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+# Custom CSS
+extra_css:
+  - stylesheets/custom.css
+  - stylesheets/homepage.css
+
+# Plugins
+plugins:
+  - search
+
+# Navigation
+nav:
+  - Home: index.md
+  - Why Agent Finder: why.md
+  - Specifications:
+    - Agent Finder Spec: spec.md
+    - AI Catalog Spec: ai_catalog_spec.md
+  - Ecosystem:
+    - Implementations: implementations.md
