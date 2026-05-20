@@ -5,8 +5,8 @@ Agent Finder is designed as a **superset** of existing agent and tool discovery 
 **Q. Why not X?**  
 **A. Why not both?**  
 
-*   **Universal Envelope**: Anything—whether it is an MCP server, an ACP agent, a skill, or a traditional REST API—can get an AI Catalog "card."
-*   **Federated Indexing**: Once a card is published, it can be indexed by any Agent Finder registry. You don't have to choose between registries—Agent Finder can consume all of them.
+*   **Universal Envelope**: Anything can get an AI Catalog "card". It supports an MCP server, a skill, an ACP agent, an A2A agent, a traditional REST API, or whatever comes next.
+*   **Federated Indexing**: Once a card is published, it can be indexed by any Agent Finder registry. You don't have to choose between registries; Agent Finder can consume all of them or you can curate your own subset.
 
 ---
 

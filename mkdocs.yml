@@ -1,6 +1,6 @@
 # Project information
 site_name: Agent Finder
-site_url: https://zeroasterisk.github.io/agentfinder/
+site_url: https://agentfinder-project.github.io/agentfinder/
 site_description: Federated Discovery and Search for AI Agents and Capabilities
 
 # Configuration
@@ -82,6 +82,7 @@ nav:
   - Guides:
     - How to publish: how_to_publish.md
     - How agents search: how_agents_search.md
+    - How to build a search: how_to_build_search.md
   - Specifications:
     - Agent Finder Spec: spec.md
     - AI Catalog Spec: ai_catalog_spec.md
