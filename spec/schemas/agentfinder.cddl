@@ -1,0 +1,123 @@
+; CDDL Specification for Agent Finder (ai-catalog & Registry schemas)
+; Compliant with IETF RFC 8610 (Concise Data Definition Language)
+
+start = ai-catalog-manifest
+
+; --- The Manifest Schema ---
+
+ai-catalog-manifest = {
+  specVersion: "1.0",
+  ? host: host-info,
+  entries: [+ catalog-entry],
+  ? collections: [+ catalog-collection]
+}
+
+host-info = {
+  displayName: tstr,
+  ? identifier: tstr,
+  ? documentationUrl: tstr,
+  ? logoUrl: tstr,
+  ? trustManifest: trust-manifest
+}
+
+catalog-collection = {
+  displayName: tstr,
+  url: tstr,
+  ? description: tstr
+}
+
+catalog-entry = {
+  identifier: tstr, ; URN pattern: urn:ai:<publisher>:<namespace>:<agent-name>
+  displayName: tstr,
+  type: tstr, ; IANA Media Type (e.g. application/mcp-server+json)
+  
+  ; Strict Value-or-Reference pattern
+  content-delivery,
+  
+  ? description: tstr,
+  ? tags: [+ tstr],
+  ? capabilities: [+ tstr],
+  ? representativeQueries: [2*5 tstr], ; Between 2 and 5 representative queries
+  ? version: tstr,
+  ? updatedAt: tstr, ; ISO 8601 timestamp
+  ? metadata: {* tstr => any},
+  ? trustManifest: trust-manifest
+}
+
+content-delivery = (
+  url: tstr //
+  data: {* tstr => any}
+)
+
+; --- The Zero-Trust / Compliance Envelope ---
+
+trust-manifest = {
+  identity: tstr, ; SPIFFE, DID, or FQDN URI
+  ? identityType: "spiffe" / "did" / "https" / "other",
+  ? attestations: [+ attestation],
+  ? provenance: [+ provenance-link],
+  ? signature: tstr
+}
+
+attestation = {
+  type: tstr,
+  uri: tstr,
+  mediaType: tstr,
+  ? digest: tstr
+}
+
+provenance-link = {
+  relation: "derivedFrom" / "publishedFrom" / "copiedFrom",
+  sourceId: tstr,
+  ? sourceDigest: tstr
+}
+
+; --- The Search Registry API Payloads ---
+
+search-request = {
+  query: {
+    text: tstr,
+    ? type: tstr,
+    ? compliance: tstr,
+    ? publisher: tstr,
+    ? federation: "auto" / "referrals" / "none"
+  },
+  ? pageSize: uint,
+  ? pageToken: tstr
+}
+
+search-response = {
+  results: [+ search-result-item],
+  ? referrals: [+ registry-referral],
+  ? pageToken: tstr
+}
+
+search-result-item = {
+  catalog-entry,
+  score: 0..100, ; Semantic relevance score
+  source: tstr   ; Registry base URL
+}
+
+registry-referral = {
+  identifier: tstr,
+  displayName: tstr,
+  type: "application/ai-registry" / "application/ai-registry+json",
+  url: tstr
+}
+
+list-response = {
+  items: [+ catalog-entry],
+  ? total: uint,
+  ? pageToken: tstr
+}
+
+error-response = {
+  errorCode: tstr,
+  message: tstr
+}
+
+; Helper generic value type
+any = any-cbor / any-json
+any-cbor = bool / int / float / tstr / bstr / [+ any-cbor] / {* any-cbor => any-cbor}
+any-json = bool / int / float / tstr / null / [+ any-json] / {* tstr => any-json}
+null = nil

@@ -604,33 +604,127 @@ Restricting the discovery identifier to this specific URN format, rather than al
 
 To support automated validation, testing, and machine-readable compliance checking, this specification defines formal schemas for both the catalog metadata manifests and the Registry REST API. 
 
-The schema specifications use industry-standard formats optimized for validation and integration tooling:
+The schema specifications are provided across three distinct formats, serving different operational roles within the systems architecture:
+1. **CDDL (Appendix D.1)**: The authoritative, abstract structural syntax definition. It provides an extremely concise, human-readable algebraic grammar optimized for formal IETF standards-track drafts, supporting both JSON and CBOR binary encodings natively.
+2. **JSON Schema (Appendix D.2)**: The active web data validation schema, optimized for automated runtime client and server compliance checking in JSON-native development environments.
+3. **OpenAPI (Appendix D.3)**: The REST endpoint specification, defining HTTP parameters, paths, status codes, and error schemas for integration with standard web gateways and client code-generators.
 
-### D.1 The `ai-catalog.json` Manifest Schema (JSON Schema)
+### D.1 The Authoritative CDDL Specification (RFC 8610)
 
-The capability manifest hosted at `/.well-known/ai-catalog.json` and individual catalog entry payloads are formally defined using the **JSON Schema (Draft 2020-12)** standard. 
+The core data structures for the `ai-catalog.json` manifest, `CatalogEntry` models, zero-trust `trustManifest` security envelope, and Search Registry API payloads are formally specified using **Concise Data Definition Language (CDDL - RFC 8610)**. 
 
-* **Authoritative Schema File**: [`spec/schemas/ai-catalog.schema.json`](file:///Users/jbu/Development/agentfinder/spec/schemas/ai-catalog.schema.json)
-* **Key Features**:
-  * Mandates strict URN pattern validation for `identifier` complying with the domain-anchored `urn:ai` format.
-  * Enforces the strict **Value-or-Reference** pattern requiring exactly one of `url` or `data` to be provided.
-  * Integrates detailed structure checks for the progressive `trustManifest` envelope, including attestations and signature fields.
+* **Authoritative Schema File**: [`spec/schemas/agentfinder.cddl`](file:///Users/jbu/Development/agentfinder/spec/schemas/agentfinder.cddl)
 
-To validate a local manifest file against the schema using standard Python or Node validation CLI tools:
-```bash
-# Example validation using ajv-cli (Node)
-npx ajv-cli validate -s spec/schemas/ai-catalog.schema.json -d path/to/your/ai-catalog.json
+```cddl
+; CDDL Specification for Agent Finder (ai-catalog & Registry schemas)
+; Compliant with IETF RFC 8610
+
+start = ai-catalog-manifest
+
+ai-catalog-manifest = {
+  specVersion: "1.0",
+  ? host: host-info,
+  entries: [+ catalog-entry],
+  ? collections: [+ catalog-collection]
+}
+
+host-info = {
+  displayName: tstr,
+  ? identifier: tstr,
+  ? documentationUrl: tstr,
+  ? logoUrl: tstr,
+  ? trustManifest: trust-manifest
+}
+
+catalog-entry = {
+  identifier: tstr, ; URN: urn:ai:<publisher>:<namespace>:<agent-name>
+  displayName: tstr,
+  type: tstr,       ; IANA Media Type (e.g., application/mcp-server+json)
+  content-delivery,
+  ? description: tstr,
+  ? tags: [+ tstr],
+  ? capabilities: [+ tstr],
+  ? representativeQueries: [2*5 tstr],
+  ? version: tstr,
+  ? updatedAt: tstr,
+  ? metadata: {* tstr => any},
+  ? trustManifest: trust-manifest
+}
+
+content-delivery = (
+  url: tstr //
+  data: {* tstr => any}
+)
+
+trust-manifest = {
+  identity: tstr,
+  ? identityType: "spiffe" / "did" / "https" / "other",
+  ? attestations: [+ attestation],
+  ? provenance: [+ provenance-link],
+  ? signature: tstr
+}
+
+attestation = {
+  type: tstr,
+  uri: tstr,
+  mediaType: tstr,
+  ? digest: tstr
+}
+
+provenance-link = {
+  relation: "derivedFrom" / "publishedFrom" / "copiedFrom",
+  sourceId: tstr,
+  ? sourceDigest: tstr
+}
+
+search-request = {
+  query: {
+    text: tstr,
+    ? type: tstr,
+    ? compliance: tstr,
+    ? publisher: tstr,
+    ? federation: "auto" / "referrals" / "none"
+  },
+  ? pageSize: uint,
+  ? pageToken: tstr
+}
+
+search-response = {
+  results: [+ search-result-item],
+  ? referrals: [+ registry-referral],
+  ? pageToken: tstr
+}
+
+search-result-item = {
+  catalog-entry,
+  score: 0..100,
+  source: tstr
+}
 ```
 
-### D.2 The Registry REST API Specification (OpenAPI)
+### D.2 The `ai-catalog.json` Manifest Schema (JSON Schema)
 
-The HTTP REST query interfaces (`POST /search` and `GET /agents`) exposed by compliant Agent Registries are formally defined using the **OpenAPI 3.1.0 Specification** in YAML format.
+The JSON representation of the capability manifest hosted at `/.well-known/ai-catalog.json` and individual catalog entries are formally defined using the **JSON Schema (Draft 2020-12)** standard. 
+
+* **Authoritative Schema File**: [`spec/schemas/ai-catalog.schema.json`](file:///Users/jbu/Development/agentfinder/spec/schemas/ai-catalog.schema.json)
+* **Key Validation Enforcements**:
+  * Pattern matching URN compliance rules for the logical `identifier` format (`^urn:ai:...`).
+  * Strict Value-or-Reference exclusion logic (`oneOf` matching either `url` or `data`, preventing duplicate definitions).
+  * Struct checking for SPIFFE/DID compliance in `trustManifest` and `attestations` objects.
+
+To validate local catalog manifest JSON files on a system using AJV CLI:
+```bash
+npx ajv-cli validate -s spec/schemas/ai-catalog.schema.json -d path/to/ai-catalog.json
+```
+
+### D.3 The Registry REST API Specification (OpenAPI)
+
+The HTTP query interfaces (`POST /search` and `GET /agents`) exposed by compliant Agent Registries are formally defined using the **OpenAPI 3.1.0 Specification** in YAML.
 
 * **Authoritative Specification File**: [`spec/schemas/openapi.yaml`](file:///Users/jbu/Development/agentfinder/spec/schemas/openapi.yaml)
-* **Key Features**:
-  * Defines paths, request/response structures, query filters, and standard error code mappings.
-  * Integrates references to the `ai-catalog.schema.json` JSON Schema files directly to reuse catalog entry payload validators for search query results and browsing lists.
-  * Models registry-to-registry query routing parameter envelopes (such as the `federation` query parameter enum and `referrals` array payloads).
+* **Key Integration Benefits**:
+  * Integrates paths, queries, status responses, and paging logic directly.
+  * References the JSON Schema `ai-catalog.schema.json` schema files to ensure search and list return types are statically bound to the specification's schema constraints.
+  * Allows automated router middleware enforcement and client/server stub generation (using tools like OpenAPI Generator).
 
-This YAML specification can be imported directly into API routers, API gateways, mock servers, or client SDK generator engines (like OpenAPI Generator).
 
