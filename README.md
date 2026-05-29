@@ -110,9 +110,9 @@ Registries support three client-controlled federation models:
 
 ## 📌 Version Status
 
-* **Specification Version**: `v0.4.2 (Draft)`
+* **Specification Version**: `v0.5 (Draft)`
 * **Status**: Proposal
-* **Latest Revision**: May 5, 2026
+* **Latest Revision**: May 28, 2026
 
 ---
 

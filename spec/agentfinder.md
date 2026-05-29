@@ -2,9 +2,9 @@
 
 **Federated Discovery and Search for Agents**
 
-**Version**: v0.4.2 (Draft)  
+**Version**: v0.5 (Draft)  
 **Status**: Proposal  
-**Date**: May 5, 2026
+**Date**: May 28, 2026
 
 ## 1\. Overview
 
@@ -406,32 +406,62 @@ Agent Registry instances populate their indexes through ingestion pipelines:
 
 An Agent Registry **MUST** expose a standard HTTP REST search interface to guarantee universal federation. The operational base URL for these endpoints is discovered dynamically by identifying catalog entries within the static ai-catalog.json manifest that carry the application/ai-registry+json media type, as defined in §4.1.
 
-### 7.1 Search (POST /search)
+### 7.1 The Query Model
 
-Accepts a natural language query with optional structured constraints. Returns catalog entries ranked by relevance.
+The `POST /search` and `POST /explore` endpoints accept a common `query` object with two members, `text` and `filter`. Each endpoint defines its own additional parameters alongside `query` (see §7.2 and §7.3) and its own presence requirements for `text` and `filter`.
 
-**Request Schema:**
-
-```
+```json
 {
   "query": {
     "text": "find me a flight booking agent",
-    "type": "application/a2a-agent-card+json",
-    "compliance": "hipaa",
-    "federation": "referrals"
-  },
-  "pageSize": 5
+    "filter": {
+      "type": ["application/a2a-agent-card+json"],
+      "tags": ["finance"],
+      "trustManifest.attestations.type": ["SOC2-Type2"]
+    }
+  }
 }
 ```
 
 | Field | Type | Description |
 | :---- | :---- | :---- |
-| query | Object | Required. Contains the search criteria (see fields below). |
-| query.text | String | Required (inside query). Natural language description of the need. |
-| query.type | String | Optional (inside query). Filter by artifact type. |
-| query.compliance | String | Optional (inside query). Filter by compliance requirement. |
-| query.publisher | String | Optional (inside query). Filter by publisher name or identifier. |
-| query.federation | String | Optional (inside query). auto (default), referrals, or none. |
+| text | String | Natural-language description of the need. Narrows the result set by semantic relevance. |
+| filter | Object | Structured constraints. Keys are field paths into the catalog entry; values are arrays (a bare scalar is accepted as a single-element array). |
+
+`text` and `filter` compose: an entry is in the matched set if it satisfies the relevance criteria for `text` (when present) AND every constraint in `filter` (when present).
+
+**Filter Semantics**: Field paths are dot-separated to address nested fields (e.g. `trustManifest.attestations.type`). When the value at a path is an array, a constraint matches if any element satisfies it. Within a single key, values are combined with OR; across keys, with AND.
+
+**Extensibility**: Any attribute present in a catalog entry MAY be used as a filter key — standard fields (type, tags, capabilities, publisher, version, …), nested fields under `trustManifest` or `host`, custom `metadata.*` fields, and `Schema.org`-vocabulary fields (§4.5). New attributes become filterable without changes to this specification.
+
+The `publisher` key is derived from the `<publisher>` segment of an entry's URN identifier (§4.2.1), not a stored field; registries extract it from the identifier.
+
+**Registry Support**: Registries SHOULD support filtering on common standard fields; support for `metadata.*` and other extension fields is registry-defined. A registry MAY reject a filter that references an unsupported field path with a 400 error.
+
+### 7.2 Search (POST /search)
+
+Accepts a `query` (§7.1) and returns catalog entries ranked by relevance. For Search, `text` is required; `filter` is optional.
+
+**Request Schema:**
+
+```json
+{
+  "query": {
+    "text": "find me a flight booking agent",
+    "filter": {
+      "type": ["application/a2a-agent-card+json"]
+    }
+  },
+  "federation": "referrals",
+  "pageSize": 5
+}
+```
+
+In addition to the `query` object (§7.1), Search accepts:
+
+| Field | Type | Description |
+| :---- | :---- | :---- |
+| federation | String | Optional. auto (default), referrals, or none. |
 | pageSize | Integer | Optional (root-level). Max results to return per page (default: 10, max: 100). |
 | pageToken | String | Optional (root-level). Pagination token to retrieve the next page. |
 
@@ -472,18 +502,83 @@ The response returns standard catalog entries with additional relevance scores, 
 }
 ```
 
-### 7.1.1 Query Processing and Resolution (Informative)
+### 7.2.1 Query Processing and Resolution (Informative)
 
 While this specification mandates the REST interface for interoperability, implementations may employ advanced techniques to resolve natural language queries to specific agent endpoints. An example flow, drawing from research on Agent Naming Services (ANS) and Federated Registries, involves the following steps:
 
 1. **Semantic Translation & Embedding**:  
-   * **LLM Query Interpretation**: The Registry uses an LLM to extract specific multi-dimensional requirements from the natural language text field, translating it into structured capability attributes (e.g., domain: travel, skill: flight\_booking, constraints: meal\_preference).  
+   * **LLM Query Interpretation**: The Registry uses an LLM to extract specific multi-dimensional requirements from the natural language text field, translating it into structured capability attributes (e.g., domain: travel, skill: flight_booking, constraints: meal_preference).  
    * **Vector Embeddings**: The Registry may also convert the query description into a dense vector embedding to understand semantic meaning (e.g., matching "foreign exchange" to "forex" or "international money transfer").  
 2. **Global Discovery via Federated Routing**:  
    * Advanced implementations may execute this query against a federated network. For example, using semantic attributes or embedding vectors to perform a search across a Distributed Hash Table (DHT) (e.g., an extended IPFS Kademlia DHT) or by leveraging **DNS-AID** to discover authoritative registries for specific domains.  
    * This maps the semantic capabilities to cryptographic digests or endpoints of agents that possess those skills across the federated network.
 
-### 7.2 List (GET /agents) — Optional
+### 7.3 Explore (POST /explore) — Optional
+
+Accepts a `query` (§7.1) and returns an aggregation over the matched set rather than ranked entries. Explore lets clients introspect a registry — for example, "which media types are available?" — and obtain facet breakdowns narrowed by the same `text` and `filter` as Search. For Explore, `text` and `filter` are both optional; when both are absent, the aggregation covers the entire registry.
+
+**Request Schema:**
+
+```json
+{
+  "query": {
+    "text": "currency conversion",
+    "filter": {
+      "trustManifest.attestations.type": ["SOC2-Type2"]
+    }
+  },
+  "resultType": {
+    "facets": [
+      { "field": "type" },
+      { "field": "publisher", "limit": 50 }
+    ]
+  }
+}
+```
+
+In addition to the `query` object (§7.1), Explore accepts:
+
+| Field | Type | Description |
+| :---- | :---- | :---- |
+| resultType | Object | Required. The shape of result to compute. The only defined shape is facets (below); future shapes such as counts or sample extend this field without protocol changes. |
+
+Each element of `resultType.facets`:
+
+| Field | Type | Description |
+| :---- | :---- | :---- |
+| field | String | Required. Field path to aggregate (same syntax as filter keys, §7.1). |
+| limit | Integer | Optional. Maximum number of buckets returned. Default: 20. |
+| minCount | Integer | Optional. Suppress buckets with counts below this threshold. |
+
+**Response Schema:**
+
+```json
+{
+  "resultType": "facets",
+  "facets": {
+    "type": {
+      "buckets": [
+        { "value": "application/mcp-server+json", "count": 1247 },
+        { "value": "application/a2a-agent-card+json", "count": 389 }
+      ],
+      "otherCount": 23
+    },
+    "publisher": {
+      "buckets": [
+        { "value": "acme.com", "count": 412 }
+      ]
+    }
+  }
+}
+```
+
+Each bucket carries `value` and SHOULD carry `count` (the number of matching entries; a registry MAY omit it where counts cannot be computed efficiently). `otherCount` reports the number of matching entries in buckets beyond `limit`.
+
+Facets are computed over the full matched set, not a single page. For semantic text queries, the registry applies a relevance cutoff: entries whose relevance falls below the cutoff are excluded from the matched set. The cutoff is registry-defined, but within a single registry the same cutoff governs both Search results and Explore facets. The cutoff and the relevance score (§7.2) reflect relevance only and MUST NOT be interpreted as a trust, compliance, or safety judgment.
+
+Explore does not federate; it is scoped to the registry queried. Federated discovery is the role of Search (§8). A registry that does not implement Explore returns a `501 Not Implemented` HTTP status code.
+
+### 7.4 List (GET /agents) — Optional
 
 Deterministic browsing, designed for developer portals. Highly cacheable, relies on strict database filtering, and does not support relevance-based sorting.
 
@@ -492,7 +587,7 @@ Deterministic browsing, designed for developer portals. Highly cacheable, relies
 | Parameter | Type | Description |
 | :---- | :---- | :---- |
 | filter | String | EBNF filter expression. |
-| orderBy | String | Sorting fields (e.g., name, created\_at DESC). |
+| orderBy | String | Sorting fields (e.g., name, created_at DESC). |
 | pageSize | Integer | Max results (default: 20, max: 100). |
 | pageToken | String | Pagination token. |
 
