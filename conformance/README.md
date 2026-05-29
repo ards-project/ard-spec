@@ -81,14 +81,14 @@ When checking a live Agent Registry server, the tool executes the following prob
   * If not supported (returns `404` or `501`), it marks this as compliant since deterministic listing is optional.
 * **POST `/search` (Mandated Search Probe)**:
   * Probes the search route which is required for dynamic semantic capability discovery.
-  * Sends a mock natural-language query payload with specific routing parameters (`federation: none`).
-  * Verifies a `200 OK` response structure.
-* **Search Result Envelope Checking**:
-  * Validates that the returned search payload contains a compliant `"results"` array.
-  * Inspects each item in the results list to ensure it defines the registry-specific fields:
-    * `"score"`: Verifies it is an integer between `0` and `100` representing semantic relevance ranking (Informative).
-    * `"source"`: Checks that the source registry base URL is defined.
+  * Sends a mock natural-language query payload with required `query` string and optional `filter` / `limit` parameters.
+  * Verifies a `200 OK` response structure containing a `"results"` array.
   * Validates that the nested payload structure is a valid `CatalogEntry` (contains `identifier`, `displayName`, `type`, and `url` or `data`).
+* **POST `/explore` (Optional Introspection Probe)**:
+  * Probes the dynamic introspection route for facet and bucketing generation.
+  * Sends a mock request requesting facet counts grouped by `type`.
+  * Verifies a `200 OK` response returning a valid `"resultType"` and `"facets"` Object.
+  * If unsupported (returns `404` or `501`), it marks this as compliant since explore is optional.
 
 ---
 
