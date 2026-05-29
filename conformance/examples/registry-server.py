@@ -141,6 +141,45 @@ class MockRegistryHandler(BaseHTTPRequestHandler):
                 "pageToken": None
             }
             self._send_json(200, response)
+        elif parsed_path.path == "/explore":
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length == 0:
+                error = {"errorCode": "INVALID_ARGUMENT", "message": "Missing request body."}
+                self._send_json(400, error)
+                return
+
+            try:
+                body_data = self.rfile.read(content_length).decode('utf-8')
+                req = json.loads(body_data)
+            except Exception as e:
+                error = {"errorCode": "INVALID_ARGUMENT", "message": f"Invalid JSON: {e}"}
+                self._send_json(400, error)
+                return
+
+            result_type = req.get("resultType", {})
+            facets_req = result_type.get("facets", [])
+
+            if not facets_req:
+                error = {"errorCode": "INVALID_ARGUMENT", "message": "Missing required 'resultType.facets' parameter."}
+                self._send_json(400, error)
+                return
+
+            # Compute dynamic facets over mock dataset
+            type_counts = {}
+            for entry in MOCK_CATALOG_ENTRIES:
+                etype = entry.get("type", "unknown")
+                type_counts[etype] = type_counts.get(etype, 0) + 1
+
+            facets_response = {
+                "resultType": "facets",
+                "facets": {
+                    "type": {
+                        "buckets": [{"value": k, "count": v} for k, v in type_counts.items()],
+                        "otherCount": 0
+                    }
+                }
+            }
+            self._send_json(200, facets_response)
         else:
             error_response = {
                 "errorCode": "NOT_FOUND",
