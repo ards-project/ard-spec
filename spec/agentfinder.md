@@ -64,7 +64,7 @@ The capability manifest (the file publishers host to advertise their agents) is 
 
 A manifest file hosted at /.well-known/ai-catalog.json lists the available artifacts.
 
-```
+```json
 {
   "specVersion": "1.0",
   "host": {
@@ -222,7 +222,7 @@ No complex identity ceremony or cloud account required.
 
 An agent hosted on Hugging Face Spaces (MCP), published in a manifest:
 
-```
+```json
 {
   "specVersion": "1.0",
   "host": { "displayName": "Alice's AI Tools" },
@@ -253,7 +253,7 @@ An agent hosted on Hugging Face Spaces (MCP), published in a manifest:
 
 A skill hosted on GitHub, published in a manifest:
 
-```
+```json
 {
   "specVersion": "1.0",
   "host": { "displayName": "Alice's AI Tools" },
@@ -271,7 +271,7 @@ A skill hosted on GitHub, published in a manifest:
 
 Discovery via GitHub Pages (combining the above):
 
-```
+```json
 {
   "specVersion": "1.0",
   "host": { "displayName": "Alice's AI Tools" },
@@ -296,7 +296,7 @@ Discovery via GitHub Pages (combining the above):
 
 Using trustManifest for compliance, published in a manifest.
 
-```
+```json
 {
   "specVersion": "1.0",
   "host": {
@@ -469,7 +469,7 @@ In addition to the `query` object (§7.1), Search accepts:
 
 The response returns standard catalog entries with additional relevance scores, plus optional referrals. The score parameter denotes **semantic relevance ranking** (0-100) computed by the search registry, indicating how well the entry satisfies the natural language query criteria. It is strictly an informational relevance metric and MUST NOT be interpreted by orchestrators as a cryptographic trust, compliance, or safety rating. Trust evaluation is fully decoupled and handled independently via the verification procedures in the trustManifest layer.
 
-```
+```json
 {
   "results": [
     {
@@ -622,7 +622,7 @@ This gives the client full control over the federation topology without requirin
 
 **Response:**
 
-```
+```json
 {
   "results": [
     {
