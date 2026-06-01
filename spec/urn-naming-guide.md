@@ -25,7 +25,7 @@ When running and testing agents locally, developers may be tempted to structure 
 
 Using `'localhost'` as the URN publisher is not allowed for the following reasons:
 
-1. **Decentralized Trust and Verification**: Under the Agent Finder identity model, the `<publisher>` segment of a URN must be a Fully Qualified Domain Name (FQDN). Registries and orchestrators extract this domain (e.g., `acme.com`) and cross-reference it against cryptographic attestations (like SPIFFE SVIDs or DIDs) within the `trustManifest` to verify authority. Since `localhost` is not a publicly resolvable, cryptographically verifiable domain, it breaks the decentralized trust model.
+1. **Decentralized Trust and Verification**: Under the Agent Finder identity model, the `<publisher>` segment of a URN must be a Fully Qualified Domain Name (FQDN). Registries and orchestrators extract this domain (e.g., `example.com`) and cross-reference it against cryptographic attestations (like SPIFFE SVIDs or DIDs) within the `trustManifest` to verify authority. Since `localhost` is not a publicly resolvable, cryptographically verifiable domain, it breaks the decentralized trust model.
 2. **Namespace Collisions**: In a federated registry system, namespaces must be globally unique to avoid collisions. If multiple developers register their local agents using the `localhost` publisher, naming conflicts will occur as soon as those catalogs are merged or indexed.
 3. **Nomenclature Instability**: The fact that an agent is currently running on localhost is a transient deployment detail. The URN represents the permanent contract; physical endpoint addresses belong in the operational transport configurations.
 
@@ -83,12 +83,12 @@ Since domain names are already globally unique via the DNS root, anchoring your 
 ---
 
 ### Scenario C: Enterprise Developers or Developers with a Verified Domain
-For developers inside an enterprise or those who own a custom domain (e.g., `acme.com`), they should use their real FQDN as the URN publisher even when developing and running locally. 
+For developers inside an enterprise or those who own a custom domain (e.g., `example.com`), they should use their real FQDN as the URN publisher even when developing and running locally. 
 
 This ensures that the URN remains completely identical between their local development, staging, and production catalogs, avoiding the need to rewrite downstream orchestration rules or client references.
 
 * **Guidance**:
-  * **URN (Identity)**: Use the real FQDN (e.g., `urn:ai:acme.com:finance:tax-agent`).
+  * **URN (Identity)**: Use the real FQDN (e.g., `urn:ai:example.com:finance:tax-agent`).
   * **Physical Endpoint**: Point to `localhost` in the local development manifest, and to the production gateway or API host in the production manifest.
 
 #### Local Manifest Example (`ai-catalog-local.json`):
@@ -97,11 +97,11 @@ This ensures that the URN remains completely identical between their local devel
   "specVersion": "1.0",
   "host": {
     "displayName": "Acme Finance Local Dev",
-    "identifier": "did:web:dev.acme.com"
+    "identifier": "did:web:dev.example.com"
   },
   "entries": [
     {
-      "identifier": "urn:ai:acme.com:finance:tax-agent",
+      "identifier": "urn:ai:example.com:finance:tax-agent",
       "displayName": "Corporate Tax Assistant",
       "type": "application/a2a-agent-card+json",
       "url": "http://localhost:8000/agents/tax-assistant",
@@ -111,28 +111,28 @@ This ensures that the URN remains completely identical between their local devel
 }
 ```
 
-#### Production Manifest Example (`ai-catalog.json` hosted at `https://acme.com/.well-known/ai-catalog.json`):
+#### Production Manifest Example (`ai-catalog.json` hosted at `https://example.com/.well-known/ai-catalog.json`):
 ```json
 {
   "specVersion": "1.0",
   "host": {
     "displayName": "Acme Corporation",
-    "identifier": "did:web:acme.com"
+    "identifier": "did:web:example.com"
   },
   "entries": [
     {
-      "identifier": "urn:ai:acme.com:finance:tax-agent",
+      "identifier": "urn:ai:example.com:finance:tax-agent",
       "displayName": "Corporate Tax Assistant",
       "type": "application/a2a-agent-card+json",
-      "url": "https://api.acme.com/finance/tax-assistant",
+      "url": "https://api.example.com/finance/tax-assistant",
       "description": "Official Corporate Tax Assistant with production identity verification.",
       "trustManifest": {
-        "identity": "spiffe://acme.com/finance/tax-agent",
+        "identity": "spiffe://example.com/finance/tax-agent",
         "identityType": "spiffe",
         "attestations": [
           {
             "type": "SOC2-Type2",
-            "uri": "https://trust.acme.com/soc2.pdf"
+            "uri": "https://trust.example.com/soc2.pdf"
           }
         ]
       }

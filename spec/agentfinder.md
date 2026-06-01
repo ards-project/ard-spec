@@ -69,14 +69,14 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
   "specVersion": "1.0",
   "host": {
     "displayName": "Acme Enterprise AI",
-    "identifier": "did:web:acme.com"
+    "identifier": "did:web:example.com"
   },
   "entries": [
     {
-      "identifier": "urn:ai:acme.com:agent:assistant",
+      "identifier": "urn:ai:example.com:agent:assistant",
       "displayName": "Corporate Assistant (A2A)",
       "type": "application/a2a-agent-card+json",
-      "url": "https://api.acme.com/agents/assistant.json",
+      "url": "https://api.example.com/agents/assistant.json",
       "description": "General-purpose corporate A2A assistant.",
       "representativeQueries": [
         "help me draft an email to the security working group",
@@ -84,10 +84,10 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
       ]
     },
     {
-      "identifier": "urn:ai:acme.com:server:weather",
+      "identifier": "urn:ai:example.com:server:weather",
       "displayName": "Weather Data Node",
       "type": "application/mcp-server+json",
-      "url": "https://api.acme.com/mcp/weather.json",
+      "url": "https://api.example.com/mcp/weather.json",
       "capabilities": ["WeatherTool", "ForecastTool"],
       "description": "Enterprise weather MCP server for live telemetry.",
       "representativeQueries": [
@@ -96,7 +96,7 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
       ]
     },
     {
-      "identifier": "urn:ai:acme.com:plugin:finance-suite",
+      "identifier": "urn:ai:example.com:plugin:finance-suite",
       "displayName": "Finance Tool Bundle",
       "type": "application/ai-catalog+json",
       "description": "A static nested bundle containing an A2A agent and its required market dataset.",
@@ -105,49 +105,49 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
         "specVersion": "1.0",
         "entries": [
           {
-            "identifier": "urn:ai:acme.com:finance:a2a",
+            "identifier": "urn:ai:example.com:finance:a2a",
             "displayName": "Finance Trading Agent",
             "type": "application/a2a-agent-card+json",
-            "url": "https://api.acme.com/agents/finance-trader.json"
+            "url": "https://api.example.com/agents/finance-trader.json"
           },
           {
-            "identifier": "urn:ai:acme.com:market:2026",
+            "identifier": "urn:ai:example.com:market:2026",
             "displayName": "Market Dataset 2026",
             "type": "application/parquet",
-            "url": "https://data.acme.com/market-2026.parquet"
+            "url": "https://data.example.com/market-2026.parquet"
           }
         ]
       }
     },
     {
-      "identifier": "urn:ai:acme.com:registry:global",
+      "identifier": "urn:ai:example.com:registry:global",
       "displayName": "Acme Global Agent Registry",
       "type": "application/ai-registry+json",
-      "url": "https://registry.acme.com/api/v1/",
+      "url": "https://registry.example.com/api/v1/",
       "description": "Dynamic REST API search interface to discover all approved enterprise agents.",
       "tags": ["registry", "search", "dynamic"],
       "trustManifest": {
-        "identity": "spiffe://acme.com/registry/global",
+        "identity": "spiffe://example.com/registry/global",
         "identityType": "spiffe",
         "attestations": [
           {
             "type": "SPIFFE-X509",
-            "uri": "https://acme.com/.well-known/spiffe/jwks",
+            "uri": "https://example.com/.well-known/spiffe/jwks",
             "mediaType": "application/json"
           },
           {
             "type": "SOC2-Type2",
-            "uri": "https://trust.acme.com/reports/soc2.pdf",
+            "uri": "https://trust.example.com/reports/soc2.pdf",
             "mediaType": "application/pdf"
           }
         ]
       }
     },
     {
-      "identifier": "urn:ai:acme.com:catalog:engineering",
+      "identifier": "urn:ai:example.com:catalog:engineering",
       "displayName": "Engineering Department Catalogs",
       "type": "application/ai-catalog+json",
-      "url": "https://acme.com/catalogs/engineering.json",
+      "url": "https://example.com/catalogs/engineering.json",
       "description": "Sub-catalogs containing CI/CD and internal deployment agents."
     }
   ]
@@ -196,7 +196,7 @@ urn:ai:<publisher>:<namespace>:<agent-name>
 
 * **urn**: Mandatory prefix indicating a Uniform Resource Name.  
 * **ai**: The Namespace Identifier (NID), designating the AI artifact and agent discovery ecosystem.  
-* **\<publisher\>**: The Namespace Specific String (NSS) root. MUST be a fully qualified domain name (FQDN) representing the publisher or host organization (e.g., acme.com, github.com). This domain acts as the organizational trust anchor and MUST be verifiable against the cryptographic workload identity in the trustManifest.  
+* **\<publisher\>**: The Namespace Specific String (NSS) root. MUST be a fully qualified domain name (FQDN) representing the publisher or host organization (e.g., example.com, github.com). This domain acts as the organizational trust anchor and MUST be verifiable against the cryptographic workload identity in the trustManifest.  
 * **\<namespace\>**: Optional hierarchical segments separated by : (e.g., finance:trading, weather:telemetry). Allows publishers to categorize capabilities by department, team, or product line without altering infrastructure routing.  
 * **\<agent-name\>**: Mandatory terminal segment representing the specific, logical short name of the agent or tool (e.g., assistant, pptx-creator).
 
@@ -301,32 +301,32 @@ Using trustManifest for compliance, published in a manifest.
   "specVersion": "1.0",
   "host": {
     "displayName": "Acme Enterprise AI",
-    "identifier": "did:web:acme.com"
+    "identifier": "did:web:example.com"
   },
   "entries": [
     {
-      "identifier": "urn:ai:acme.com:travel:concierge",
+      "identifier": "urn:ai:example.com:travel:concierge",
       "displayName": "Travel Concierge",
       "type": "application/a2a-agent-card+json",
-      "url": "https://api.acme.com/travel/concierge.json",
+      "url": "https://api.example.com/travel/concierge.json",
       "description": "AI-powered travel planning",
       "trustManifest": {
-        "identity": "spiffe://acme.com/travel/concierge",
+        "identity": "spiffe://example.com/travel/concierge",
         "identityType": "spiffe",
         "attestations": [
           {
             "type": "SPIFFE-X509",
-            "uri": "https://acme.com/.well-known/spiffe/jwks",
+            "uri": "https://example.com/.well-known/spiffe/jwks",
             "mediaType": "application/json"
           },
           {
             "type": "SOC2-Type2",
-            "uri": "https://trust.acme.com/reports/soc2.pdf",
+            "uri": "https://trust.example.com/reports/soc2.pdf",
             "mediaType": "application/pdf"
           },
           {
             "type": "GDPR",
-            "uri": "https://trust.acme.com/compliance/gdpr",
+            "uri": "https://trust.example.com/compliance/gdpr",
             "mediaType": "text/html"
           }
         ]
@@ -473,12 +473,12 @@ The response returns standard catalog entries with additional relevance scores, 
 {
   "results": [
     {
-      "identifier": "urn:ai:acme.com:agent:assistant",
+      "identifier": "urn:ai:example.com:agent:assistant",
       "displayName": "Corporate Assistant (A2A)",
       "type": "application/a2a-agent-card+json",
-      "url": "https://api.acme.com/agents/assistant.json",
+      "url": "https://api.example.com/agents/assistant.json",
       "score": 95,
-      "source": "https://registry.acme.com/api/v1/"
+      "source": "https://registry.example.com/api/v1/"
     },
     {
       "identifier": "urn:ai:example.com:weather-server",
@@ -565,7 +565,7 @@ Each element of `resultType.facets`:
     },
     "publisher": {
       "buckets": [
-        { "value": "acme.com", "count": 412 }
+        { "value": "example.com", "count": 412 }
       ]
     }
   }
@@ -626,7 +626,7 @@ This gives the client full control over the federation topology without requirin
 {
   "results": [
     {
-      "identifier": "urn:ai:acme.com:agent:expense",
+      "identifier": "urn:ai:example.com:agent:expense",
       "displayName": "Corporate Expenses",
       "type": "application/a2a-agent-card+json",
       "url": "https://internal.corp/agents/expense.json",

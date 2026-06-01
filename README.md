@@ -54,7 +54,7 @@ Every agent in the catalog is uniquely identified by a domain-anchored, RFC 8141
 urn:ai:<publisher>:<namespace>:<agent-name>
 ```
 * **`urn:ai`**: Ecosystem prefix.
-* **`<publisher>`**: Verifiable FQDN representing the publisher (e.g., `acme.com`), establishing a decentralized trust anchor.
+* **`<publisher>`**: Verifiable FQDN representing the publisher (e.g., `example.com`), establishing a decentralized trust anchor.
 * **`<namespace>`**: Optional hierarchical grouping (e.g., `finance:trading`).
 * **`<agent-name>`**: Unique terminal short name (e.g., `assistant`).
 

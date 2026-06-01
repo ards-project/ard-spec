@@ -278,7 +278,7 @@ components:
           type: string
           format: uri
           description: The URL endpoint of the registry where this entry was indexed.
-          example: "https://registry.acme.com/api/v1/"
+          example: "https://registry.example.com/api/v1/"
 
     RegistryReferral:
       type: object

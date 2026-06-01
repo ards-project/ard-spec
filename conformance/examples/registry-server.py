@@ -17,10 +17,10 @@ PORT = 9010
 # Mock catalog database seeded from spec/examples/ai-catalog.json
 MOCK_CATALOG_ENTRIES = [
   {
-    "identifier": "urn:ai:acme.com:agent:assistant",
+    "identifier": "urn:ai:example.com:agent:assistant",
     "displayName": "Corporate Assistant (A2A)",
     "type": "application/a2a-agent-card+json",
-    "url": "https://api.acme.com/agents/assistant.json",
+    "url": "https://api.example.com/agents/assistant.json",
     "description": "General-purpose corporate A2A assistant for internal workflows.",
     "representativeQueries": [
       "help me draft an email to the security working group",
@@ -28,10 +28,10 @@ MOCK_CATALOG_ENTRIES = [
     ]
   },
   {
-    "identifier": "urn:ai:acme.com:server:weather",
+    "identifier": "urn:ai:example.com:server:weather",
     "displayName": "Weather Data Node",
     "type": "application/mcp-server+json",
-    "url": "https://api.acme.com/mcp/weather.json",
+    "url": "https://api.example.com/mcp/weather.json",
     "capabilities": ["WeatherTool", "ForecastTool"],
     "description": "Enterprise weather MCP server for live telemetry.",
     "representativeQueries": [
@@ -40,10 +40,10 @@ MOCK_CATALOG_ENTRIES = [
     ]
   },
   {
-    "identifier": "urn:ai:acme.com:catalog:engineering",
+    "identifier": "urn:ai:example.com:catalog:engineering",
     "displayName": "Engineering Sub-Catalog Reference",
     "type": "application/ai-catalog+json",
-    "url": "https://acme.com/catalogs/engineering.json",
+    "url": "https://example.com/catalogs/engineering.json",
     "description": "Nested catalog containing CI/CD and internal deployment agents."
   }
 ]

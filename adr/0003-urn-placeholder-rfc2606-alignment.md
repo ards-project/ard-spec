@@ -34,7 +34,7 @@ We aligned all local-development placeholder recommendations in `spec/urn-naming
 This placeholder architecture establishes a clear security boundary based on the development lifecycle phase:
 
 * **Syntax-Only Validation (Scenario A & B — Default)**: For standard local development, there is **no active cryptographic identity verification** happening. The placeholder domains (`*.localhost`, `example.com`) are enforced strictly to satisfy standard syntax validation rules and maintain architectural consistency with production files.
-* **Workload Verification (Scenario C — Advanced Enterprise)**: If an enterprise developer is testing their production zero-trust security mesh (like SPIFFE/SPIRE or mTLS) inside a local Kubernetes/Istio cluster on their laptop, they use their **real domain** (e.g., `acme.com`) as the URN publisher. This allows their local zero-trust mesh to actively validate their test certificates against the URN namespace before pushing to production.
+* **Workload Verification (Scenario C — Advanced Enterprise)**: If an enterprise developer is testing their production zero-trust security mesh (like SPIFFE/SPIRE or mTLS) inside a local Kubernetes/Istio cluster on their laptop, they use their **real domain** (e.g., `example.com`) as the URN publisher. This allows their local zero-trust mesh to actively validate their test certificates against the URN namespace before pushing to production.
 
 This two-tier approach keeps local testing extremely lightweight and zero-friction, while providing a seamless path for heavy-duty enterprise security integration.
 
