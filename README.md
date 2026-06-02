@@ -33,7 +33,7 @@ As the ecosystem of AI capabilities scales to thousands or millions of individua
 
 1. **Search-First Discovery**: Capabilities are discovered dynamically at runtime through queries, rather than pre-installed or hardcoded (analogous to web search engines indexing the web).
 2. **Context-Window Scalability**: Filters and semantic rankings are computed in external discovery indexes, enabling orchestrators to scale to millions of tools.
-3. **Artifact-Agnostic Envelope**: Uses standard **IANA Media Types** (e.g., `application/a2a-agent-card+json`, `application/mcp-server+json`) to identify envelope contents, leaving the internal schema to the specific protocol specifications.
+3. **Artifact-Agnostic Envelope**: Uses standard **IANA Media Types** (e.g., `application/a2a-agent-card+json`, `application/mcp-server-card+json`) to identify envelope contents, leaving the internal schema to the specific protocol specifications.
 4. **Strict Value-or-Reference**: Safe, predictable ingestion using mutually exclusive `url` (remote reference) or `data` (embedded payload) keys.
 5. **Universal REST Baseline**: Mandates a standard HTTP REST search interface (`POST /search`) for discovery and federation to ensure maximum interoperability.
 6. **Separation of Concerns**: Decouples operational details—authentication is handled by the specific agent execution protocol, and physical delivery is managed by backend distribution networks (e.g., OCI, npm).
@@ -67,6 +67,9 @@ Agent Finder supports a robust, optional `trustManifest` object that sits alongs
 * **Attestations**: Verifiable compliance credentials (e.g., SOC2-Type2, HIPAA-Audit, GDPR).
 * **Provenance**: Relationship tracking (`derivedFrom`, `publishedFrom`) and digests for integrity.
 * **Signatures**: Cryptographic detached JWS signatures over the trust metadata.
+
+For a conceptual overview of the trust model and naming relationships, see the [Trust Model and Naming Conceptual Guide](spec/trust-model-conceptual-guide.md). For detailed information on the technical zero-trust verification workflows, see the [Cryptographic Identity and Trust Verification Guide](spec/cryptographic-identity-verification.md).
+
 
 ---
 
@@ -103,6 +106,9 @@ Registries support three client-controlled federation models:
 ## 📂 Repository Structure
 
 * [**`spec/agentfinder.md`**](spec/agentfinder.md): The core Agent Finder discovery and federation specification document.
+* [**`spec/trust-model-conceptual-guide.md`**](spec/trust-model-conceptual-guide.md): Conceptual guide explaining trustManifest dimensions, identity decoupling, and domain alignment.
+* [**`spec/cryptographic-identity-verification.md`**](spec/cryptographic-identity-verification.md): Technical implementation guide for static and dynamic cryptographic trust verification.
+* [**`spec/urn-naming-guide.md`**](spec/urn-naming-guide.md): Best practices and naming conventions for domain-anchored URN namespaces.
 * [**`adr/`**](adr/): Architectural Decision Records (ADRs) documenting key design, protocol, and validation decisions.
 * [**`conformance/`**](conformance/): The official Agent Finder conformance testing suite. Contains CLI validators, mock catalog manifests, mock registry REST API servers, and automated end-to-end demo tools.
 

@@ -20,7 +20,7 @@ We refined the URN pattern definition to be fully RFC 8141-compliant, highly fle
 
 1. **Decoupled Namespace Segments**:
    * The pattern was refactored to require a minimum of one publisher domain segment and one terminal agent name segment, allowing intermediate namespace segments to be optional and recursive:
-     `^urn:ai:[a-zA-Z0-9.-]+(?::[a-zA-Z0-9._-]+)+$`
+     `^urn:ai:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$`
 2. **Support Underscores (`_`) in Namespace and Agent Name**:
    * Added underscore support to all non-domain segments.
 3. **Strict FQDN Constraints for Publisher Domain**:

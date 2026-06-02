@@ -53,7 +53,7 @@ If you are building and testing an agent that will **only run locally** and will
     {
       "identifier": "urn:ai:agent.localhost:weather:telemetry",
       "displayName": "Local Weather Node",
-      "type": "application/mcp-server+json",
+      "type": "application/mcp-server-card+json",
       "url": "http://localhost:8080/mcp",
       "description": "Local test instance of the weather capability."
     }
