@@ -19,7 +19,7 @@
     {
       "identifier": "urn:ai:acme.com:server:weather",
       "displayName": "Weather Data Node",
-      "type": "application/mcp-server+json",
+      "type": "application/mcp-server-card+json",
       "url": "https://api.acme.com/mcp/weather.json",
       "capabilities": ["WeatherTool", "ForecastTool"],
       "description": "Enterprise weather MCP server for live telemetry.",

@@ -36,7 +36,7 @@ Traditional tool selection relies on injecting all descriptions into the LLM's c
 
 The specification does not define or constrain the internal schema of specific agent types (MCP, A2A, etc.). Instead, it acts as a clean envelope that uses IANA Media Types to identify what an artifact is, delegating the definition of artifact-specific metadata to the respective protocol specifications.
 
-\[\!NOTE\] **IANA Registration Status**: The media types application/a2a-agent-card+json and application/mcp-server+json used in this specification are de-facto community standards tracking towards formal registration. Implementers should note that while well-known path directories (like /.well-known/agent-card.json) are officially registered permanent entries, full media type registrations are pending working group joint submission. Omission of strict verification by intermediaries is recommended during this transition.
+\[\!NOTE\] **IANA Registration Status**: The media types application/a2a-agent-card+json and application/mcp-server-card+json used in this specification are de-facto community standards tracking towards formal registration. Implementers should note that while well-known path directories (like /.well-known/agent-card.json) are officially registered permanent entries, full media type registrations are pending working group joint submission. Omission of strict verification by intermediaries is recommended during this transition.
 
 ### 3.4 Strict Value-or-Reference
 
@@ -86,7 +86,7 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
     {
       "identifier": "urn:ai:acme.com:server:weather",
       "displayName": "Weather Data Node",
-      "type": "application/mcp-server+json",
+      "type": "application/mcp-server-card+json",
       "url": "https://api.acme.com/mcp/weather.json",
       "capabilities": ["WeatherTool", "ForecastTool"],
       "description": "Enterprise weather MCP server for live telemetry.",
@@ -230,7 +230,7 @@ An agent hosted on Hugging Face Spaces (MCP), published in a manifest:
     {
       "identifier": "urn:ai:hf.co:alice-dev:weather-agent",
       "displayName": "Weather Agent",
-      "type": "application/mcp-server+json",
+      "type": "application/mcp-server-card+json",
       "inline": {
         "name": "Weather Agent",
         "description": "Simple weather lookup using open data",
@@ -279,7 +279,7 @@ Discovery via GitHub Pages (combining the above):
     {
       "identifier": "urn:ai:hf.co:alice-dev:weather-agent",
       "displayName": "Weather Agent",
-      "type": "application/mcp-server+json",
+      "type": "application/mcp-server-card+json",
       "url": "https://alice-dev.github.io/weather-agent/entry.json"
     },
     {
@@ -483,7 +483,7 @@ The response returns standard catalog entries with additional relevance scores, 
     {
       "identifier": "urn:ai:example.com:weather-server",
       "displayName": "Global Weather Service",
-      "type": "application/mcp-server+json",
+      "type": "application/mcp-server-card+json",
       "url": "https://weather.example.com/mcp",
       "capabilities": ["WeatherTool"],
       "score": 88,
@@ -558,7 +558,7 @@ Each element of `resultType.facets`:
   "facets": {
     "type": {
       "buckets": [
-        { "value": "application/mcp-server+json", "count": 1247 },
+        { "value": "application/mcp-server-card+json", "count": 1247 },
         { "value": "application/a2a-agent-card+json", "count": 389 }
       ],
       "otherCount": 23

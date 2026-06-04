@@ -8,7 +8,7 @@ During the design of the `POST /search` API in v0.4.2 of the Agent Finder specif
 
 The core architectural problem was:
 1. **Relevance Score Integrity**: In semantic natural language search, the primary sorting vector is the dynamics-based relevance score (`score` 0-100). Sorting by metadata fields (e.g., `displayName` or `created_at DESC`) conflicts with and destroys relevance-based ranking, returning newer or alphabetical records that do not satisfy the semantic query intent.
-2. **LLM and Client Ergonomics**: Asking simple HTTP clients or LLM orchestrators to generate complex EBNF Boolean logic strings (e.g., `"type = 'application/mcp-server+json' AND contains(description, 'translate')"`) inside search payloads is error-prone and prone to LLM parser hallucinations.
+2. **LLM and Client Ergonomics**: Asking simple HTTP clients or LLM orchestrators to generate complex EBNF Boolean logic strings (e.g., `"type = 'application/mcp-server-card+json' AND contains(description, 'translate')"`) inside search payloads is error-prone and prone to LLM parser hallucinations.
 3. **Database Index Efficiency**: Parsing and executing complex arbitrary Boolean query strings on the fly inside high-concurrency semantic text and vector search queries adds severe computational overhead.
 
 ## Decision

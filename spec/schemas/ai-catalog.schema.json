@@ -67,7 +67,7 @@
       "properties": {
         "identifier": {
           "type": "string",
-          "pattern": "^urn:ai:[a-zA-Z0-9.-]+:[a-zA-Z0-9.-:]+:[a-zA-Z0-9.-]+$",
+          "pattern": "^urn:ai:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$",
           "description": "RFC 8141-compliant unique logical URN formatted as: urn:ai:<publisher>:<namespace>:<agent-name>"
         },
         "displayName": {
@@ -76,7 +76,7 @@
         },
         "type": {
           "type": "string",
-          "description": "IANA Media Type indicating the specific protocol wrapper or payload structure (e.g. application/mcp-server+json)."
+          "description": "IANA Media Type indicating the specific protocol wrapper or payload structure (e.g. application/mcp-server-card+json)."
         },
         "url": {
           "type": "string",
@@ -143,6 +143,9 @@
           "enum": ["spiffe", "did", "https", "other"],
           "description": "Hint representing the cryptographic format of the identity."
         },
+        "trustSchema": {
+          "$ref": "#/$defs/trustSchema"
+        },
         "attestations": {
           "type": "array",
           "description": "List of verifiable claims (SOC 2 audits, compliance statements, HIPAA checks).",
@@ -198,6 +201,32 @@
         "signature": {
           "type": "string",
           "description": "Detached JWS signature generated over the fields of the trustManifest."
+        }
+      },
+      "additionalProperties": false
+    },
+    "trustSchema": {
+      "type": "object",
+      "description": "Describes the trust framework applied to the artifact.",
+      "required": ["identifier", "version"],
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "description": "Unique identifier of the trust schema/framework (e.g. URN)."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the trust schema/framework."
+        },
+        "governanceUri": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI pointing to the governance policy document."
+        },
+        "verificationMethods": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Verification methods supported by the schema (e.g., ['did', 'x509', 'dns-01'])."
         }
       },
       "additionalProperties": false

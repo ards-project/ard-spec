@@ -82,7 +82,7 @@ paths:
         - name: filter
           in: query
           required: false
-          description: EBNF-like filter expression (e.g., "type = 'application/mcp-server+json' AND createdAfter > '2026-01-01'")
+          description: EBNF-like filter expression (e.g., "type = 'application/mcp-server-card+json' AND createdAfter > '2026-01-01'")
           schema:
             type: string
         - name: orderBy
@@ -142,7 +142,7 @@ components:
             items:
               type: string
           example:
-            type: ["application/mcp-server+json"]
+            type: ["application/mcp-server-card+json"]
             "trustManifest.attestations.type": ["SOC2-Type2"]
       additionalProperties: false
 
@@ -335,7 +335,7 @@ components:
         message:
           type: string
           description: Human-readable description explaining the error.
-          example: "The filter expression syntax 'type = MCP' is invalid. Did you mean 'type = application/mcp-server+json'?"
+          example: "The filter expression syntax 'type = MCP' is invalid. Did you mean 'type = application/mcp-server-card+json'?"
 
   responses:
     400BadRequest:

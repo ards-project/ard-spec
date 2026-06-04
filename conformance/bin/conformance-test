@@ -12,7 +12,7 @@ import urllib.request
 import urllib.error
 
 # Strict URN Regex matching urn:ai:<publisher>:<namespace>:<agent-name>
-URN_REGEX = re.compile(r"^urn:ai:([a-zA-Z0-9.-]+):([a-zA-Z0-9.-:]+):([a-zA-Z0-9.-]+)$")
+URN_REGEX = re.compile(r"^urn:ai:([a-zA-Z0-9.-]+)(?::([a-zA-Z0-9._:-]+))?:([a-zA-Z0-9._-]+)$")
 
 # Colors for beautiful CLI output
 COLOR_RESET = "\033[0m"
@@ -138,7 +138,7 @@ class ConformanceTester:
             if not media_type:
                 self.add_error(f"[{label}] Missing required 'type' (mediaType).")
             else:
-                valid_types = ["application/mcp-server+json", "application/a2a-agent-card+json", "application/ai-catalog+json", "application/ai-registry+json"]
+                valid_types = ["application/mcp-server-card+json", "application/a2a-agent-card+json", "application/ai-catalog+json", "application/ai-registry+json"]
                 if media_type not in valid_types:
                     self.add_warning(f"[{label}] Media type '{media_type}' is not one of standard discovery types: {valid_types}.")
 
@@ -216,7 +216,7 @@ class ConformanceTester:
             "query": {
                 "text": "weather forecast tools",
                 "filter": {
-                    "type": ["application/mcp-server+json"]
+                    "type": ["application/mcp-server-card+json"]
                 }
             },
             "federation": "none",
