@@ -2,14 +2,13 @@
 
 **Federated Discovery and Search for Agentic Resources**
 
-**Version**: v0.5 (Draft)  
+**Version**: v0.9 (Draft)  
 **Status**: Proposal  
 **Date**: May 28, 2026
 
 **Authors**:
 
 - Junjie Bu — Google
-- Scott Courtney — GoDaddy
 - R.V.Guha — Microsoft
 - Shaun Smith — Hugging Face
 
@@ -19,7 +18,7 @@ LLMs increasingly rely on external capabilities — MCP tools, A2A agents, skill
 
 The **Agentic Resource Discovery Specification (ARD)** defines how AI artifacts are cataloged, discovered, and searched across federated networks.
 
-This version (v0.5) aligns the discovery framework with the broader ai-catalog standard, shifting towards a media-type-driven approach and mandating standard web protocols (REST) for discovery interfaces to ensure maximum interoperability.
+This version (v0.9) aligns the discovery framework with the broader ai-catalog standard, shifting towards a media-type-driven approach and mandating standard web protocols (REST) for discovery interfaces to ensure maximum interoperability.
 
 ## 2\. Motivation
 
