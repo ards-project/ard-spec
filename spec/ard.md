@@ -363,9 +363,35 @@ Provides verifiable proof of a claim (e.g., compliance certifications).
 
 | Field | Type | Description |
 | :---- | :---- | :---- |
-| type | String | **Required**. Attestation type (e.g., "SOC2-Type2", "HIPAA-Audit"). |
+| type | String | **Required**. Attestation type (e.g., "SOC2-Type2", "HIPAA-Audit", "TRACE-v0.2"). |
 | uri | String | **Required**. Location of the attestation document. |
 | digest | String | Optional. Cryptographic hash for integrity verification. |
+
+### 5.2.1 Runtime Governance Attestations
+
+In addition to compliance certifications (SOC2-Type2, HIPAA-Audit), the attestation object accommodates **runtime governance attestations** — cryptographically signed records proving that an agent ran under a specific policy in a verified execution environment.
+
+**TRACE-v0.2** (Trust Runtime Attestation and Compliance Evidence) is a runtime governance attestation type. A TRACE Trust Record is an EAT-profile (RFC 9711) signed JSON artifact that encodes:
+
+- The Cedar policy bundle hash that governed the agent session
+- A tool-call transcript hash, chained via Merkle structure to the execution log
+- The hardware measurement of the execution environment (TEE platform, firmware, RIM)
+- The agent workload identity (SPIFFE SVID or DID)
+- Optional SCITT transparency log anchor for append-only external verifiability
+
+TRACE records are independently verifiable offline — a verifier holding the issuer's public key can confirm authenticity without contacting the issuing registry or the agent operator.
+
+**Example entry with TRACE runtime governance attestation:**
+
+
+
+A TRACE attestation URI resolves to the TRACE Trust Record for the most recent attested session. For durable point-in-time records, the URI may reference a SCITT-anchored entry. The digest field SHOULD be the SHA-256 hash of the TRACE Trust Record JSON.
+
+**Discovery filter example — governed agents only:**
+
+
+
+Registries that index TRACE attestation types enable orchestrators to filter exclusively for agents with hardware-verifiable runtime governance records, without embedding trust logic in the orchestrator itself.
 
 ### 5.3 Provenance Link Object
 

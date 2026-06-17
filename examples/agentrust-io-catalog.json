@@ -1,0 +1,105 @@
+{
+  "$comment": "Reference: agentrust.io governed-agent catalog. All entries carry TRACE-v0.2 runtime governance attestations alongside SPIFFE X.509 identity.",
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "agentrust.io",
+    "identifier": "agentrust.io",
+    "documentationUrl": "https://agentrust.io/docs",
+    "logoUrl": "https://agentrust.io/assets/logo.svg",
+    "trustManifest": {
+      "identity": "spiffe://trust.agentrust.io/registry/global",
+      "identityType": "spiffe",
+      "attestations": [
+        {
+          "type": "SPIFFE-X509",
+          "uri": "https://agentrust.io/.well-known/spiffe/jwks"
+        }
+      ]
+    }
+  },
+  "entries": [
+    {
+      "identifier": "urn:ai:agentrust.io:governed:cmcp-gateway",
+      "displayName": "Confidential MCP Gateway (cMCP)",
+      "description": "Hardware-attested policy enforcement gateway for MCP tool calls. Cedar policies evaluated inside AMD SEV-SNP / Intel TDX TEE. Every session produces a TRACE Trust Record independently verifiable offline.",
+      "type": "application/mcp-server+json",
+      "url": "https://api.agentrust.io/mcp/cmcp",
+      "version": "0.2.0",
+      "tags": ["governance", "confidential-computing", "policy-enforcement", "mcp", "tee"],
+      "capabilities": ["PolicyEnforcement", "HardwareAttestation", "AuditLog", "TRACE"],
+      "trustManifest": {
+        "identity": "spiffe://trust.agentrust.io/gateway/cmcp/prod",
+        "identityType": "spiffe",
+        "attestations": [
+          {
+            "type": "SPIFFE-X509",
+            "uri": "https://agentrust.io/.well-known/spiffe/jwks"
+          },
+          {
+            "type": "TRACE-v0.2",
+            "uri": "https://trace.agentrust.io/records/cmcp-prod-latest",
+            "digest": "sha256:3f4a8b2c1d9e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2"
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "urn:ai:agentrust.io:governed:agent-manifest",
+      "displayName": "Agent Manifest SDK",
+      "description": "Hardware-anchors all 10 artifacts defining an agent at deployment. Attestation extended to agents — attested at registration and re-attested on any change.",
+      "type": "application/mcp-server+json",
+      "url": "https://api.agentrust.io/mcp/agent-manifest",
+      "version": "0.1.0",
+      "tags": ["governance", "identity", "attestation", "agent-manifest"],
+      "capabilities": ["AgentIdentity", "HardwareAttestation", "ManifestVerification"],
+      "trustManifest": {
+        "identity": "spiffe://trust.agentrust.io/service/agent-manifest/prod",
+        "identityType": "spiffe",
+        "attestations": [
+          {
+            "type": "SPIFFE-X509",
+            "uri": "https://agentrust.io/.well-known/spiffe/jwks"
+          },
+          {
+            "type": "TRACE-v0.2",
+            "uri": "https://trace.agentrust.io/records/agent-manifest-prod-latest",
+            "digest": "sha256:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "urn:ai:agentrust.io:governed:trace-registry",
+      "displayName": "TRACE Registry",
+      "description": "Public append-only Merkle registry for TRACE Trust Record anchors. Query attested session records for any TRACE-governed agent. Supports SCITT-anchored verification.",
+      "type": "application/mcp-server+json",
+      "url": "https://trace.agentrust.io/mcp",
+      "version": "0.2.0",
+      "tags": ["governance", "attestation", "trace", "audit", "scitt"],
+      "capabilities": ["TRACEVerification", "AuditQuery", "SCITTAnchoring"],
+      "trustManifest": {
+        "identity": "spiffe://trust.agentrust.io/service/trace-registry/prod",
+        "identityType": "spiffe",
+        "attestations": [
+          {
+            "type": "SPIFFE-X509",
+            "uri": "https://agentrust.io/.well-known/spiffe/jwks"
+          },
+          {
+            "type": "TRACE-v0.2",
+            "uri": "https://trace.agentrust.io/records/trace-registry-prod-latest",
+            "digest": "sha256:f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9"
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "urn:ai:agentrust.io:registry:governed-agents",
+      "displayName": "agentrust.io Governed Agent Registry",
+      "description": "Federated ARD registry for TRACE-attested, policy-governed agents. All indexed entries carry TRACE-v0.2 runtime governance attestations. Filter with trustManifest.attestations.type=[TRACE-v0.2] to find governed agents across the federation.",
+      "type": "application/ai-registry+json",
+      "url": "https://registry.agentrust.io/api/v1/",
+      "tags": ["registry", "governance", "federation", "trace"]
+    }
+  ]
+}
