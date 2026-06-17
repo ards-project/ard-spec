@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
 Mock Agent Registry REST API Server
-Implements standard v0.9 Agentic Resource Discovery REST endpoints:
+Implements standard v0.4 Agentic Resource Discovery REST endpoints:
   - POST /search
-  - POST /explore
   - GET /agents
 Zero dependencies, uses Python standard library.
 """
