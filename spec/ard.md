@@ -379,17 +379,51 @@ In addition to compliance certifications (SOC2-Type2, HIPAA-Audit), the attestat
 - The agent workload identity (SPIFFE SVID or DID)
 - Optional SCITT transparency log anchor for append-only external verifiability
 
-TRACE records are independently verifiable offline — a verifier holding the issuer's public key can confirm authenticity without contacting the issuing registry or the agent operator.
+TRACE records are independently verifiable offline -- a verifier holding the issuer's public key can confirm authenticity without contacting the issuing registry or the agent operator.
+
+Spec: [agentrust-io/trace-spec](https://agentrust-io.github.io/trace-spec/)
 
 **Example entry with TRACE runtime governance attestation:**
 
-
+```json
+{
+  "identifier": "urn:ai:agentrust.io:governed:cmcp-gateway",
+  "displayName": "Confidential MCP Gateway",
+  "type": "application/mcp-server+json",
+  "url": "https://api.agentrust.io/mcp/cmcp",
+  "tags": ["governance", "confidential-computing", "policy-enforcement"],
+  "trustManifest": {
+    "identity": "spiffe://trust.agentrust.io/gateway/cmcp/prod",
+    "identityType": "spiffe",
+    "attestations": [
+      {
+        "type": "SPIFFE-X509",
+        "uri": "https://agentrust.io/.well-known/spiffe/jwks"
+      },
+      {
+        "type": "TRACE-v0.2",
+        "uri": "https://trace.agentrust.io/records/cmcp-prod-latest",
+        "digest": "sha256:3f4a8b2c1d9e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2"
+      }
+    ]
+  }
+}
+```
 
 A TRACE attestation URI resolves to the TRACE Trust Record for the most recent attested session. For durable point-in-time records, the URI may reference a SCITT-anchored entry. The digest field SHOULD be the SHA-256 hash of the TRACE Trust Record JSON.
 
-**Discovery filter example — governed agents only:**
+**Discovery filter example -- governed agents only:**
 
-
+```json
+{
+  "query": {
+    "text": "policy-governed MCP gateway with hardware attestation",
+    "filter": {
+      "trustManifest.attestations.type": ["TRACE-v0.2"]
+    }
+  }
+}
+```
 
 Registries that index TRACE attestation types enable orchestrators to filter exclusively for agents with hardware-verifiable runtime governance records, without embedding trust logic in the orchestrator itself.
 
