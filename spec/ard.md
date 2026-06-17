@@ -776,7 +776,7 @@ This script performs manifest schema validation, launches a mock registry server
 
 The authors thank the following people for their contributions and feedback, in no particular order.
 
-- Microsoft — Miesha Baker, Shelby Delano, Kevin Scott, Dee Templeton, Jeremy Moseley, Ryan Nadel, Jennifer Marsmann, Lisa Jaloza, Lindsey Li, Chelsea Carter, Adam Zukor
+- Microsoft — Miesha Baker, Shelby Delano, Kevin Scott, Dee Templeton, Ryan Nadel, Jennifer Marsman, Lisa Jaloza, Lindsey Li, Chelsea Carter, Adam Zukor
 - GitHub — Evan Boyle, Trent Jones, Jeremy Moseley, Meagan Cojocar
 - GoDaddy — Scott Courtney
 - Nvidia — Aysen Ilkhabar
