@@ -1,0 +1,124 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "SnowSure",
+    "identifier": "snowsure.ai",
+    "documentationUrl": "https://www.snowsure.ai",
+    "logoUrl": "https://www.snowdata.ai/opengraph-image",
+    "trustManifest": {
+      "identity": "https://www.snowsure.ai",
+      "identityType": "https",
+      "attestations": [
+        {
+          "type": "DataProvenance",
+          "uri": "https://www.snowdata.ai/for-ai/trust#verification"
+        },
+        {
+          "type": "OpenStandard",
+          "uri": "https://opensourcesnow.com"
+        }
+      ],
+      "provenance": [
+        {
+          "relation": "publishedFrom",
+          "sourceId": "urn:ai:snowdata.ai:organization"
+        }
+      ]
+    }
+  },
+  "entries": [
+    {
+      "identifier": "urn:ai:snowsure.ai:mcp:live-snow",
+      "displayName": "SnowSure MCP Server",
+      "type": "application/mcp-server+json",
+      "url": "https://www.snowsure.ai/mcp",
+      "description": "17 tools for live conditions, 14-day multi-model forecasts, powder rankings, resort guides, webcams, and grounded Q&A. One URL, no install, no auth.",
+      "tags": [
+        "snow",
+        "ski",
+        "travel",
+        "mcp",
+        "forecast"
+      ],
+      "capabilities": [
+        "get_snow_report",
+        "get_weather_forecast",
+        "find_best_powder",
+        "plan_ski_trip",
+        "ask_snowdata",
+        "search_resorts",
+        "get_regional_summary"
+      ],
+      "representativeQueries": [
+        "Where's the best powder in the Alps this week?",
+        "Is Niseko open today and what's the base depth?",
+        "Compare snowfall at Verbier versus Zermatt this season",
+        "Plan a five-day ski trip to Colorado with the deepest snow",
+        "Which resorts in Japan have more than 30cm of new snow?"
+      ],
+      "version": "1.0.0",
+      "metadata": {
+        "transport": "streamable-http",
+        "toolCount": "17"
+      }
+    },
+    {
+      "identifier": "urn:ai:snowsure.ai:api:rest",
+      "displayName": "SnowSure REST API",
+      "type": "application/openapi+json",
+      "url": "https://api.snowdata.ai",
+      "description": "Resorts, ranked snow reports, leaderboards, trends, forecast-trust, and intelligence insights.",
+      "tags": [
+        "snow",
+        "api",
+        "openapi"
+      ],
+      "representativeQueries": [
+        "Get ranked snow reports for European ski resorts",
+        "Pull SnowSure intelligence leaderboards over REST",
+        "Access historical snow trends for a resort by slug"
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "identifier": "urn:ai:snowsure.ai:api:answer-engine",
+      "displayName": "SnowSure Answer Engine",
+      "type": "application/json",
+      "url": "https://www.snowsure.ai/api/v1/ask",
+      "description": "Grounded natural-language answers over verified snow data in six languages (en, es, fr, de, it).",
+      "tags": [
+        "snow",
+        "qa",
+        "answer-engine"
+      ],
+      "capabilities": [
+        "ask_snowdata"
+      ],
+      "representativeQueries": [
+        "Is Jackson Hole getting snow this week?",
+        "Which Utah resorts have the best powder forecast?",
+        "What is the SnowSure score for Whistler today?"
+      ],
+      "version": "1.0.0",
+      "metadata": {
+        "method": "POST",
+        "locales": "en,es,fr,de,it"
+      }
+    },
+    {
+      "identifier": "urn:ai:snowdata.ai:catalog:corporate",
+      "displayName": "Snowdata Corporate ARD Catalog",
+      "type": "application/ai-catalog+json",
+      "url": "https://www.snowdata.ai/.well-known/ai-catalog.json",
+      "description": "Snowdata corporate federation hub — content MCP, intelligence proxies, ARD search registry.",
+      "tags": [
+        "federation",
+        "b2b"
+      ],
+      "representativeQueries": [
+        "How do developers integrate with Snowdata MCP and APIs?",
+        "Where is the Snowdata ARD search registry?"
+      ]
+    }
+  ]
+}
