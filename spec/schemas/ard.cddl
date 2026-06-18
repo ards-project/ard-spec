@@ -68,12 +68,17 @@ provenance-link = {
 ; --- The Search and Explore Registry API Payloads ---
 
 query-model = {
+  ? text: tstr,
+  ? filter: {* tstr => ([+ tstr] / tstr)}
+}
+
+search-query-model = {
   text: tstr,
   ? filter: {* tstr => ([+ tstr] / tstr)}
 }
 
 search-request = {
-  query: query-model,
+  query: search-query-model,
   ? federation: "auto" / "referrals" / "none",
   ? pageSize: uint,
   ? pageToken: tstr
