@@ -1,0 +1,308 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Afore — A Travel House",
+    "identifier": "did:web:afo.re",
+    "documentationUrl": "https://afo.re/about/for-ai",
+    "logoUrl": "https://afo.re/creative/afore_logo_may11.png",
+    "trustManifest": {
+      "identity": "did:web:afo.re",
+      "identityType": "did",
+      "attestations": [
+        {
+          "type": "security-contact",
+          "uri": "https://afo.re/.well-known/security.txt",
+          "mediaType": "text/plain"
+        },
+        {
+          "type": "content-policy",
+          "uri": "https://afo.re/llms.txt",
+          "mediaType": "text/plain"
+        },
+        {
+          "type": "partner-documentation",
+          "uri": "https://afo.re/about/for-partners",
+          "mediaType": "text/html"
+        }
+      ]
+    }
+  },
+  "entries": [
+    {
+      "identifier": "urn:ai:afo.re:server:travel-mcp",
+      "displayName": "Afore Travel House MCP Server",
+      "type": "application/mcp-server+json",
+      "url": "https://afo.re/.well-known/mcp.json",
+      "description": "Model Context Protocol server for Afore's luxury travel editorial (Le Journal), destination guides (The Library), structured place datasets, and search across Mediterranean Europe — Côte d'Azur, Provence, Italian Alps, and beyond. Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+      "capabilities": [
+        "afore_search",
+        "afore_list_journal",
+        "afore_list_library",
+        "afore_get_article",
+        "afore_get_guide_metadata",
+        "afore_list_places",
+        "afore_cannes_places",
+        "afore_journal_rss",
+        "afore_llms_txt"
+      ],
+      "tags": [
+        "travel",
+        "luxury-travel",
+        "destination-guides",
+        "hotels",
+        "provence",
+        "french-riviera",
+        "mediterranean"
+      ],
+      "representativeQueries": [
+        "find boutique hotels on the French Riviera with Afore editorial reviews",
+        "what does Afore recommend for slow travel in Provence",
+        "Afore review of a boutique hotel in Saint-Paul-de-Vence",
+        "luxury travel planning Provence with Afore concierge editorial",
+        "list Afore library destination guides for the Mediterranean"
+      ],
+      "version": "0.3.0",
+      "updatedAt": "2026-06-18T19:11:50.224Z",
+      "metadata": {
+        "citationPolicy": "Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+        "trainingPolicy": "journal-allowed-with-attribution; library-metadata-only",
+        "license": "https://afo.re/llms.txt",
+        "mcpEndpoint": "https://afo.re/api/mcp",
+        "mcpTransport": "streamable-http"
+      }
+    },
+    {
+      "identifier": "urn:ai:afo.re:api:public-rest",
+      "displayName": "Afore Public REST API",
+      "type": "application/openapi+yaml",
+      "url": "https://afo.re/openapi/afore-public-api.yaml",
+      "description": "Read-only OpenAPI 3.1 catalog of Afore's public HTTP endpoints — journal and library JSON catalogs, Markdown article views, RSS, global places index, and structured guide datasets. Does not expose paid guide bodies. Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+      "capabilities": [
+        "listJournalArticles",
+        "listLibraryGuides",
+        "listPlaces",
+        "getGlobalPlaces",
+        "getCannesPlaces",
+        "journalRssFeed"
+      ],
+      "tags": [
+        "travel",
+        "openapi",
+        "rest",
+        "rss",
+        "markdown",
+        "structured-data"
+      ],
+      "representativeQueries": [
+        "fetch Afore journal articles as JSON for a travel assistant",
+        "get the RSS feed of Afore Le Journal articles",
+        "list hotels and destinations Afore has written about on the Côte d'Azur",
+        "list all Afore library guide metadata without MCP"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-06-18T19:11:50.224Z",
+      "metadata": {
+        "citationPolicy": "Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+        "trainingPolicy": "journal-allowed-with-attribution; library-metadata-only",
+        "license": "https://afo.re/llms.txt",
+        "baseUrl": "https://afo.re",
+        "cors": "public-read"
+      }
+    },
+    {
+      "identifier": "urn:ai:afo.re:dataset:global-places",
+      "displayName": "Afore Global Places Catalog",
+      "type": "application/json",
+      "url": "https://afo.re/api/public/v1/places",
+      "description": "Aggregated JSON of every named place Afore has covered — Library locations with GPS and film cross-references, plus Le Journal destinations and hotel mentions. Filter by destination substring and kind (hotel, tourist_attraction, destination).",
+      "capabilities": [
+        "GlobalPlacesCatalog",
+        "HotelLookup",
+        "DestinationLookup",
+        "GPSItineraryPlanning"
+      ],
+      "tags": [
+        "places",
+        "hotels",
+        "destinations",
+        "gps",
+        "french-riviera",
+        "provence",
+        "structured-data"
+      ],
+      "representativeQueries": [
+        "hotels Afore has written about on the Côte d'Azur",
+        "list tourist attractions Afore covers in Provence with GPS",
+        "find destinations mentioned in Afore Le Journal with coordinates",
+        "structured place catalog for luxury travel itinerary planning"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-06-18T19:11:50.224Z",
+      "metadata": {
+        "citationPolicy": "Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+        "trainingPolicy": "journal-allowed-with-attribution; library-metadata-only",
+        "license": "https://afo.re/llms.txt"
+      }
+    },
+    {
+      "identifier": "urn:ai:afo.re:feed:journal-rss",
+      "displayName": "Le Journal RSS Feed",
+      "type": "application/rss+xml",
+      "url": "https://afo.re/api/public/v1/journal/rss",
+      "description": "RSS 2.0 feed of every Le Journal article — title, excerpt, author, publish date, and canonical URL. Suitable for lightweight agents and aggregators that do not use MCP.",
+      "capabilities": [
+        "JournalRssFeed",
+        "ArticleDiscovery"
+      ],
+      "tags": [
+        "rss",
+        "journal",
+        "editorial",
+        "travel",
+        "feed"
+      ],
+      "representativeQueries": [
+        "subscribe to Afore Le Journal RSS for new travel articles",
+        "RSS feed of luxury travel editorial from the French Riviera",
+        "latest Afore journal articles for an AI news aggregator"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-06-18T19:11:50.224Z",
+      "metadata": {
+        "citationPolicy": "Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+        "trainingPolicy": "journal-allowed-with-attribution; library-metadata-only",
+        "license": "https://afo.re/llms.txt"
+      }
+    },
+    {
+      "identifier": "urn:ai:afo.re:sitemap:image-index",
+      "displayName": "Afore Image Sitemap",
+      "type": "application/xml",
+      "url": "https://afo.re/image-sitemap.xml",
+      "description": "XML sitemap of hero images across Le Journal and The Library — title, caption, alt text, and canonical page URL for visual travel and itinerary agents.",
+      "capabilities": [
+        "ImageSitemap",
+        "VisualTravelDiscovery"
+      ],
+      "tags": [
+        "images",
+        "sitemap",
+        "visual",
+        "travel",
+        "seo"
+      ],
+      "representativeQueries": [
+        "hero images for Afore travel articles and destination guides",
+        "image index of French Riviera hotels and destinations from Afore",
+        "visual travel content catalog with alt text and captions"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-06-18T19:11:50.224Z",
+      "metadata": {
+        "citationPolicy": "Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+        "trainingPolicy": "journal-allowed-with-attribution; library-metadata-only",
+        "license": "https://afo.re/llms.txt"
+      }
+    },
+    {
+      "identifier": "urn:ai:afo.re:policy:llms-txt",
+      "displayName": "Afore llms.txt — AI policy & resource index",
+      "type": "text/plain",
+      "url": "https://afo.re/llms.txt",
+      "description": "Machine-readable site summary, citation rules, training/indexing policy, and curated index of MCP, REST, RSS, and structured data endpoints for AI assistants.",
+      "capabilities": [
+        "ContentPolicy",
+        "ResourceIndex",
+        "CitationRules"
+      ],
+      "tags": [
+        "llms.txt",
+        "policy",
+        "citation",
+        "training",
+        "discovery"
+      ],
+      "representativeQueries": [
+        "what is Afore's AI citation and training policy",
+        "where does Afore publish machine-readable travel content for assistants",
+        "llms.txt index of Afore MCP and API endpoints",
+        "can AI assistants index Afore Le Journal articles"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-06-18T19:11:50.224Z",
+      "metadata": {
+        "citationPolicy": "Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+        "trainingPolicy": "journal-allowed-with-attribution; library-metadata-only",
+        "license": "https://afo.re/llms.txt"
+      }
+    },
+    {
+      "identifier": "urn:ai:afo.re:discovery:agents-json",
+      "displayName": "Afore agents.json discovery manifest",
+      "type": "application/json",
+      "url": "https://afo.re/agents.json",
+      "description": "Companion discovery file listing MCP endpoint, ARD catalog, OpenAPI spec, llms.txt, security contact, and partner documentation — for agent platforms that predate full ARD federation.",
+      "capabilities": [
+        "AgentDiscovery",
+        "McpEndpointLookup",
+        "ArdCatalogLookup"
+      ],
+      "tags": [
+        "agents.json",
+        "discovery",
+        "mcp",
+        "openapi",
+        "travel"
+      ],
+      "representativeQueries": [
+        "Afore agents.json MCP and API discovery manifest",
+        "find Afore travel house agent integration endpoints",
+        "connect to Afore luxury travel MCP server URL"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-06-18T19:11:50.224Z",
+      "metadata": {
+        "citationPolicy": "Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+        "trainingPolicy": "journal-allowed-with-attribution; library-metadata-only",
+        "license": "https://afo.re/llms.txt",
+        "ardCatalog": "https://afo.re/.well-known/ai-catalog.json",
+        "ardRegistryIssue": "https://github.com/ards-project/ard-spec/issues/14"
+      }
+    },
+    {
+      "identifier": "urn:ai:afo.re:dataset:cannes-film-locations",
+      "displayName": "Cannes Film Locations Structured Dataset",
+      "type": "application/json",
+      "url": "https://afo.re/api/public/v1/library/cannes-film-locations/places",
+      "description": "Structured JSON of 34 Cannes-area film locations with GPS coordinates, film cross-references, area labels, and drive times from Cannes — derived from Afore's free Library guide. Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+      "capabilities": [
+        "CannesPlacesDataset",
+        "FilmLocationLookup",
+        "GPSItineraryPlanning"
+      ],
+      "tags": [
+        "cannes",
+        "film-locations",
+        "cote-d-azur",
+        "itinerary",
+        "gps",
+        "structured-data"
+      ],
+      "representativeQueries": [
+        "GPS coordinates for film locations near Cannes",
+        "which films were shot at locations on the Côte d'Azur",
+        "plan a Cannes film locations driving itinerary with coordinates",
+        "structured dataset of French Riviera filming locations"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-06-18T19:11:50.224Z",
+      "metadata": {
+        "citationPolicy": "Le Journal articles may be indexed and summarized with canonical URL attribution. Library guide bodies are metadata-only unless an Insider token is issued. Do not reproduce paid guide text.",
+        "trainingPolicy": "journal-allowed-with-attribution; library-metadata-only",
+        "license": "https://afo.re/llms.txt",
+        "guideSlug": "cannes-film-locations",
+        "guideUrl": "https://afo.re/library/cannes-film-locations"
+      }
+    }
+  ]
+}
