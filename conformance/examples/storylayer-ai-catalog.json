@@ -1,0 +1,52 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Storylayer",
+    "identifier": "did:web:app.storylayer.ai",
+    "documentationUrl": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+    "logoUrl": "https://storylayer.ai/icon.png",
+    "trustManifest": {
+      "issuer": "did:web:app.storylayer.ai",
+      "catalogUrl": "https://app.storylayer.ai/.well-known/ai-catalog.json",
+      "didDocument": "https://app.storylayer.ai/.well-known/did.json",
+      "policyUrl": "https://storylayer.ai/privacy"
+    }
+  },
+  "entries": [
+    {
+      "identifier": "urn:ai:app.storylayer.ai:server:publishing-mcp",
+      "displayName": "Storylayer Publishing MCP Server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://app.storylayer.ai/.well-known/mcp.json",
+      "description": "Production MCP server for AI-native social media and blog publishing.",
+      "capabilities": ["whoami", "create_story", "publish_story", "schedule_story"],
+      "representativeQueries": [
+        "connect Claude to Instagram and schedule posts from Airtable",
+        "automate social media publishing from Google Sheets with AI"
+      ],
+      "version": "1.2.0",
+      "updatedAt": "2026-06-18T12:00:00.000Z"
+    },
+    {
+      "identifier": "urn:ai:app.storylayer.ai:api:rest-v1",
+      "displayName": "Storylayer REST API v1",
+      "type": "application/vnd.oai.openapi+json",
+      "url": "https://app.storylayer.ai/.well-known/openapi.json",
+      "description": "Bearer-authenticated REST API for programmatic publishing.",
+      "version": "1.2.0",
+      "updatedAt": "2026-06-18T12:00:00.000Z"
+    },
+    {
+      "identifier": "urn:ai:app.storylayer.ai:workflow:airtable-to-social",
+      "displayName": "Airtable → Multi-Channel Publishing",
+      "type": "application/ai-catalog+json",
+      "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+      "description": "Connect Airtable, render branded graphics, publish to all social channels via MCP or REST.",
+      "representativeQueries": [
+        "automate Instagram posts from Airtable when checkbox is checked"
+      ],
+      "version": "1.2.0",
+      "updatedAt": "2026-06-18T12:00:00.000Z"
+    }
+  ]
+}
