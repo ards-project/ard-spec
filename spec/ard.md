@@ -387,7 +387,7 @@ Spec: [agentrust-io/trace-spec](https://agentrust-io.github.io/trace-spec/)
 
 ```json
 {
-  "identifier": "urn:ai:agentrust.io:governed:cmcp-gateway",
+  "identifier": "urn:air:agentrust.io:governed:cmcp-gateway",
   "displayName": "Confidential MCP Gateway",
   "type": "application/mcp-server+json",
   "url": "https://api.agentrust.io/mcp/cmcp",

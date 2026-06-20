@@ -19,7 +19,7 @@
   },
   "entries": [
     {
-      "identifier": "urn:ai:agentrust.io:governed:cmcp-gateway",
+      "identifier": "urn:air:agentrust.io:governed:cmcp-gateway",
       "displayName": "Confidential MCP Gateway (cMCP)",
       "description": "Hardware-attested policy enforcement gateway for MCP tool calls. Cedar policies evaluated inside AMD SEV-SNP / Intel TDX TEE. Every session produces a TRACE Trust Record independently verifiable offline.",
       "type": "application/mcp-server+json",
@@ -44,7 +44,7 @@
       }
     },
     {
-      "identifier": "urn:ai:agentrust.io:governed:agent-manifest",
+      "identifier": "urn:air:agentrust.io:governed:agent-manifest",
       "displayName": "Agent Manifest SDK",
       "description": "Hardware-anchors all 10 artifacts defining an agent at deployment. Attestation extended to agents — attested at registration and re-attested on any change.",
       "type": "application/mcp-server+json",
@@ -69,7 +69,7 @@
       }
     },
     {
-      "identifier": "urn:ai:agentrust.io:governed:trace-registry",
+      "identifier": "urn:air:agentrust.io:governed:trace-registry",
       "displayName": "TRACE Registry",
       "description": "Public append-only Merkle registry for TRACE Trust Record anchors. Query attested session records for any TRACE-governed agent. Supports SCITT-anchored verification.",
       "type": "application/mcp-server+json",
@@ -94,7 +94,7 @@
       }
     },
     {
-      "identifier": "urn:ai:agentrust.io:registry:governed-agents",
+      "identifier": "urn:air:agentrust.io:registry:governed-agents",
       "displayName": "agentrust.io Governed Agent Registry",
       "description": "Federated ARD registry for TRACE-attested, policy-governed agents. All indexed entries carry TRACE-v0.2 runtime governance attestations. Filter with trustManifest.attestations.type=[TRACE-v0.2] to find governed agents across the federation.",
       "type": "application/ai-registry+json",
