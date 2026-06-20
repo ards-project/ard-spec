@@ -17,7 +17,7 @@ PORT = 9010
 # Mock catalog database seeded from spec/examples/ai-catalog.json
 MOCK_CATALOG_ENTRIES = [
   {
-    "identifier": "urn:ai:acme.com:agent:assistant",
+    "identifier": "urn:air:acme.com:agent:assistant",
     "displayName": "Corporate Assistant (A2A)",
     "type": "application/a2a-agent-card+json",
     "url": "https://api.acme.com/agents/assistant.json",
@@ -28,7 +28,7 @@ MOCK_CATALOG_ENTRIES = [
     ]
   },
   {
-    "identifier": "urn:ai:acme.com:server:weather",
+    "identifier": "urn:air:acme.com:server:weather",
     "displayName": "Weather Data Node",
     "type": "application/mcp-server-card+json",
     "url": "https://api.acme.com/mcp/weather.json",
@@ -40,7 +40,7 @@ MOCK_CATALOG_ENTRIES = [
     ]
   },
   {
-    "identifier": "urn:ai:acme.com:catalog:engineering",
+    "identifier": "urn:air:acme.com:catalog:engineering",
     "displayName": "Engineering Sub-Catalog Reference",
     "type": "application/ai-catalog+json",
     "url": "https://acme.com/catalogs/engineering.json",
