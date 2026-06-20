@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/Agent-Card/agentfinder/main/spec/schemas/ai-catalog.schema.json",
+  "$id": "https://raw.githubusercontent.com/ards-project/ard-spec/main/spec/schemas/ai-catalog.schema.json",
   "title": "AICatalogManifest",
   "description": "JSON Schema for the ai-catalog.json capability manifest, defining how AI artifacts are advertised.",
   "type": "object",
@@ -67,8 +67,8 @@
       "properties": {
         "identifier": {
           "type": "string",
-          "pattern": "^urn:ai:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$",
-          "description": "RFC 8141-compliant unique logical URN formatted as: urn:ai:<publisher>:<namespace>:<agent-name>"
+          "pattern": "^urn:air:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$",
+          "description": "RFC 8141-compliant unique logical URN formatted as: urn:air:<publisher>:<namespace>:<agent-name>"
         },
         "displayName": {
           "type": "string",

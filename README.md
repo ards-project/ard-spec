@@ -14,7 +14,6 @@ this is the single source of truth.
 ## Layout
 
 - [`spec/ard.md`](spec/ard.md) — the specification
-- [`spec/urn-naming-guide.md`](spec/urn-naming-guide.md) — URN identifier guide
 - [`spec/schemas/`](spec/schemas/) — CDDL, JSON Schema, and OpenAPI definitions
 - [`adr/`](adr/) — architecture decision records
 - [`conformance/`](conformance/) — conformance test tooling

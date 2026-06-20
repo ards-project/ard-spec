@@ -125,8 +125,6 @@ components:
   schemas:
     QueryModel:
       type: object
-      required:
-        - text
       properties:
         text:
           type: string
@@ -146,13 +144,20 @@ components:
             "trustManifest.attestations.type": ["SOC2-Type2"]
       additionalProperties: false
 
+    SearchQueryModel:
+      allOf:
+        - $ref: '#/components/schemas/QueryModel'
+        - type: object
+          required:
+            - text
+
     SearchRequest:
       type: object
       required:
         - query
       properties:
         query:
-          $ref: '#/components/schemas/QueryModel'
+          $ref: '#/components/schemas/SearchQueryModel'
         federation:
           type: string
           enum: [auto, referrals, none]
@@ -272,7 +277,7 @@ components:
           type: integer
           minimum: 0
           maximum: 100
-          description: Semantic relevance rating (0 to 100) computed by the registry. Note: This is not a security or trust score.
+          description: "Semantic relevance rating (0 to 100) computed by the registry. Note: This is not a security or trust score."
           example: 95
         source:
           type: string
@@ -291,7 +296,7 @@ components:
         identifier:
           type: string
           description: Logical identifier of the referred registry.
-          example: "urn:ai:nlweb.ai:registry:public"
+          example: "urn:air:nlweb.ai:registry:public"
         displayName:
           type: string
           description: Name of the referred registry.

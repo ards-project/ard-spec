@@ -18,15 +18,18 @@ PROJECT_ROOT="$(dirname "$(dirname "$DIR")")"
 
 echo -e "${BOLD}${CYAN}=== Starting Agentic Resource Discovery Conformance Verification Demo ===${RESET}"
 
-# 1. Verify manifest file
-echo -e "\n${BOLD}[Step 1/3] Validating mock manifest file...${RESET}"
-"$PROJECT_ROOT/conformance/bin/conformance-test" manifest "$PROJECT_ROOT/conformance/examples/ai-catalog.json"
-MANIFEST_STATUS=$?
+# 1. Verify manifest files
+echo -e "\n${BOLD}[Step 1/3] Validating mock manifest files...${RESET}"
+MANIFEST_STATUS=0
+for manifest_file in "$PROJECT_ROOT"/conformance/examples/*.json; do
+    echo -e "\n${CYAN}Testing file: $(basename "$manifest_file")${RESET}"
+    "$PROJECT_ROOT/conformance/bin/conformance-test" manifest "$manifest_file" || MANIFEST_STATUS=1
+done
 
 if [ $MANIFEST_STATUS -eq 0 ]; then
-    echo -e "  ${GREEN}✓ Step 1: Mock manifest is fully spec-compliant!${RESET}"
+    echo -e "  ${GREEN}✓ Step 1: All mock manifests are fully spec-compliant!${RESET}"
 else
-    echo -e "  ${RED}✗ Step 1: Mock manifest failed validation.${RESET}"
+    echo -e "  ${RED}✗ Step 1: One or more mock manifests failed validation.${RESET}"
     exit 1
 fi
 
