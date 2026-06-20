@@ -1,124 +1,206 @@
 {
-  "specVersion": "1.0",
-  "host": {
-    "displayName": "SnowSure",
-    "identifier": "snowsure.ai",
-    "documentationUrl": "https://www.snowsure.ai",
-    "logoUrl": "https://www.snowdata.ai/opengraph-image",
-    "trustManifest": {
-      "identity": "https://www.snowsure.ai",
-      "identityType": "https",
-      "attestations": [
+    "specVersion": "1.0",
+    "host": {
+        "displayName": "SnowSure",
+        "identifier": "did:web:www.snowsure.ai",
+        "documentationUrl": "https://www.snowsure.ai/developers",
+        "trustManifest": {
+            "identity": "did:web:www.snowsure.ai",
+            "identityType": "did",
+            "provenance": [
+                {
+                    "relation": "publishedFrom",
+                    "sourceId": "https://www.snowsure.ai"
+                }
+            ],
+            "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dzdXJlLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..OEhTRnt4ABmVX9B2MNGy7-MV18io4Ez6XxJumr3oeL211tXGCp7o1VMYlZl9vT7w1HsBhbuwMmhjGqsDwQBDCQ"
+        }
+    },
+    "entries": [
         {
-          "type": "DataProvenance",
-          "uri": "https://www.snowdata.ai/for-ai/trust#verification"
+            "identifier": "urn:air:snowsure.ai:server:mcp",
+            "displayName": "SnowSure MCP Server",
+            "type": "application/mcp-server-card+json",
+            "url": "https://www.snowsure.ai/.well-known/mcp/server-card.json",
+            "description": "Hosted Streamable HTTP MCP server for ski snow conditions, multi-model forecasts, powder rankings, resort guides, webcams, and a grounded natural-language Answer Engine across 500+ resorts. No install or auth required.",
+            "capabilities": [
+                "get_destination",
+                "ask_snowdata",
+                "get_snow_report",
+                "get_resort",
+                "get_resort_info",
+                "get_resort_photos",
+                "search_resorts",
+                "find_best_powder",
+                "compare_forecasts",
+                "get_weather_forecast",
+                "find_resorts_by_criteria",
+                "get_snow_history",
+                "plan_ski_trip",
+                "get_webcam_status",
+                "get_regional_summary",
+                "get_southern_hemisphere_report",
+                "list_insight_categories",
+                "get_insights",
+                "get_ml_trends"
+            ],
+            "representativeQueries": [
+                "where is the best powder in the alps right now",
+                "compare the 7-day snow forecast for Niseko and Hakuba",
+                "plan a 5-day ski trip to Colorado in late January",
+                "which resorts got fresh snow in the last 24 hours",
+                "what is the SnowSure score and base depth at Zermatt today"
+            ],
+            "documentationUrl": "https://www.snowsure.ai/developers/mcp",
+            "trustManifest": {
+                "identity": "did:web:www.snowsure.ai",
+                "identityType": "did",
+                "provenance": [
+                    {
+                        "relation": "publishedFrom",
+                        "sourceId": "https://www.snowsure.ai"
+                    }
+                ],
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dzdXJlLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ.._H6Qds7x_7bJBiqH_w-manaWLlDtxgvudHJX1ndDgaCB1nTBaDnpNnVPFUN1tXN92LWvJCrXvLeWS9PS2ruZAw"
+            }
         },
         {
-          "type": "OpenStandard",
-          "uri": "https://opensourcesnow.com"
-        }
-      ],
-      "provenance": [
+            "identifier": "urn:air:snowsure.ai:api:rest",
+            "displayName": "SnowSure REST API",
+            "type": "application/openapi+json",
+            "url": "https://www.snowsure.ai/openapi.json",
+            "description": "Read-only HTTP/JSON API for ski resort snow conditions, ranked snow reports, individual resort detail with multi-model forecasts, forecast-trust/accuracy, leaderboards (powder days, bluebird days), trends, and intelligence insights. No auth required.",
+            "capabilities": [
+                "getResorts",
+                "getResortBySlug",
+                "getSnowReport",
+                "getForecastTrust",
+                "getForecastAccuracy",
+                "getLeaderboards",
+                "getTrends",
+                "getInsights"
+            ],
+            "representativeQueries": [
+                "list all ski resorts in Europe sorted by snow score",
+                "get current conditions and forecast for jackson-hole",
+                "show ranked snow report for the best resorts right now",
+                "how accurate has the forecast been for this resort"
+            ],
+            "documentationUrl": "https://www.snowsure.ai/llms-full.txt",
+            "trustManifest": {
+                "identity": "did:web:www.snowsure.ai",
+                "identityType": "did",
+                "provenance": [
+                    {
+                        "relation": "publishedFrom",
+                        "sourceId": "https://www.snowsure.ai"
+                    }
+                ],
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dzdXJlLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..B-sCfpFpVjs3gD-Qau28jFci-Gbv8P-7TP0_sY3SCtzG7qzeZoLeTPdGNZKpdqAGmRw6J_0a7tv9XLYl-YhlBg"
+            }
+        },
         {
-          "relation": "publishedFrom",
-          "sourceId": "urn:ai:snowdata.ai:organization"
+            "identifier": "urn:air:snowsure.ai:api:answer-engine",
+            "displayName": "SnowSure Answer Engine",
+            "type": "application/openapi+json",
+            "url": "https://www.snowsure.ai/openapi.json",
+            "description": "Grounded natural-language Q&A over SnowSure's verified snow data. POST a question and receive an answer grounded in resort conditions, multi-model forecasts, and intelligence cards \u2014 never web search. Supports locales en|es|fr|de|it|ja. Endpoint: POST /api/v1/ask (operationId askSnowSure).",
+            "capabilities": [
+                "askSnowSure"
+            ],
+            "representativeQueries": [
+                "is it a good week to ski Chamonix",
+                "what is the terrain breakdown by ability at Aspen Snowmass",
+                "which Japan resorts have the deepest base this week",
+                "will there be a bluebird powder day at Niseko in the next 5 days"
+            ],
+            "documentationUrl": "https://www.snowsure.ai/llms-full.txt",
+            "trustManifest": {
+                "identity": "did:web:www.snowsure.ai",
+                "identityType": "did",
+                "provenance": [
+                    {
+                        "relation": "publishedFrom",
+                        "sourceId": "https://www.snowsure.ai"
+                    }
+                ],
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dzdXJlLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..BmlHOIwh9wk1NfH0XvvZKahDzS84AlpQnoH7uivw9eBndgFWY_4SQGdZbTmMnpVcHZ8hzlH202gfMvjGifzaAg"
+            }
+        },
+        {
+            "identifier": "urn:air:snowdata.ai:catalog:corporate",
+            "displayName": "Snowdata Corporate ARD Catalog",
+            "type": "application/ai-catalog+json",
+            "url": "https://www.snowdata.ai/.well-known/ai-catalog.json",
+            "description": "Snowdata B2B federation hub: content MCP, intelligence proxies, ARD search registry, and nested links to SnowSure and mcp.snowdata.ai.",
+            "representativeQueries": [
+                "How does a ski resort join the Snowdata verification network?",
+                "Where is the Snowdata ARD catalog for developers?"
+            ],
+            "documentationUrl": "https://www.snowdata.ai/for-ai",
+            "trustManifest": {
+                "identity": "did:web:www.snowsure.ai",
+                "identityType": "did",
+                "provenance": [
+                    {
+                        "relation": "publishedFrom",
+                        "sourceId": "https://www.snowsure.ai"
+                    }
+                ],
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dzdXJlLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..Ypvm0rHoLrvHWC4uhv2UPKQE98yLXcf1WTIWIVvtLBHGsJA-hbtvtB6-V0WXAwCdNCJyHrzKAMJMsO4y9OVvCg"
+            }
+        },
+        {
+            "identifier": "urn:air:snowsure.ai:registry:search",
+            "displayName": "SnowSure ARD Discovery Registry",
+            "type": "application/ai-registry+json",
+            "url": "https://www.snowsure.ai/api/ard/search",
+            "description": "Natural-language discovery service for ski & snow agentic resources. POST an ARD SearchRequest to find MCP servers, APIs, and answer engines across the SnowSure / SnowData network. Federates partner catalogs.",
+            "representativeQueries": [
+                "find a tool for live ski snow conditions",
+                "discover ski resort forecast APIs",
+                "what agents can plan a ski trip"
+            ],
+            "documentationUrl": "https://www.snowsure.ai/developers",
+            "trustManifest": {
+                "identity": "did:web:www.snowsure.ai",
+                "identityType": "did",
+                "provenance": [
+                    {
+                        "relation": "publishedFrom",
+                        "sourceId": "https://www.snowsure.ai"
+                    }
+                ],
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dzdXJlLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..8kTceH3HJP0QPbMTHolwHHK2OuNsIxFw7UQbf48goxidL1_zMlAapbRPtLK7miIPZ-t2EZHH9U7uk6lBZzcRCg"
+            }
+        },
+        {
+            "identifier": "urn:air:snowsure.ai:agent:answer-engine",
+            "displayName": "SnowSure Answer Engine (A2A)",
+            "type": "application/a2a-agent-card+json",
+            "url": "https://www.snowsure.ai/.well-known/agent-card.json",
+            "description": "A2A-discoverable conversational agent for grounded ski & snow Q&A and trip planning. JSON-RPC message/send at /api/a2a, backed by SnowSure's verified data.",
+            "capabilities": [
+                "snow-conditions-qa",
+                "trip-planning"
+            ],
+            "representativeQueries": [
+                "is it a good week to ski Chamonix",
+                "plan a 5-day ski trip to Colorado in late January",
+                "which Japan resorts have the deepest base this week"
+            ],
+            "documentationUrl": "https://www.snowsure.ai/developers",
+            "trustManifest": {
+                "identity": "did:web:www.snowsure.ai",
+                "identityType": "did",
+                "provenance": [
+                    {
+                        "relation": "publishedFrom",
+                        "sourceId": "https://www.snowsure.ai"
+                    }
+                ],
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dzdXJlLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..H5UFtD_Vu-4dmEvmzUnN_YKUYG3oaLY_jjk54prFVVgLHQ6V0wnNv2dGj5CkYlR9bMG-mRwcPx3KELU-V2wpDw"
+            }
         }
-      ]
-    }
-  },
-  "entries": [
-    {
-      "identifier": "urn:ai:snowsure.ai:mcp:live-snow",
-      "displayName": "SnowSure MCP Server",
-      "type": "application/mcp-server+json",
-      "url": "https://www.snowsure.ai/mcp",
-      "description": "17 tools for live conditions, 14-day multi-model forecasts, powder rankings, resort guides, webcams, and grounded Q&A. One URL, no install, no auth.",
-      "tags": [
-        "snow",
-        "ski",
-        "travel",
-        "mcp",
-        "forecast"
-      ],
-      "capabilities": [
-        "get_snow_report",
-        "get_weather_forecast",
-        "find_best_powder",
-        "plan_ski_trip",
-        "ask_snowdata",
-        "search_resorts",
-        "get_regional_summary"
-      ],
-      "representativeQueries": [
-        "Where's the best powder in the Alps this week?",
-        "Is Niseko open today and what's the base depth?",
-        "Compare snowfall at Verbier versus Zermatt this season",
-        "Plan a five-day ski trip to Colorado with the deepest snow",
-        "Which resorts in Japan have more than 30cm of new snow?"
-      ],
-      "version": "1.0.0",
-      "metadata": {
-        "transport": "streamable-http",
-        "toolCount": "17"
-      }
-    },
-    {
-      "identifier": "urn:ai:snowsure.ai:api:rest",
-      "displayName": "SnowSure REST API",
-      "type": "application/openapi+json",
-      "url": "https://api.snowdata.ai",
-      "description": "Resorts, ranked snow reports, leaderboards, trends, forecast-trust, and intelligence insights.",
-      "tags": [
-        "snow",
-        "api",
-        "openapi"
-      ],
-      "representativeQueries": [
-        "Get ranked snow reports for European ski resorts",
-        "Pull SnowSure intelligence leaderboards over REST",
-        "Access historical snow trends for a resort by slug"
-      ],
-      "version": "1.0.0"
-    },
-    {
-      "identifier": "urn:ai:snowsure.ai:api:answer-engine",
-      "displayName": "SnowSure Answer Engine",
-      "type": "application/json",
-      "url": "https://www.snowsure.ai/api/v1/ask",
-      "description": "Grounded natural-language answers over verified snow data in six languages (en, es, fr, de, it).",
-      "tags": [
-        "snow",
-        "qa",
-        "answer-engine"
-      ],
-      "capabilities": [
-        "ask_snowdata"
-      ],
-      "representativeQueries": [
-        "Is Jackson Hole getting snow this week?",
-        "Which Utah resorts have the best powder forecast?",
-        "What is the SnowSure score for Whistler today?"
-      ],
-      "version": "1.0.0",
-      "metadata": {
-        "method": "POST",
-        "locales": "en,es,fr,de,it"
-      }
-    },
-    {
-      "identifier": "urn:ai:snowdata.ai:catalog:corporate",
-      "displayName": "Snowdata Corporate ARD Catalog",
-      "type": "application/ai-catalog+json",
-      "url": "https://www.snowdata.ai/.well-known/ai-catalog.json",
-      "description": "Snowdata corporate federation hub — content MCP, intelligence proxies, ARD search registry.",
-      "tags": [
-        "federation",
-        "b2b"
-      ],
-      "representativeQueries": [
-        "How do developers integrate with Snowdata MCP and APIs?",
-        "Where is the Snowdata ARD search registry?"
-      ]
-    }
-  ]
+    ]
 }
