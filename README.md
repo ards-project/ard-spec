@@ -1,5 +1,12 @@
 # Agentic Resource Discovery (ARD)
 
+> **Proposing a change to the specification?** Please
+> [open an issue](https://github.com/ards-project/ard-spec/issues/new) to start a
+> discussion first. The spec is maintained by its authors, and changes to it are
+> made by the maintainers once a proposal is agreed. Pull requests that modify the
+> specification will generally be closed in favor of that discussion. Issues,
+> questions, and feedback are always welcome.
+
 Canonical home of the **Agentic Resource Discovery** specification — a federated,
 domain-anchored standard for cataloging, searching, and discovering agentic
 resources (MCP servers, A2A agent cards, Skills, APIs, and other callable
@@ -10,13 +17,6 @@ services) across networks of discovery services. It builds on the
 **[agenticresourcediscovery.org/spec](https://agenticresourcediscovery.org/spec/)**
 — the docs site renders [`spec/ard.md`](spec/ard.md) directly from this repo, so
 this is the single source of truth.
-
-> **Proposing a change to the specification?** Please
-> [open an issue](https://github.com/ards-project/ard-spec/issues/new) to start a
-> discussion first. The spec is maintained by its authors, and changes to it are
-> made by the maintainers once a proposal is agreed. Pull requests that modify the
-> specification will generally be closed in favor of that discussion. Issues,
-> questions, and feedback are always welcome.
 
 ## Layout
 
