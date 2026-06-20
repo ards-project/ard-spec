@@ -11,8 +11,8 @@ import json
 import urllib.request
 import urllib.error
 
-# Strict URN Regex matching urn:ai:<publisher>:<namespace>:<agent-name>
-URN_REGEX = re.compile(r"^urn:ai:([a-zA-Z0-9.-]+)(?::([a-zA-Z0-9._:-]+))?:([a-zA-Z0-9._-]+)$")
+# Strict URN Regex matching urn:air:<publisher>:<namespace>:<agent-name>
+URN_REGEX = re.compile(r"^urn:air:([a-zA-Z0-9.-]+)(?::([a-zA-Z0-9._:-]+))?:([a-zA-Z0-9._-]+)$")
 
 # Colors for beautiful CLI output
 COLOR_RESET = "\033[0m"
@@ -125,7 +125,7 @@ class ConformanceTester:
                 # URN pattern checks
                 match = URN_REGEX.match(ident)
                 if not match:
-                    self.add_error(f"[{label}] Identifier '{ident}' does not match RFC 8141 URN pattern 'urn:ai:<publisher>:<namespace>:<agent-name>'.")
+                    self.add_error(f"[{label}] Identifier '{ident}' does not match RFC 8141 URN pattern 'urn:air:<publisher>:<namespace>:<agent-name>'.")
                 else:
                     publisher, namespace, name = match.groups()
                     print_success(f"[{label}] Valid URN format. Publisher: '{publisher}', Name: '{name}'.")
