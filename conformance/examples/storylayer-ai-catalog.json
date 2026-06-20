@@ -1,52 +1,213 @@
 {
-  "specVersion": "1.0",
-  "host": {
-    "displayName": "Storylayer",
-    "identifier": "did:web:app.storylayer.ai",
-    "documentationUrl": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
-    "logoUrl": "https://storylayer.ai/icon.png",
-    "trustManifest": {
-      "issuer": "did:web:app.storylayer.ai",
-      "catalogUrl": "https://app.storylayer.ai/.well-known/ai-catalog.json",
-      "didDocument": "https://app.storylayer.ai/.well-known/did.json",
-      "policyUrl": "https://storylayer.ai/privacy"
-    }
-  },
-  "entries": [
-    {
-      "identifier": "urn:ai:app.storylayer.ai:server:publishing-mcp",
-      "displayName": "Storylayer Publishing MCP Server",
-      "type": "application/mcp-server-card+json",
-      "url": "https://app.storylayer.ai/.well-known/mcp.json",
-      "description": "Production MCP server for AI-native social media and blog publishing.",
-      "capabilities": ["whoami", "create_story", "publish_story", "schedule_story"],
-      "representativeQueries": [
-        "connect Claude to Instagram and schedule posts from Airtable",
-        "automate social media publishing from Google Sheets with AI"
-      ],
-      "version": "1.2.0",
-      "updatedAt": "2026-06-18T12:00:00.000Z"
+    "specVersion": "1.0",
+    "host": {
+        "displayName": "Storylayer",
+        "identifier": "did:web:app.storylayer.ai",
+        "documentationUrl": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+        "logoUrl": "https://storylayer.ai/icon.png",
+        "trustManifest": {
+            "identity": "did:web:app.storylayer.ai",
+            "identityType": "did"
+        }
     },
-    {
-      "identifier": "urn:ai:app.storylayer.ai:api:rest-v1",
-      "displayName": "Storylayer REST API v1",
-      "type": "application/vnd.oai.openapi+json",
-      "url": "https://app.storylayer.ai/.well-known/openapi.json",
-      "description": "Bearer-authenticated REST API for programmatic publishing.",
-      "version": "1.2.0",
-      "updatedAt": "2026-06-18T12:00:00.000Z"
-    },
-    {
-      "identifier": "urn:ai:app.storylayer.ai:workflow:airtable-to-social",
-      "displayName": "Airtable → Multi-Channel Publishing",
-      "type": "application/ai-catalog+json",
-      "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
-      "description": "Connect Airtable, render branded graphics, publish to all social channels via MCP or REST.",
-      "representativeQueries": [
-        "automate Instagram posts from Airtable when checkbox is checked"
-      ],
-      "version": "1.2.0",
-      "updatedAt": "2026-06-18T12:00:00.000Z"
-    }
-  ]
+    "entries": [
+        {
+            "identifier": "urn:air:app.storylayer.ai:server:publishing-mcp",
+            "displayName": "Storylayer Publishing MCP Server",
+            "type": "application/mcp-server-card+json",
+            "url": "https://app.storylayer.ai/.well-known/mcp.json",
+            "description": "Production MCP server for AI-native social media and blog publishing. Drive Instagram, Facebook, X, LinkedIn, Pinterest, and Ghost from Claude, ChatGPT, Cursor, or any MCP client. OAuth 2.1 + Dynamic Client Registration for hosted agents; PAT for local clients.",
+            "capabilities": [
+                "whoami",
+                "list_projects",
+                "list_templates",
+                "list_social_connections",
+                "list_pinterest_boards",
+                "list_moments",
+                "get_bio_link",
+                "update_bio_link",
+                "list_bio_link_items",
+                "add_bio_link_item",
+                "update_bio_link_item",
+                "remove_bio_link_item",
+                "list_stories",
+                "mint_story_links",
+                "get_story",
+                "get_slide_insights",
+                "create_story",
+                "preview_story",
+                "create_stories_bulk",
+                "schedule_story",
+                "publish_story",
+                "retry_story",
+                "move_story",
+                "update_story_status",
+                "retract_story",
+                "update_story",
+                "instagram_location_search",
+                "instagram_user_lookup",
+                "instagram_preflight_bulk",
+                "list_media",
+                "upload_media_from_url",
+                "upload_media",
+                "upload_media_init",
+                "upload_media_chunk",
+                "upload_media_finalize",
+                "request_upload_url",
+                "list_webhooks",
+                "create_webhook"
+            ],
+            "tags": [
+                "publishing",
+                "social-media",
+                "instagram",
+                "automation",
+                "mcp",
+                "agentic"
+            ],
+            "representativeQueries": [
+                "connect Claude to Instagram and schedule posts from Airtable",
+                "automate social media publishing from Google Sheets with AI",
+                "publish a Pinterest pin via MCP",
+                "schedule an Instagram carousel from my listing data",
+                "what social channels are connected to my Storylayer project"
+            ],
+            "version": "1.2.3",
+            "updatedAt": "2026-06-19T12:00:00.000Z"
+        },
+        {
+            "identifier": "urn:air:app.storylayer.ai:api:rest-v1",
+            "displayName": "Storylayer REST API v1",
+            "type": "application/vnd.oai.openapi+json",
+            "url": "https://app.storylayer.ai/.well-known/openapi.json",
+            "description": "Bearer-authenticated REST API for programmatic story creation, scheduling, publishing, media upload, webhooks, and channel management.",
+            "capabilities": [
+                "stories",
+                "automations",
+                "queue",
+                "channels",
+                "webhooks",
+                "media",
+                "analytics",
+                "captions"
+            ],
+            "tags": [
+                "rest-api",
+                "publishing",
+                "webhooks",
+                "automation"
+            ],
+            "representativeQueries": [
+                "create a scheduled Instagram post via REST API",
+                "register a webhook for story.published events",
+                "upload media and publish to multiple social channels",
+                "list pending stories in my content queue",
+                "generate AI captions and publish to LinkedIn"
+            ],
+            "version": "1.2.3",
+            "updatedAt": "2026-06-19T12:00:00.000Z"
+        },
+        {
+            "identifier": "urn:air:app.storylayer.ai:workflow:airtable-to-social",
+            "displayName": "Airtable \u2192 Multi-Channel Publishing",
+            "type": "application/ai-catalog+json",
+            "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+            "description": "Connect Airtable, render branded Creatomate graphics, generate AI captions, publish to Instagram, Facebook, X, LinkedIn, Pinterest, and Ghost via MCP or REST.",
+            "capabilities": [
+                "create_story",
+                "schedule_story",
+                "publish_story",
+                "create_automation"
+            ],
+            "tags": [
+                "workflow",
+                "airtable",
+                "automation",
+                "multi-channel"
+            ],
+            "representativeQueries": [
+                "automate Instagram posts from Airtable when checkbox is checked",
+                "publish new Airtable rows to all social channels",
+                "daily scheduled post from my CRM data"
+            ],
+            "version": "1.2.3",
+            "updatedAt": "2026-06-19T12:00:00.000Z"
+        },
+        {
+            "identifier": "urn:air:app.storylayer.ai:workflow:google-sheets-to-instagram",
+            "displayName": "Google Sheets \u2192 Instagram",
+            "type": "application/ai-catalog+json",
+            "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+            "description": "New spreadsheet rows become branded Instagram posts \u2014 schedule or publish immediately through the MCP server or REST API.",
+            "capabilities": [
+                "create_story",
+                "schedule_story",
+                "publish_story",
+                "list_social_connections"
+            ],
+            "tags": [
+                "workflow",
+                "google-sheets",
+                "instagram"
+            ],
+            "representativeQueries": [
+                "publish new Google Sheet rows to Instagram automatically",
+                "schedule Instagram posts from Google Sheets with AI captions",
+                "turn spreadsheet rows into Instagram carousels"
+            ],
+            "version": "1.2.3",
+            "updatedAt": "2026-06-19T12:00:00.000Z"
+        },
+        {
+            "identifier": "urn:air:app.storylayer.ai:workflow:ghost-blog-from-data",
+            "displayName": "Data \u2192 Ghost Blog Publishing",
+            "type": "application/ai-catalog+json",
+            "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+            "description": "Generate long-form blog articles from structured data and publish to Ghost CMS alongside social snippets.",
+            "capabilities": [
+                "create_story",
+                "publish_story",
+                "preview_story"
+            ],
+            "tags": [
+                "workflow",
+                "ghost",
+                "blog",
+                "cms"
+            ],
+            "representativeQueries": [
+                "publish blog posts to Ghost from Airtable automatically",
+                "generate AI blog articles and post to Ghost CMS",
+                "cross-post social caption as Ghost blog article"
+            ],
+            "version": "1.2.3",
+            "updatedAt": "2026-06-19T12:00:00.000Z"
+        },
+        {
+            "identifier": "urn:air:app.storylayer.ai:workflow:real-estate-listings",
+            "displayName": "Real Estate Listings \u2192 Social",
+            "type": "application/ai-catalog+json",
+            "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+            "description": "Property listing data becomes multi-channel posts with branded templates, location tags, and scheduled publishing.",
+            "capabilities": [
+                "create_story",
+                "instagram_preflight_bulk",
+                "schedule_story",
+                "create_stories_bulk"
+            ],
+            "tags": [
+                "workflow",
+                "real-estate",
+                "listings",
+                "instagram"
+            ],
+            "representativeQueries": [
+                "post new property listings to Instagram and Facebook from my CRM",
+                "schedule real estate carousel posts from listing photos",
+                "automate open-house announcements on social media"
+            ],
+            "version": "1.2.3",
+            "updatedAt": "2026-06-19T12:00:00.000Z"
+        }
+    ]
 }
