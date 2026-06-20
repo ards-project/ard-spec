@@ -20,7 +20,7 @@ host-info = {
 }
 
 catalog-entry = {
-  identifier: tstr, ; URN pattern: urn:ai:<publisher>:<namespace>:<agent-name>
+  identifier: tstr, ; URN pattern: urn:air:<publisher>:<namespace>:<agent-name>
   displayName: tstr,
   type: tstr, ; IANA Media Type (e.g. application/mcp-server-card+json)
   
@@ -68,12 +68,17 @@ provenance-link = {
 ; --- The Search and Explore Registry API Payloads ---
 
 query-model = {
+  ? text: tstr,
+  ? filter: {* tstr => ([+ tstr] / tstr)}
+}
+
+search-query-model = {
   text: tstr,
   ? filter: {* tstr => ([+ tstr] / tstr)}
 }
 
 search-request = {
-  query: query-model,
+  query: search-query-model,
   ? federation: "auto" / "referrals" / "none",
   ? pageSize: uint,
   ? pageToken: tstr

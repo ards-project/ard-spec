@@ -63,7 +63,7 @@ When checking a capability manifest (`ai-catalog.json`), the tool executes the f
 * **JSON Structural Integrity**: Parses the manifest payload to ensure it is valid, uncorrupted JSON.
 * **JSON Schema Draft 2020-12 Conformance**: If the Python `jsonschema` library is installed (`pip install jsonschema`), the tool automatically runs a strict schema-level validation using the official [ai-catalog.schema.json](../spec/schemas/ai-catalog.schema.json) file.
 * **Strict URN Pattern Matching**: Enforces that each entry's `identifier` adheres strictly to the domain-anchored URN namespace format defined in the spec:
-  `urn:ai:<publisher>:<namespace>:<agent-name>` (RFC 8141).
+  `urn:air:<publisher>:<namespace>:<agent-name>` (RFC 8141).
 * **Value-or-Reference Delivery**: Enforces the mutual exclusivity constraint of the specification. Each entry **MUST** contain precisely one of either `"url"` (remote reference) or `"data"` (embedded payload), and will fail if both or neither are provided.
 * **Ecosystem Attributes Validation**:
   * Checks that `"representativeQueries"` contains between **2 to 5** natural-language queries to ensure high-performance semantic vector embeddings.
