@@ -79,7 +79,7 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
   },
   "entries": [
     {
-      "identifier": "urn:ai:acme.com:agent:assistant",
+      "identifier": "urn:air:acme.com:agent:assistant",
       "displayName": "Corporate Assistant (A2A)",
       "type": "application/a2a-agent-card+json",
       "url": "https://api.acme.com/agents/assistant.json",
@@ -90,7 +90,7 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
       ]
     },
     {
-      "identifier": "urn:ai:acme.com:server:weather",
+      "identifier": "urn:air:acme.com:server:weather",
       "displayName": "Weather Data Node",
       "type": "application/mcp-server+json",
       "url": "https://api.acme.com/mcp/weather.json",
@@ -102,7 +102,7 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
       ]
     },
     {
-      "identifier": "urn:ai:acme.com:plugin:finance-suite",
+      "identifier": "urn:air:acme.com:plugin:finance-suite",
       "displayName": "Finance Tool Bundle",
       "type": "application/ai-catalog+json",
       "description": "A static nested bundle containing an A2A agent and its required market dataset.",
@@ -111,13 +111,13 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
         "specVersion": "1.0",
         "entries": [
           {
-            "identifier": "urn:ai:acme.com:finance:a2a",
+            "identifier": "urn:air:acme.com:finance:a2a",
             "displayName": "Finance Trading Agent",
             "type": "application/a2a-agent-card+json",
             "url": "https://api.acme.com/agents/finance-trader.json"
           },
           {
-            "identifier": "urn:ai:acme.com:market:2026",
+            "identifier": "urn:air:acme.com:market:2026",
             "displayName": "Market Dataset 2026",
             "type": "application/parquet",
             "url": "https://data.acme.com/market-2026.parquet"
@@ -126,7 +126,7 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
       }
     },
     {
-      "identifier": "urn:ai:acme.com:registry:global",
+      "identifier": "urn:air:acme.com:registry:global",
       "displayName": "Acme Global Agent Registry",
       "type": "application/ai-registry+json",
       "url": "https://registry.acme.com/api/v1/",
@@ -148,7 +148,7 @@ A manifest file hosted at /.well-known/ai-catalog.json lists the available artif
       }
     },
     {
-      "identifier": "urn:ai:acme.com:catalog:engineering",
+      "identifier": "urn:air:acme.com:catalog:engineering",
       "displayName": "Engineering Department Catalogs",
       "type": "application/ai-catalog+json",
       "url": "https://acme.com/catalogs/engineering.json",
@@ -164,7 +164,7 @@ Each object in the entries array MUST contain:
 
 | Field | Type | Description |
 | :---- | :---- | :---- |
-| identifier | String | Globally unique logical identifier for discovery. MUST use a domain-anchored URN namespace format (`urn:ai:<publisher>:<namespace>:<agent-name>`) where `<publisher>` is a verifiable domain name. This guarantees cross-network uniqueness, nomenclature stability, and decentralized trust binding. See [§4.2.1](#421-agent-identifier-identifier-format-and-rationale) for detailed format specifications and architectural rationale. |
+| identifier | String | Globally unique logical identifier for discovery. MUST use a domain-anchored URN namespace format (`urn:air:<publisher>:<namespace>:<agent-name>`) where `<publisher>` is a verifiable domain name. This guarantees cross-network uniqueness, nomenclature stability, and decentralized trust binding. See [§4.2.1](#421-agent-identifier-identifier-format-and-rationale) for detailed format specifications and architectural rationale. |
 | displayName | String | Human-readable name. |
 | type | String | Type of the AI artifact. |
 
@@ -193,7 +193,7 @@ Optional fields:
 The identifier field serves as the primary logical handle for an agent or capability across federated discovery networks. It MUST follow a standardized, domain-anchored URN format complying with IETF RFC 8141:
 
 ```
-urn:ai:<publisher>:<namespace>:<agent-name>
+urn:air:<publisher>:<namespace>:<agent-name>
 ```
 
 #### Format Structure
@@ -232,7 +232,7 @@ An agent hosted on Hugging Face Spaces (MCP), published in a manifest:
   "host": { "displayName": "Alice's AI Tools" },
   "entries": [
     {
-      "identifier": "urn:ai:hf.co:alice-dev:weather-agent",
+      "identifier": "urn:air:hf.co:alice-dev:weather-agent",
       "displayName": "Weather Agent",
       "type": "application/mcp-server+json",
       "inline": {
@@ -263,7 +263,7 @@ A skill hosted on GitHub, published in a manifest:
   "host": { "displayName": "Alice's AI Tools" },
   "entries": [
     {
-      "identifier": "urn:ai:github.com:alice-dev:pptx-creator",
+      "identifier": "urn:air:github.com:alice-dev:pptx-creator",
       "displayName": "pptx-creator",
       "type": "application/ai-skill",
       "url": "https://github.com/alice-dev/pptx-creator",
@@ -281,13 +281,13 @@ Discovery via GitHub Pages (combining the above):
   "host": { "displayName": "Alice's AI Tools" },
   "entries": [
     {
-      "identifier": "urn:ai:hf.co:alice-dev:weather-agent",
+      "identifier": "urn:air:hf.co:alice-dev:weather-agent",
       "displayName": "Weather Agent",
       "type": "application/mcp-server+json",
       "url": "https://alice-dev.github.io/weather-agent/entry.json"
     },
     {
-      "identifier": "urn:ai:github.com:alice-dev:pptx-creator",
+      "identifier": "urn:air:github.com:alice-dev:pptx-creator",
       "displayName": "pptx-creator",
       "type": "application/ai-skill+md",
       "url": "https://github.com/alice-dev/pptx-creator"
@@ -309,7 +309,7 @@ Using trustManifest for compliance, published in a manifest.
   },
   "entries": [
     {
-      "identifier": "urn:ai:acme.com:travel:concierge",
+      "identifier": "urn:air:acme.com:travel:concierge",
       "displayName": "Travel Concierge",
       "type": "application/a2a-agent-card+json",
       "url": "https://api.acme.com/travel/concierge.json",
@@ -473,7 +473,7 @@ The response returns standard catalog entries with additional relevance scores, 
 {
   "results": [
     {
-      "identifier": "urn:ai:acme.com:agent:assistant",
+      "identifier": "urn:air:acme.com:agent:assistant",
       "displayName": "Corporate Assistant (A2A)",
       "type": "application/a2a-agent-card+json",
       "url": "https://api.acme.com/agents/assistant.json",
@@ -481,7 +481,7 @@ The response returns standard catalog entries with additional relevance scores, 
       "source": "https://registry.acme.com/api/v1/"
     },
     {
-      "identifier": "urn:ai:example.com:weather-server",
+      "identifier": "urn:air:example.com:weather-server",
       "displayName": "Global Weather Service",
       "type": "application/mcp-server+json",
       "url": "https://weather.example.com/mcp",
@@ -492,7 +492,7 @@ The response returns standard catalog entries with additional relevance scores, 
   ],
   "referrals": [
     {
-      "identifier": "urn:ai:nlweb.ai:registry:public",
+      "identifier": "urn:air:nlweb.ai:registry:public",
       "displayName": "Public Agent Finder",
       "type": "application/ai-registry",
       "url": "https://finder.nlweb.ai/search"
@@ -626,7 +626,7 @@ This gives the client full control over the federation topology without requirin
 {
   "results": [
     {
-      "identifier": "urn:ai:acme.com:agent:expense",
+      "identifier": "urn:air:acme.com:agent:expense",
       "displayName": "Corporate Expenses",
       "type": "application/a2a-agent-card+json",
       "url": "https://internal.corp/agents/expense.json",
@@ -636,13 +636,13 @@ This gives the client full control over the federation topology without requirin
   ],
   "referrals": [
     {
-      "identifier": "urn:ai:blweb.ai:registry:public",
+      "identifier": "urn:air:blweb.ai:registry:public",
       "displayName": "Public Agent Finder",
       "type": "application/ai-registry",
       "url": "https://finder.nlweb.ai/search"
     },
     {
-      "identifier": "urn:ai:example.com:registry:travel",
+      "identifier": "urn:air:example.com:registry:travel",
       "displayName": "Travel Agent Finder",
       "type": "application/ai-registry",
       "url": "https://travel.finder.example/search"
@@ -690,10 +690,10 @@ Logical AND is used across different parameters; OR is used within a single para
 
 Restricting the discovery identifier to this specific URN format, rather than allowing arbitrary URIs (such as https://... or spiffe://...), provides fundamental architectural benefits for federated agent discovery:
 
-1. **Nomenclature Stability (Immutable Noun vs. Mutable Location)**: Arbitrary URIs, particularly HTTP URLs, conflate the *logical identity* of a capability with its *physical network location*. If an enterprise migrates workloads across cloud providers, restructures its API gateway, or alters its deployment clusters, an HTTP URL breaks. The urn:ai: identifier acts as an abstract, permanent contract (the "noun"). Physical distribution and transport bindings are decoupled into the url or data fields, allowing underlying infrastructure to evolve without breaking client discovery, indexing, or orchestration code.  
-2. **Strict Separation of Concerns**: Federated search registries require a clean, stable primary key to index capabilities efficiently across global networks. Conversely, zero-trust execution runtimes require dynamic, verifiable cryptographic tokens (SPIFFE IDs, DIDs, X.509 certificates) to authenticate workloads. Forcing a single URI to serve both roles creates an architectural bottleneck. The urn:ai: format cleanly decouples the searchable discovery handle from the security principal, allowing the discovery index and the security mesh to operate independently.  
-3. **Decentralized Trust and Authority Binding**: In a globally federated open discovery network, search registries must prevent malicious actors from claiming namespaces they do not own (e.g., an untrusted publisher claiming urn:ai:google.com:tax-agent). Mandating that `<publisher>` be a valid FQDN establishes an immediate, verifiable authority anchor. Registries and orchestrators programmatically extract the domain from the URN (google.com) and cross-reference it with the cryptographic claim in trustManifest.identity. If the workload cannot produce a valid cryptographic attestation (e.g., mTLS certificate or SPIFFE SVID) issued by google.com, the capability is rejected. This ensures decentralized, zero-trust verification without requiring a centralized naming committee.  
-4. **Search and Discovery Ergonomics (The @ Resolution Pattern)**: Users and LLMs require intuitive, semantic handles for capabilities (e.g., Assistant@Acme). The structured hierarchy of `urn:ai:<publisher>:<namespace>:<agent-name>` allows search engines and federated registries to parse components deterministically. Registries can easily match natural language queries to the publisher domain (Acme) and the terminal short name (Assistant), enabling high-performance semantic filtering, aggregation, and conflict resolution (e.g., displaying Assistant with a verified Acme shield).  
+1. **Nomenclature Stability (Immutable Noun vs. Mutable Location)**: Arbitrary URIs, particularly HTTP URLs, conflate the *logical identity* of a capability with its *physical network location*. If an enterprise migrates workloads across cloud providers, restructures its API gateway, or alters its deployment clusters, an HTTP URL breaks. The urn:air: identifier acts as an abstract, permanent contract (the "noun"). Physical distribution and transport bindings are decoupled into the url or data fields, allowing underlying infrastructure to evolve without breaking client discovery, indexing, or orchestration code.  
+2. **Strict Separation of Concerns**: Federated search registries require a clean, stable primary key to index capabilities efficiently across global networks. Conversely, zero-trust execution runtimes require dynamic, verifiable cryptographic tokens (SPIFFE IDs, DIDs, X.509 certificates) to authenticate workloads. Forcing a single URI to serve both roles creates an architectural bottleneck. The urn:air: format cleanly decouples the searchable discovery handle from the security principal, allowing the discovery index and the security mesh to operate independently.  
+3. **Decentralized Trust and Authority Binding**: In a globally federated open discovery network, search registries must prevent malicious actors from claiming namespaces they do not own (e.g., an untrusted publisher claiming urn:air:google.com:tax-agent). Mandating that `<publisher>` be a valid FQDN establishes an immediate, verifiable authority anchor. Registries and orchestrators programmatically extract the domain from the URN (google.com) and cross-reference it with the cryptographic claim in trustManifest.identity. If the workload cannot produce a valid cryptographic attestation (e.g., mTLS certificate or SPIFFE SVID) issued by google.com, the capability is rejected. This ensures decentralized, zero-trust verification without requiring a centralized naming committee.  
+4. **Search and Discovery Ergonomics (The @ Resolution Pattern)**: Users and LLMs require intuitive, semantic handles for capabilities (e.g., Assistant@Acme). The structured hierarchy of `urn:air:<publisher>:<namespace>:<agent-name>` allows search engines and federated registries to parse components deterministically. Registries can easily match natural language queries to the publisher domain (Acme) and the terminal short name (Assistant), enabling high-performance semantic filtering, aggregation, and conflict resolution (e.g., displaying Assistant with a verified Acme shield).  
 5. **Cross-Network Uniqueness and Federation Scalability**: Domain-anchored URNs guarantee global uniqueness across disparate federated registries without requiring centralized registration databases. Because domain names are already globally unique via the DNS root, anchoring the URN to a domain eliminates collision risks when merging catalogs from multiple upstream registries in auto or referrals federation modes.
 
 ---
@@ -719,7 +719,7 @@ The JSON representation of the capability manifest hosted at `/.well-known/ai-ca
 
 * **Authoritative Schema File**: [`spec/schemas/ai-catalog.schema.json`](schemas/ai-catalog.schema.json)
 * **Key Validation Enforcements**:
-  * Pattern matching URN compliance rules for the logical `identifier` format (`^urn:ai:...`).
+  * Pattern matching URN compliance rules for the logical `identifier` format (`^urn:air:...`).
   * Strict Value-or-Reference exclusion logic (`oneOf` matching either `url` or `data`, preventing duplicate definitions).
   * Struct checking for SPIFFE/DID compliance in `trustManifest` and `attestations` objects.
 

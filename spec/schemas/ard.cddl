@@ -20,7 +20,7 @@ host-info = {
 }
 
 catalog-entry = {
-  identifier: tstr, ; URN pattern: urn:ai:<publisher>:<namespace>:<agent-name>
+  identifier: tstr, ; URN pattern: urn:air:<publisher>:<namespace>:<agent-name>
   displayName: tstr,
   type: tstr, ; IANA Media Type (e.g. application/mcp-server-card+json)
   
