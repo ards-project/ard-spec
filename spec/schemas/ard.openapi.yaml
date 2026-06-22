@@ -298,7 +298,7 @@ components:
         identifier:
           type: string
           description: Logical identifier of the referred registry.
-          example: "urn:air:nlweb.ai:registry:public"
+          example: "urn:ai:nlweb.ai:registry:public"
         displayName:
           type: string
           description: Name of the referred registry.

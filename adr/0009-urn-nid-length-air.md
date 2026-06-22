@@ -10,11 +10,11 @@ The Agentic Resource Discovery (ARD) specification initially utilized the `urn:a
 We are changing the primary URN namespace identifier (NID) from `ai` to `air` to ensure the NID is at least three characters long. 
 
 The new pattern will be:
-`urn:air:<publisher>:<namespace>:<agent-name>`
+`urn:ai:<publisher>:<namespace>:<agent-name>`
 
 This change also aligns with the latest agreed alignments across with ai-catalog.
 
 ## Consequences
-- All schema references, OpenAPI documents, CDDL specifications, and mock data have been updated to use `urn:air:` instead of `urn:ai:`.
+- All schema references, OpenAPI documents, CDDL specifications, and mock data have been updated to use `urn:ai:` instead of `urn:ai:`.
 - This ensures full compliance with standard URN parsers and avoids short-identifier constraint issues.
 - Implementers must update their identifier schemas to use the `air` NID.

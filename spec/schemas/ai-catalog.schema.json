@@ -67,8 +67,8 @@
       "properties": {
         "identifier": {
           "type": "string",
-          "pattern": "^urn:air:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$",
-          "description": "RFC 8141-compliant unique logical URN formatted as: urn:air:<publisher>:<namespace>:<agent-name>"
+          "pattern": "^urn:ai:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$",
+          "description": "RFC 8141-compliant unique logical URN formatted as: urn:ai:<publisher>:<namespace>:<agent-name>"
         },
         "displayName": {
           "type": "string",
