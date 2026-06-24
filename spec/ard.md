@@ -363,9 +363,62 @@ Provides verifiable proof of a claim (e.g., compliance certifications).
 
 | Field | Type | Description |
 | :---- | :---- | :---- |
-| type | String | **Required**. Attestation type (e.g., "SOC2-Type2", "HIPAA-Audit"). |
+| type | String | **Required**. Attestation type (e.g., "SOC2-Type2", "HIPAA-Audit", "SOVP-v1"). |
 | uri | String | **Required**. Location of the attestation document. |
-| digest | String | Optional. Cryptographic hash for integrity verification. |
+| digest | Object | Optional. Cryptographic hash for integrity verification. Contains `alg` (hash algorithm, e.g., "sha256") and `value` (hex-encoded digest). |
+
+#### 5.2.1 Registered Attestation Types
+
+The following attestation types have documented schemas and are recognized by this specification:
+
+| Type | Layer | Description | Schema |
+| :---- | :---- | :---- | :---- |
+| SOC2-Type2 | Compliance | SOC 2 Type II audit report | — |
+| HIPAA-Audit | Compliance | HIPAA compliance audit | — |
+| TRACE-v0.2 | Runtime governance | Runtime agent execution attestation (what the agent did) | [agentrust-io/trace-spec](https://github.com/agentrust-io/trace-spec) |
+| SOVP-v1 | Infrastructure trust | Pre-execution infrastructure attestation (host measured and hardened before connection) | [draft-litzki-sovp-03](https://datatracker.ietf.org/doc/draft-litzki-sovp/) |
+
+#### 5.2.2 SOVP-v1 Attestation Type
+
+SOVP-v1 attests the infrastructure state of a host before an agent connects. It occupies the layer between install-time consent (install-manifest) and runtime governance (TRACE-v0.2).
+
+The seven-property contract (per §5.4):
+
+| Property | SOVP-v1 |
+| :---- | :---- |
+| Canonical bytes | JCS (RFC 8785) over the identity payload |
+| Content address | SHA-256 over canonical bytes (`digest.value`) |
+| Evidence family + schema | `type: "SOVP-v1"`, schema at draft-litzki-sovp-03 |
+| Scope + freshness | 265-parameter infrastructure snapshot, 90-day validity window |
+| Recompute | Verifier recomputes SHA-256 over JCS-canonical bytes, checks Ed25519 signature — no issuer callback |
+| Coverage | Record states which parameter clusters were checked; unchecked clusters declared explicitly |
+| Non-claims | Attests infrastructure state at ingress. Does not attest agent behavior, policy compliance, or runtime execution |
+
+Example catalog entry:
+
+```json
+{
+  "identifier": "urn:air:acme.com:finance:invoice-processor",
+  "displayName": "Invoice Processor",
+  "type": "application/a2a-agent-card+json",
+  "url": "https://api.acme.com/agents/invoice",
+  "trustManifest": {
+    "attestations": [
+      {
+        "type": "SOVP-v1",
+        "uri": "https://api.acme.com/.well-known/sovp-identity.json",
+        "digest": {
+          "alg": "sha256",
+          "value": "<SHA-256 over JCS-canonical identity record bytes>"
+        }
+      }
+    ]
+  }
+}
+```
+
+Reference implementation (Apache 2.0): [litzki-systems/sovp-python](https://github.com/litzki-systems/sovp-python)
+IETF Individual Draft: [draft-litzki-sovp-03](https://datatracker.ietf.org/doc/draft-litzki-sovp/)
 
 ### 5.3 Provenance Link Object
 
