@@ -1,0 +1,46 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "U.S. Food and Drug Administration",
+    "identifier": "did:web:fda.gov",
+    "documentationUrl": "https://open.fda.gov/apis/drug/ndc/"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:fda.gov:api:drug-ndc",
+      "displayName": "FDA Drug NDC Directory API",
+      "type": "application/mcp-server-card+json",
+      "url": "https://api.fda.gov/drug/ndc.json",
+      "description": "Official FDA National Drug Code Directory API providing comprehensive drug product information including packaging, labeling, and manufacturer data. Updated daily with official drug listings from the NDC Directory.",
+      "representativeQueries": [
+        "find drug information by NDC code 1234-5678-90",
+        "search for all aspirin products with dosage form tablet",
+        "get manufacturer information for Pfizer drugs",
+        "find generic equivalents for brand name Lipitor",
+        "look up drug packaging and strength information"
+      ],
+      "capabilities": ["DrugLookup", "ManufacturerSearch", "DosageFormFilter", "PackagingInfo", "LabelerInfo", "ProductListing"],
+      "trustManifest": {
+        "identity": "did:web:fda.gov",
+        "identityType": "did",
+        "attestations": [
+          {
+            "type": "Official-Government-API",
+            "uri": "https://www.fda.gov/regulatory-information/foia/electronic-reading-room",
+            "mediaType": "text/html"
+          },
+          {
+            "type": "Data-Source-Verification",
+            "uri": "https://open.fda.gov/data/ndc/",
+            "mediaType": "text/html"
+          },
+          {
+            "type": "Daily-Update-Commitment",
+            "uri": "https://open.fda.gov/data/ndc/",
+            "mediaType": "text/html"
+          }
+        ]
+      }
+    }
+  ]
+}

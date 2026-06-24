@@ -1,0 +1,165 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "MediTech Health Systems",
+    "identifier": "did:web:meditech.health",
+    "documentationUrl": "https://meditech.health/developers/ai-integration"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:meditech.health:mcp:patient-records",
+      "displayName": "Patient Records Access",
+      "type": "application/mcp-server-card+json",
+      "url": "https://api.meditech.health/mcp/patient-records.json",
+      "capabilities": ["PatientLookup", "MedicalHistory", "MedicationList", "AllergyCheck"],
+      "description": "Secure HIPAA-compliant access to patient medical records with audit logging.",
+      "representativeQueries": [
+        "retrieve patient John Doe's medication list",
+        "check patient allergies before prescribing",
+        "get recent lab results for patient ID 12345",
+        "find patient's primary care physician",
+        "access patient's vaccination history"
+      ],
+      "trustManifest": {
+        "identity": "spiffe://meditech.health/mcp/patient-records",
+        "identityType": "spiffe",
+        "attestations": [
+          {
+            "type": "HIPAA-Compliance",
+            "uri": "https://compliance.meditech.health/hipaa-audit.pdf",
+            "mediaType": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "urn:air:meditech.health:agent:clinical-assistant",
+      "displayName": "Clinical Decision Support Assistant",
+      "type": "application/a2a-agent-card+json",
+      "url": "https://api.meditech.health/agents/clinical-assistant.json",
+      "description": "AI-powered clinical assistant for diagnostic suggestions and treatment recommendations.",
+      "representativeQueries": [
+        "suggest differential diagnosis for chest pain symptoms",
+        "recommend treatment plan for type 2 diabetes patient",
+        "analyze lab results and provide clinical insights",
+        "check drug interactions for prescribed medications",
+        "provide evidence-based treatment guidelines"
+      ],
+      "capabilities": ["DiagnosticSupport", "TreatmentPlanning", "DrugInteractionCheck", "EvidenceLookup"],
+      "trustManifest": {
+        "identity": "spiffe://meditech.health/agents/clinical-assistant",
+        "identityType": "spiffe",
+        "attestations": [
+          {
+            "type": "FDA-Cleared",
+            "uri": "https://fda.meditech.health/clearance.pdf",
+            "mediaType": "application/pdf"
+          },
+          {
+            "type": "Clinical-Validation",
+            "uri": "https://validation.meditech.health/clinical-study.pdf",
+            "mediaType": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "urn:air:meditech.health:mcp:lab-results",
+      "displayName": "Laboratory Results Integration",
+      "type": "application/mcp-server-card+json",
+      "url": "https://api.meditech.health/mcp/lab-results.json",
+      "capabilities": ["LabResultQuery", "TrendAnalysis", "AbnormalFlagging", "ReportGeneration"],
+      "description": "Interface to laboratory information systems for test results and analysis.",
+      "representativeQueries": [
+        "get complete blood count results for patient",
+        "analyze creatinine level trends over 6 months",
+        "flag abnormal lab values in recent tests",
+        "generate lab report summary for physician",
+        "compare current results with baseline values"
+      ]
+    },
+    {
+      "identifier": "urn:air:meditech.health:agent:appointment-scheduler",
+      "displayName": "Smart Appointment Scheduler",
+      "type": "application/a2a-agent-card+json",
+      "url": "https://api.meditech.health/agents/appointment-scheduler.json",
+      "description": "Intelligent scheduling system that optimizes patient appointments based on urgency and availability.",
+      "representativeQueries": [
+        "schedule follow-up appointment for cardiology review",
+        "find earliest available slot for urgent consultation",
+        "reschedule patient appointment due to conflict",
+        "book annual physical exam with primary care",
+        "optimize clinic schedule for maximum efficiency"
+      ],
+      "capabilities": ["AppointmentBooking", "ScheduleOptimization", "ConflictResolution", "ReminderSystem"]
+    },
+    {
+      "identifier": "urn:air:meditech.health:mcp:billing-coder",
+      "displayName": "Medical Billing & Coding",
+      "type": "application/mcp-server-card+json",
+      "url": "https://api.meditech.health/mcp/billing-coder.json",
+      "capabilities": ["ICD10Coding", "CPTCoding", "ChargeCapture", "ClaimValidation"],
+      "description": "Automated medical coding and billing system for healthcare reimbursement.",
+      "representativeQueries": [
+        "assign ICD-10 codes for diabetes diagnosis",
+        "generate CPT codes for surgical procedures",
+        "validate claim before submission to insurance",
+        "capture charges for telehealth consultation",
+        "check coding compliance for billing audit"
+      ]
+    },
+    {
+      "identifier": "urn:air:meditech.health:catalog:telemedicine",
+      "displayName": "Telemedicine Services Catalog",
+      "type": "application/ai-catalog+json",
+      "url": "https://meditech.health/catalogs/telemedicine.json",
+      "description": "Specialized catalog containing virtual care and remote monitoring capabilities."
+    },
+    {
+      "identifier": "urn:air:meditech.health:mcp:pharmacy-integration",
+      "displayName": "Pharmacy Management System",
+      "type": "application/mcp-server-card+json",
+      "url": "https://api.meditech.health/mcp/pharmacy.json",
+      "capabilities": ["PrescriptionProcessing", "DrugInventory", "RefillManagement", "FormularyCheck"],
+      "description": "Integration with pharmacy systems for prescription management and drug inventory.",
+      "representativeQueries": [
+        "process electronic prescription for antibiotics",
+        "check drug formulary coverage for patient insurance",
+        "manage medication refill requests",
+        "verify drug availability in hospital pharmacy",
+        "track medication adherence and compliance"
+      ]
+    },
+    {
+      "identifier": "urn:air:fda.gov:api:drug-ndc",
+      "displayName": "FDA Drug NDC Directory API",
+      "type": "application/mcp-server-card+json",
+      "url": "https://api.fda.gov/drug/ndc.json",
+      "description": "Official FDA National Drug Code Directory API providing comprehensive drug product information including packaging, labeling, and manufacturer data. Updated daily with official drug listings.",
+      "representativeQueries": [
+        "find drug information by NDC code 1234-5678-90",
+        "search for all aspirin products with dosage form tablet",
+        "get manufacturer information for Pfizer drugs",
+        "find generic equivalents for brand name Lipitor",
+        "look up drug packaging and strength information"
+      ],
+      "capabilities": ["DrugLookup", "ManufacturerSearch", "DosageFormFilter", "PackagingInfo", "LabelerInfo"],
+      "trustManifest": {
+        "identity": "did:web:fda.gov",
+        "identityType": "did",
+        "attestations": [
+          {
+            "type": "Official-Government-API",
+            "uri": "https://www.fda.gov/regulatory-information/foia/electronic-reading-room",
+            "mediaType": "text/html"
+          },
+          {
+            "type": "Data-Source-Verification",
+            "uri": "https://open.fda.gov/data/ndc/",
+            "mediaType": "text/html"
+          }
+        ]
+      }
+    }
+  ]
+}
