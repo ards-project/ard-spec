@@ -204,6 +204,27 @@ urn:air:<publisher>:<namespace>:<agent-name>
 * **`<namespace>`**: Optional hierarchical segments separated by : (e.g., finance:trading, weather:telemetry). Allows publishers to categorize capabilities by department, team, or product line without altering infrastructure routing.  
 * **`<agent-name>`**: Mandatory terminal segment representing the specific, logical short name of the agent or tool (e.g., assistant, pptx-creator).
 
+#### Domainless Publishers: the DID-Anchored Branch
+
+Publishers without a controllable fully qualified domain name — for example, agents whose identity is rooted in a [Decentralized Identifier (W3C DID)](https://www.w3.org/TR/did-core/) and a signed personal data store rather than in DNS — MAY substitute a DID for the `<publisher>` FQDN. The `<publisher>` position then carries a DID in place of a domain:
+
+```
+urn:air:did:<method>:<method-specific-id>:<namespace>:<agent-name>
+```
+
+* The literal token `did` in the `<publisher>` position signals the DID-anchored branch and distinguishes it unambiguously from an FQDN root (no registrable domain is the bare label `did`).
+* In the initial registered set, `<method>` MUST be one of `plc` or `web`, and the DID MUST occupy **exactly three** colon-delimited segments — `did:<method>:<method-specific-id>`. Accordingly, `did:web` is restricted to its host-only form (`did:web:<host>`) in this branch; path-bearing `did:web` identifiers and additional DID methods (`did:key`, `did:peer`, …) are deferred to a future amendment so the resolution machinery can be validated against a small, fixed set first.
+* `<namespace>` (optional) and `<agent-name>` (mandatory terminal segment) retain exactly their meaning from the FQDN branch.
+
+Examples:
+
+```
+urn:air:did:plc:ewvi7nxzyoun6zhxrhs64oiz:mcp:memory-server
+urn:air:did:web:example.com:weather:telemetry
+```
+
+Authority for a DID-anchored identifier is established by verified control of the DID — see [§5.1.1](#511-did-anchored-identity-resolution-domainless-publishers) — not by FQDN cross-reference against `trustManifest`. A `did:web` publisher that also controls a domain MAY appear under either branch; the two forms denote the same publisher when the `did:web` host equals the FQDN, which makes `did:web` a natural migration on-ramp between the branches. The existing `identifier` pattern in the `ai-catalog.json` schema already admits this branch (the DID's internal colons parse as additional segments), so no schema change is required.
+
 #### Please see more details at [Architectural Rationale for URN Restriction](#appendix-c:-agent-naming-urn-format)
 
 ### 4.3 Host Info Object
@@ -296,6 +317,32 @@ Discovery via GitHub Pages (combining the above):
 }
 ```
 
+#### The Domainless (DID-Anchored) Path
+
+Like the Solo Developer Path, but the publisher has no domain at all — identity is rooted in a `did:plc` and a signed personal data store. The discovery identifier uses the DID-anchored branch (§4.2.1); authority is proven by DID control (§5.1.1), and `trustManifest` carries the same DID with `identityType: "did"`.
+
+```json
+{
+  "specVersion": "1.0",
+  "host": { "displayName": "Yep", "identifier": "did:plc:ewvi7nxzyoun6zhxrhs64oiz" },
+  "entries": [
+    {
+      "identifier": "urn:air:did:plc:ewvi7nxzyoun6zhxrhs64oiz:mcp:memory-server",
+      "displayName": "Memory Server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://example.dev/.well-known/mcp/memory-server.json",
+      "trustManifest": {
+        "identity": "did:plc:ewvi7nxzyoun6zhxrhs64oiz",
+        "identityType": "did",
+        "signature": "<detached JWS over the JCS-canonicalized Trust Manifest; alg negotiated via the DID Document verificationMethod>"
+      }
+    }
+  ]
+}
+```
+
+No FQDN, no SPIFFE issuer, no cloud account: a consumer resolves `did:plc:ewvi7nxzyoun6zhxrhs64oiz` to its DID Document, validates the detached JWS against the published key, and accepts the entry as bound to that DID.
+
 #### Enterprise Example
 
 Using trustManifest for compliance, published in a manifest.
@@ -356,6 +403,21 @@ The trustManifest object sits alongside the artifact content in a catalog entry 
 | attestations | Array | Optional. List of Attestation objects providing verifiable claims. |
 | provenance | Array | Optional. List of Provenance Link objects recording lineage. |
 | signature | String | Optional. Detached JWS signature computed over the Trust Manifest content. |
+
+**Authority alignment for DID-anchored identities.** For `identityType: "did"`, the authority-alignment requirement on `identity` (above) is satisfied by verified control of the DID, established via the resolution path defined in [§5.1.1](#511-did-anchored-identity-resolution-domainless-publishers). FQDN alignment is NOT required for this identity type. The FQDN mainline — where the cryptographic trust domain MUST align with the authority domain root embedded in the discovery identifier namespace — is otherwise unchanged.
+
+### 5.1.1 DID-Anchored Identity Resolution (Domainless Publishers)
+
+When a catalog entry's discovery identifier uses the DID-anchored URN branch ([§4.2.1](#421-agent-identifier-identifier-format-and-rationale)) — or, equivalently, when `trustManifest.identity` is a DID with `identityType: "did"` — registries and orchestrators MUST establish publisher authority by verifying control of the DID rather than by FQDN cross-reference. The procedure is:
+
+1. **Resolve the DID Document.** Dereference the DID to its DID Document using the method-specific resolution path:
+   * `did:plc` → `GET https://plc.directory/<did>`
+   * `did:web` → `GET https://<host>/.well-known/did.json`, where `<host>` is the method-specific identifier.
+2. **Select the verification key.** From the DID Document's `verificationMethod` array, select the key indicated by the detached JWS `kid` header parameter when present; otherwise select the first `verificationMethod` whose key type is compatible with the JWS `alg`.
+3. **Reconstruct the signed payload.** Canonicalize the signed content using **JCS (JSON Canonicalization Scheme, [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785))**. Canonicalization MUST be JCS and MUST NOT be implementation-defined; JCS is already the canonical form used elsewhere in this specification, keeping a single signing mental model. The detached JWS ([RFC 7515 §A.5](https://www.rfc-editor.org/rfc/rfc7515)) carried in `trustManifest.signature` is computed over these canonical bytes.
+4. **Validate the signature.** Verify the detached JWS against the selected verification key. On success, the entry is bound to the DID and the publisher is authoritative for that DID's namespace. On failure, the entry MUST be rejected.
+
+A successful DID-control proof establishes *who published* the entry; consistent with [§7.2](#72-search-post-search), it MUST NOT be interpreted as a cryptographic trust, compliance, or safety rating for the underlying capability.
 
 ### 5.2 Attestation Object
 
@@ -695,6 +757,18 @@ Restricting the discovery identifier to this specific URN format, rather than al
 3. **Decentralized Trust and Authority Binding**: In a globally federated open discovery network, search registries must prevent malicious actors from claiming namespaces they do not own (e.g., an untrusted publisher claiming urn:air:google.com:tax-agent). Mandating that `<publisher>` be a valid FQDN establishes an immediate, verifiable authority anchor. Registries and orchestrators programmatically extract the domain from the URN (google.com) and cross-reference it with the cryptographic claim in trustManifest.identity. If the workload cannot produce a valid cryptographic attestation (e.g., mTLS certificate or SPIFFE SVID) issued by google.com, the capability is rejected. This ensures decentralized, zero-trust verification without requiring a centralized naming committee.  
 4. **Search and Discovery Ergonomics (The @ Resolution Pattern)**: Users and LLMs require intuitive, semantic handles for capabilities (e.g., Assistant@Acme). The structured hierarchy of `urn:air:<publisher>:<namespace>:<agent-name>` allows search engines and federated registries to parse components deterministically. Registries can easily match natural language queries to the publisher domain (Acme) and the terminal short name (Assistant), enabling high-performance semantic filtering, aggregation, and conflict resolution (e.g., displaying Assistant with a verified Acme shield).  
 5. **Cross-Network Uniqueness and Federation Scalability**: Domain-anchored URNs guarantee global uniqueness across disparate federated registries without requiring centralized registration databases. Because domain names are already globally unique via the DNS root, anchoring the URN to a domain eliminates collision risks when merging catalogs from multiple upstream registries in auto or referrals federation modes.
+
+### C.1 DID-Anchored Identifiers for Domainless Publishers
+
+The five properties above assume an FQDN `<publisher>` root. The DID-anchored branch ([§4.2.1](#421-agent-identifier-identifier-format-and-rationale)) preserves every one of them for publishers that hold no controllable domain:
+
+1. **Nomenclature stability** — a DID is an immutable logical noun by construction and never encodes a physical network location, so the immutable-noun property is strengthened, not weakened.
+2. **Separation of concerns** — the DID remains the searchable discovery handle, while the security principal is the key material resolved from the DID Document ([§5.1.1](#511-did-anchored-identity-resolution-domainless-publishers)). Discovery index and security mesh stay decoupled exactly as in the FQDN branch.
+3. **Decentralized trust and authority binding** — DNS is not the only verifiable authority root. Control of a DID is provable without a domain: `did:plc` via its signed PLC operation log, `did:web` via a DNS-anchored `did.json`. Authority is established by the §5.1.1 resolution path in place of an mTLS certificate or SPIFFE SVID issued by the FQDN. Namespace-squatting is foreclosed the same way the FQDN branch forecloses it — an actor cannot present a valid DID-control proof for a DID it does not control.
+4. **Search and discovery ergonomics** — the terminal `<agent-name>` and optional `<namespace>` segments parse identically; only the publisher-root component differs (a DID rather than a domain shield).
+5. **Cross-network uniqueness** — DIDs are globally unique by construction, so catalog merges across federated registries remain collision-free without a central registry.
+
+This branch is deliberately written to compose with the transport-side URN questions raised in [#24 (URN semantics for NAT'd and relay-accessed agents)](https://github.com/ards-project/ard-spec/issues/24): both press the FQDN assumption in item 3 of the main rationale above — #24 from the transport side, this branch from the identity side. A future unified "domainless namespace" amendment should be able to subsume both without conflicting with the wording here.
 
 ---
 
