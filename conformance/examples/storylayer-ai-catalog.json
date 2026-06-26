@@ -78,7 +78,7 @@
         {
             "identifier": "urn:air:app.storylayer.ai:api:rest-v1",
             "displayName": "Storylayer REST API v1",
-            "type": "application/vnd.oai.openapi+json",
+            "type": "application/openapi+json",
             "url": "https://app.storylayer.ai/.well-known/openapi.json",
             "description": "Bearer-authenticated REST API for programmatic story creation, scheduling, publishing, media upload, webhooks, and channel management.",
             "capabilities": [
@@ -110,8 +110,8 @@
         {
             "identifier": "urn:air:app.storylayer.ai:workflow:airtable-to-social",
             "displayName": "Airtable \u2192 Multi-Channel Publishing",
-            "type": "application/ai-catalog+json",
-            "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+            "type": "application/mcp-server-card+json",
+            "url": "https://app.storylayer.ai/.well-known/mcp.json",
             "description": "Connect Airtable, render branded Creatomate graphics, generate AI captions, publish to Instagram, Facebook, X, LinkedIn, Pinterest, and Ghost via MCP or REST.",
             "capabilities": [
                 "create_story",
@@ -136,8 +136,8 @@
         {
             "identifier": "urn:air:app.storylayer.ai:workflow:google-sheets-to-instagram",
             "displayName": "Google Sheets \u2192 Instagram",
-            "type": "application/ai-catalog+json",
-            "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+            "type": "application/mcp-server-card+json",
+            "url": "https://app.storylayer.ai/.well-known/mcp.json",
             "description": "New spreadsheet rows become branded Instagram posts \u2014 schedule or publish immediately through the MCP server or REST API.",
             "capabilities": [
                 "create_story",
@@ -161,8 +161,8 @@
         {
             "identifier": "urn:air:app.storylayer.ai:workflow:ghost-blog-from-data",
             "displayName": "Data \u2192 Ghost Blog Publishing",
-            "type": "application/ai-catalog+json",
-            "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+            "type": "application/mcp-server-card+json",
+            "url": "https://app.storylayer.ai/.well-known/mcp.json",
             "description": "Generate long-form blog articles from structured data and publish to Ghost CMS alongside social snippets.",
             "capabilities": [
                 "create_story",
@@ -186,8 +186,8 @@
         {
             "identifier": "urn:air:app.storylayer.ai:workflow:real-estate-listings",
             "displayName": "Real Estate Listings \u2192 Social",
-            "type": "application/ai-catalog+json",
-            "url": "https://app.storylayer.ai/.well-known/agent-quickstart.md",
+            "type": "application/mcp-server-card+json",
+            "url": "https://app.storylayer.ai/.well-known/mcp.json",
             "description": "Property listing data becomes multi-channel posts with branded templates, location tags, and scheduled publishing.",
             "capabilities": [
                 "create_story",
