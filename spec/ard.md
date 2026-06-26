@@ -770,6 +770,8 @@ The five properties above assume an FQDN `<publisher>` root. The DID-anchored br
 
 This branch is deliberately written to compose with the transport-side URN questions raised in [#24 (URN semantics for NAT'd and relay-accessed agents)](https://github.com/ards-project/ard-spec/issues/24): both press the FQDN assumption in item 3 of the main rationale above — #24 from the transport side, this branch from the identity side. A future unified "domainless namespace" amendment should be able to subsume both without conflicting with the wording here.
 
+**Signing discipline composes with the infrastructure-attestation layer.** The detached JWS in this branch ([§5.1.1](#511-did-anchored-identity-resolution-domainless-publishers)) is computed over JCS-canonicalized ([RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)) bytes — the same canonicalization baseline that SOVP-v1 ([#48](https://github.com/ards-project/ard-spec/pull/48), §5.2.1) pins for its pre-execution attestation payload. The two occupy disjoint section space and impose no normative coupling, but a DID-anchored publisher that also carries a SOVP attestation signs its identity claim and its infrastructure claim under a single canonicalization primitive, preserving one signing mental model across both layers. This is a composition property, not a dependency: neither branch requires the other.
+
 ---
 
 ## Appendix D: Formal Schema Definitions
