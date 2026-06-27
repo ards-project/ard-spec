@@ -35,7 +35,7 @@ fi
 
 # 2. Spawn example registry API server
 echo -e "\n${BOLD}[Step 2/3] Starting Example Registry API server in background...${RESET}"
-python3 "$PROJECT_ROOT/conformance/examples/registry-server.py" > /dev/null 2>&1 &
+python3 "$PROJECT_ROOT/conformance/examples/basic/registry-server.py" > /dev/null 2>&1 &
 SERVER_PID=$!
 
 # Set trap to ensure server is always killed on exit (even on shell errors or Ctrl+C)
