@@ -37,6 +37,25 @@ def print_warning(msg):
 def print_bullet(msg):
     print(f"  • {msg}")
 
+def parse_request_headers(header_args):
+    headers = {}
+    for raw_header in header_args:
+        if ":" not in raw_header:
+            raise ValueError(f"Invalid header '{raw_header}'. Expected 'Name: value' format.")
+
+        name, value = raw_header.split(":", 1)
+        name = name.strip()
+        value = value.strip()
+
+        if not name:
+            raise ValueError(f"Invalid header '{raw_header}'. Header name cannot be empty.")
+        if "\r" in name or "\n" in name or "\r" in value or "\n" in value:
+            raise ValueError(f"Invalid header '{raw_header}'. Header values cannot contain line breaks.")
+
+        headers[name] = value
+
+    return headers
+
 class ConformanceTester:
     def __init__(self):
         self.errors = []
@@ -190,15 +209,16 @@ class ConformanceTester:
 
         return len(self.errors) == 0
 
-    def validate_registry(self, registry_base_url):
+    def validate_registry(self, registry_base_url, request_headers=None):
         print_header(f"Validating Agent Registry: {registry_base_url}")
         base_url = registry_base_url.rstrip('/')
+        request_headers = request_headers or {}
         
         # 1. Test GET /agents (Optional deterministic listing)
         agents_url = f"{base_url}/agents"
         print(f"\n  {COLOR_BOLD}Probing GET /agents...{COLOR_RESET}")
         try:
-            req = urllib.request.Request(agents_url, method="GET")
+            req = urllib.request.Request(agents_url, headers=request_headers, method="GET")
             with urllib.request.urlopen(req, timeout=5) as response:
                 body = response.read().decode('utf-8')
                 data = json.loads(body)
@@ -235,10 +255,12 @@ class ConformanceTester:
         
         try:
             req_data = json.dumps(mock_search_query).encode('utf-8')
+            headers = dict(request_headers)
+            headers["Content-Type"] = "application/json"
             req = urllib.request.Request(
-                search_url, 
-                data=req_data, 
-                headers={"Content-Type": "application/json"}, 
+                search_url,
+                data=req_data,
+                headers=headers,
                 method="POST"
             )
             
@@ -308,10 +330,12 @@ class ConformanceTester:
         
         try:
             req_data = json.dumps(mock_explore_query).encode('utf-8')
+            headers = dict(request_headers)
+            headers["Content-Type"] = "application/json"
             req = urllib.request.Request(
-                explore_url, 
-                data=req_data, 
-                headers={"Content-Type": "application/json"}, 
+                explore_url,
+                data=req_data,
+                headers=headers,
                 method="POST"
             )
             
@@ -351,14 +375,18 @@ def main():
         print(f"{COLOR_BOLD}Agentic Resource Discovery Conformance CLI v0.5.0{COLOR_RESET}")
         print("Usage:")
         print("  conformance-test manifest <local_file_path_or_url>")
-        print("  conformance-test registry <registry_base_url>")
+        print("  conformance-test registry <registry_base_url> [--header 'Name: value']...")
         sys.exit(1)
 
     command = sys.argv[1].lower()
     target = sys.argv[2]
+    args = sys.argv[3:]
     tester = ConformanceTester()
 
     if command == "manifest":
+        if args:
+            print_failure(f"Unexpected arguments for manifest command: {' '.join(args)}")
+            sys.exit(1)
         # Handle remote url vs local path
         if target.startswith("http://") or target.startswith("https://"):
             try:
@@ -381,7 +409,26 @@ def main():
                 print_failure(f"Failed to read local file: {e}")
                 sys.exit(1)
     elif command == "registry":
-        success = tester.validate_registry(target)
+        header_args = []
+        idx = 0
+        while idx < len(args):
+            arg = args[idx]
+            if arg != "--header":
+                print_failure(f"Unknown registry option '{arg}'. Supported option: --header 'Name: value'")
+                sys.exit(1)
+            if idx + 1 >= len(args):
+                print_failure("--header requires a value in 'Name: value' format.")
+                sys.exit(1)
+            header_args.append(args[idx + 1])
+            idx += 2
+
+        try:
+            request_headers = parse_request_headers(header_args)
+        except ValueError as e:
+            print_failure(str(e))
+            sys.exit(1)
+
+        success = tester.validate_registry(target, request_headers=request_headers)
     else:
         print_failure(f"Unknown test suite command '{command}'. Must be 'manifest' or 'registry'.")
         sys.exit(1)

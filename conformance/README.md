@@ -53,6 +53,16 @@ Probes and validates a live running Agent Registry REST API server.
 ./bin/conformance-test registry http://localhost:9010/api
 ```
 
+For private or self-hosted registries that require request headers, pass one or more `--header` options. Headers are applied to all Registry API probes (`GET /agents`, `POST /search`, and `POST /explore`):
+
+```bash
+ARD_REGISTRY_TOKEN=...
+./bin/conformance-test registry https://registry.example.com/api/ard \
+  --header "Authorization: Bearer ${ARD_REGISTRY_TOKEN}"
+```
+
+This is a conformance tooling option only; it does not require authentication for public registries or define a Registry API security model.
+
 ---
 
 ## 🔍 What It Validates
