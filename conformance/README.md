@@ -40,7 +40,7 @@ Validates a local file or a remote live HTTP URL pointing to an `ai-catalog.json
 
 ```bash
 # Validate a local catalog manifest file
-./bin/conformance-test manifest examples/ai-catalog.json
+./bin/conformance-test manifest examples/basic/ai-catalog.json
 
 # Validate a remote well-known catalog manifest hosted on a web server
 ./bin/conformance-test manifest https://example.com/.well-known/ai-catalog.json
