@@ -117,3 +117,9 @@ For strict schema-level checking, install the Python `jsonschema` validator in y
 pip install jsonschema
 ```
 If present, the tool will automatically activate JSON Schema checking alongside its custom semantic validations.
+
+## Reference publisher examples
+
+The `examples/publishers/` directory lists early adopters with live ARD catalogs and integration documentation:
+
+- [Afore — A Travel House](examples/publishers/afore-travel-house.md) — luxury travel editorial, MCP, structured places data ([live catalog](https://afo.re/.well-known/ai-catalog.json))
