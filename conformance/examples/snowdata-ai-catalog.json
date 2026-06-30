@@ -1,0 +1,396 @@
+{
+    "specVersion": "1.0",
+    "host": {
+        "displayName": "Snowdata",
+        "identifier": "snowdata.ai",
+        "documentationUrl": "https://www.snowdata.ai/for-ai",
+        "logoUrl": "https://www.snowdata.ai/opengraph-image",
+        "trustManifest": {
+            "identity": "did:web:www.snowdata.ai",
+            "identityType": "https",
+            "attestations": [
+                {
+                    "type": "DataProvenance",
+                    "uri": "https://www.snowdata.ai/for-ai/trust#verification",
+                    "mediaType": "text/html"
+                },
+                {
+                    "type": "OpenStandard",
+                    "uri": "https://opensourcesnow.com",
+                    "mediaType": "text/html"
+                }
+            ],
+            "provenance": [
+                {
+                    "relation": "publishedFrom",
+                    "sourceId": "urn:air:snowdata.ai:organization"
+                }
+            ],
+            "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..9FXXrkFrjE7jB6aDeNcKgKgZbRMpMlf217DqIgVzQtBLsgvRNC4PRlbFpb9iY5jIU7jNEWQhVXKNk2E0_NMeCw"
+        }
+    },
+    "entries": [
+        {
+            "identifier": "urn:air:snowdata.ai:mcp:live-snow",
+            "displayName": "Snowdata Live Snow MCP",
+            "type": "application/mcp-server-card+json",
+            "url": "https://www.snowdata.ai/.well-known/mcp/live-server-card.json",
+            "description": "Primary MCP server for live verified resort snow conditions, forecasts, powder search, trip planning, and grounded Q&A across 430+ resorts. Use this \u2014 not the content MCP \u2014 when users ask about current snow.",
+            "tags": [
+                "snow",
+                "ski",
+                "weather",
+                "forecast",
+                "mcp",
+                "travel"
+            ],
+            "capabilities": [
+                "get_resort",
+                "get_snow_report",
+                "get_weather_forecast",
+                "get_snow_history",
+                "find_resorts_by_criteria",
+                "find_best_powder",
+                "plan_ski_trip",
+                "compare_forecasts",
+                "get_webcam_status",
+                "get_regional_summary",
+                "search_resorts",
+                "ask_snowdata",
+                "ask_snowsure"
+            ],
+            "representativeQueries": [
+                "Where's the best powder this weekend within four hours of Denver?",
+                "Compare snowfall at Niseko versus Verbier this season.",
+                "Is Mt Hutt open today? What's the base depth?",
+                "Plan a five-day ski trip to Argentina in late August \u2014 open resorts only.",
+                "Show me resorts in Colorado with more than 30cm of new snow in the last 48 hours."
+            ],
+            "version": "1.0.0",
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "trustManifest": {
+                "identity": "did:web:www.snowdata.ai",
+                "identityType": "https",
+                "attestations": [
+                    {
+                        "type": "DataProvenance",
+                        "uri": "https://www.snowdata.ai/for-ai/trust#verification",
+                        "mediaType": "text/html"
+                    },
+                    {
+                        "type": "OpenStandard",
+                        "uri": "https://opensourcesnow.com",
+                        "mediaType": "text/html"
+                    }
+                ],
+                "provenance": [
+                    {
+                        "relation": "publishedFrom",
+                        "sourceId": "urn:air:snowdata.ai:organization"
+                    }
+                ],
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..AFSzS6BUo0DJnUm0gPdMwZXWDqarwkr9P5uVkrlHG_trnKZEQWwdjohCV8IbAVoUNoN-bS_4nhb-wJWUmkTVDw"
+            },
+            "metadata": {
+                "transport": "streamable-http",
+                "endpoint": "https://mcp.snowdata.ai",
+                "docs": "https://mcp.snowdata.ai",
+                "attribution": "Verified Snowdata / SnowSure evidence with timestamps"
+            }
+        },
+        {
+            "identifier": "urn:air:snowdata.ai:mcp:content",
+            "displayName": "Snowdata Content MCP",
+            "type": "application/mcp-server-card+json",
+            "url": "https://www.snowdata.ai/.well-known/mcp/content-server-card.json",
+            "description": "Corporate site knowledge: resort onboarding, pricing, developer guides, FAQs, intelligence API contract, and pointers to live snow MCP. For company and integration questions \u2014 not live conditions.",
+            "tags": [
+                "snow",
+                "documentation",
+                "onboarding",
+                "mcp",
+                "b2b"
+            ],
+            "capabilities": [
+                "snowdata_list_pages",
+                "snowdata_get_page",
+                "snowdata_get_company_profile",
+                "snowdata_get_resort_onboarding",
+                "snowdata_get_developer_guide",
+                "snowdata_get_intelligence_overview",
+                "snowdata_get_faqs",
+                "snowdata_search_knowledge",
+                "snowdata_get_llms_context",
+                "snowdata_live_data_mcp_pointer"
+            ],
+            "representativeQueries": [
+                "How does a ski resort join the Snowdata verification network?",
+                "What MCP server should I install for Snowdata corporate information?",
+                "Where does Snowdata distribute verified resort snow data?"
+            ],
+            "version": "1.0.0",
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "metadata": {
+                "transport": "streamable-http",
+                "endpoint": "https://www.snowdata.ai/api/mcp",
+                "liveDataPointer": "https://mcp.snowdata.ai"
+            },
+            "trustManifest": {
+                "identityType": "did",
+                "identity": "did:web:www.snowdata.ai",
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..PLMYki8mbflTZspZU0yZrjQMcJ9CKPYDsJKMhcIMG7FWHWJZd4PHGrS565cqb9xArmayWl5xzo4lAE8clf-mDQ"
+            }
+        },
+        {
+            "identifier": "urn:air:snowdata.ai:api:intelligence",
+            "displayName": "SnowSure Intelligence Cards API",
+            "type": "application/json",
+            "url": "https://www.snowdata.ai/api/intelligence",
+            "description": "Pre-built snow intelligence cards (resorts open, regional SnowSure leaders, season comparisons, powder windows). Public read-only proxy to SnowSure; cache ~5 minutes.",
+            "tags": [
+                "snow",
+                "intelligence",
+                "api",
+                "dashboard"
+            ],
+            "capabilities": [
+                "resorts-open-today",
+                "top-snowsure-today-by-region",
+                "prior-season-vs-5yr-norm",
+                "next-powder-window",
+                "24h-forecast-skill"
+            ],
+            "representativeQueries": [
+                "Show me the top SnowSure resorts by region today",
+                "Which resorts are open in the Southern Hemisphere right now?",
+                "Compare this season snowfall to the five-year average globally"
+            ],
+            "version": "1.0.0",
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "metadata": {
+                "method": "GET",
+                "contract": "https://www.snowdata.ai/docs/snowdata-intelligence-api.md",
+                "upstream": "https://www.snowsure.ai/api/v1/intelligence"
+            },
+            "trustManifest": {
+                "identityType": "did",
+                "identity": "did:web:www.snowdata.ai",
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..hMTBjnGxbkyDtGkGmkzWL46SC8MT0dPtHWG7zepbbXRsULLZogvl4b93my0pWCMy9EK7gRj2Lj1RwEYtLNE-Dg"
+            }
+        },
+        {
+            "identifier": "urn:air:snowdata.ai:api:answer-engine",
+            "displayName": "Snowdata Answer Engine",
+            "type": "application/json",
+            "url": "https://www.snowdata.ai/api/chat",
+            "description": "Grounded natural-language Q&A about snow conditions, forecasts, and resort evidence. Proxies SnowSure Answer Engine; requires sessionId for multi-turn.",
+            "tags": [
+                "snow",
+                "qa",
+                "chat",
+                "answer-engine"
+            ],
+            "capabilities": [
+                "ask_snowdata"
+            ],
+            "representativeQueries": [
+                "Is Niseko getting snow this week?",
+                "Which Colorado resorts have the deepest base right now?",
+                "Where is the best powder in Japan this weekend?"
+            ],
+            "version": "1.0.0",
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "metadata": {
+                "method": "POST",
+                "contract": "https://www.snowdata.ai/docs/snowdata-answer-engine-integration.md"
+            },
+            "trustManifest": {
+                "identityType": "did",
+                "identity": "did:web:www.snowdata.ai",
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..elLSi0AQikig1qftnvi1j268X-p09nG3u1pgDB4bNw6nLT2WZNy9Yl7a6zxZaBOf1qGqD6MVol2L6G8msuvsAQ"
+            }
+        },
+        {
+            "identifier": "urn:air:snowdata.ai:resource:llms-txt",
+            "displayName": "Snowdata llms.txt",
+            "type": "text/plain",
+            "url": "https://www.snowdata.ai/llms.txt",
+            "description": "Concise machine-readable site summary for LLM crawlers and agent context \u2014 routing rules for live snow vs corporate content.",
+            "tags": [
+                "documentation",
+                "llms-txt",
+                "aeo"
+            ],
+            "representativeQueries": [
+                "What is Snowdata and how should an AI assistant use it?",
+                "When should an agent use mcp.snowdata.ai vs the content MCP?",
+                "How does Snowdata verify resort snow reports for AI assistants?"
+            ],
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "trustManifest": {
+                "identityType": "did",
+                "identity": "did:web:www.snowdata.ai",
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..WuGJOwuU8PQmYJM3sfOdgECtVwFp0ir_SivNnTq9Bo1FU3fJb-2d7E5WCv0-ws2qDTWsInPA7lIt-qIJYvcsAg"
+            }
+        },
+        {
+            "identifier": "urn:air:snowdata.ai:api:openapi",
+            "displayName": "Snowdata Public API (OpenAPI)",
+            "type": "application/openapi+json",
+            "url": "https://www.snowdata.ai/.well-known/openapi.json",
+            "description": "OpenAPI 3.1 description of Snowdata public proxy endpoints: intelligence cards, Answer Engine, homepage cards, resort hero.",
+            "tags": [
+                "snow",
+                "api",
+                "openapi"
+            ],
+            "representativeQueries": [
+                "What REST endpoints does Snowdata expose for intelligence cards?",
+                "How do I call the Snowdata Answer Engine over HTTP?",
+                "Where is the OpenAPI spec for Snowdata public proxy APIs?"
+            ],
+            "version": "1.0.0",
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "trustManifest": {
+                "identityType": "did",
+                "identity": "did:web:www.snowdata.ai",
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..aTy0Ji6jwOWbBtvKE2FLeRrG4mzqIsz939LiGIKYcRLBijiVd1pvVCxGC45Jl6OyJmQ3qxbTBqABYM37JhobCw"
+            }
+        },
+        {
+            "identifier": "urn:air:snowdata.ai:registry:snow-search",
+            "displayName": "Snowdata ARD Search Registry",
+            "type": "application/ai-registry+json",
+            "url": "https://www.snowdata.ai/api/ard/search",
+            "description": "Category-specific ARD search for snow, ski, and travel agent resources. POST with query.text to discover matching Snowdata capabilities.",
+            "tags": [
+                "registry",
+                "search",
+                "snow",
+                "dynamic"
+            ],
+            "representativeQueries": [
+                "Find an MCP server for ski resort snow conditions",
+                "Where can I get verified powder forecasts for the Alps?"
+            ],
+            "version": "1.0.0",
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "trustManifest": {
+                "identity": "did:web:www.snowdata.ai",
+                "identityType": "https",
+                "attestations": [
+                    {
+                        "type": "DataProvenance",
+                        "uri": "https://www.snowdata.ai/for-ai/trust#verification",
+                        "mediaType": "text/html"
+                    },
+                    {
+                        "type": "OpenStandard",
+                        "uri": "https://opensourcesnow.com",
+                        "mediaType": "text/html"
+                    }
+                ],
+                "provenance": [
+                    {
+                        "relation": "publishedFrom",
+                        "sourceId": "urn:air:snowdata.ai:organization"
+                    }
+                ],
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..2eZx_5Tk3MVdWRmXdTHC548-1eCqIXAbBldMIKO3oH0IhUAqyrv8jYrKiZ3yTQLrhZcJr0eZIamGP7VMs3iDCA"
+            }
+        },
+        {
+            "identifier": "urn:air:snowsure.ai:catalog:consumer",
+            "displayName": "SnowSure ARD Catalog",
+            "type": "application/ai-catalog+json",
+            "url": "https://www.snowsure.ai/.well-known/ai-catalog.json",
+            "description": "Consumer SnowSure MCP (17 tools), REST API (OpenAPI), and grounded Answer Engine \u2014 500+ resort guides. Primary catalog for live skier queries.",
+            "tags": [
+                "snow",
+                "ski",
+                "travel",
+                "federation",
+                "snowsure"
+            ],
+            "representativeQueries": [
+                "Where's the best powder in the Alps this week?",
+                "Show me live snow conditions for Verbier and Zermatt",
+                "Which ski resorts in Colorado have the most fresh snow?"
+            ],
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "trustManifest": {
+                "identityType": "did",
+                "identity": "did:web:www.snowdata.ai",
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..5B0lWDowsAMfx06QGuAHVfaaiVFuIWZxIr1rxjIHpbEe7C-ydStzQtDZa6kYrmZjo0rIJDyIkTor_ZOkqefqAg"
+            }
+        },
+        {
+            "identifier": "urn:air:mcp.snowdata.ai:catalog:live",
+            "displayName": "Snowdata Live MCP Catalog",
+            "type": "application/ai-catalog+json",
+            "url": "https://mcp.snowdata.ai/.well-known/ai-catalog.json",
+            "description": "Publisher catalog for mcp.snowdata.ai \u2014 live verified resort snow MCP endpoint.",
+            "tags": [
+                "snow",
+                "mcp",
+                "federation"
+            ],
+            "representativeQueries": [
+                "Connect to the Snowdata live snow MCP server",
+                "Find verified ski resort snow data via MCP"
+            ],
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "trustManifest": {
+                "identityType": "did",
+                "identity": "did:web:www.snowdata.ai",
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..rEEfitDefYc8A9NDR5vPwfZc83vdT3srvgsNQVlUpKpgO0roX3hoVUFnr-5PPiUNAD7CoraSjsuJqETic_pMAQ"
+            }
+        },
+        {
+            "identifier": "urn:air:snowdata.ai:catalog:snow-ecosystem",
+            "displayName": "Snowdata Agentic Resource Bundle",
+            "type": "application/ai-catalog+json",
+            "description": "Nested catalog linking Snowdata live MCP, REST API docs, and Open Source Snow Spec for federated discovery.",
+            "tags": [
+                "bundle",
+                "snow",
+                "federation"
+            ],
+            "data": {
+                "specVersion": "1.0",
+                "host": {
+                    "displayName": "Snowdata Ecosystem",
+                    "identifier": "snowdata.ai"
+                },
+                "entries": [
+                    {
+                        "identifier": "urn:air:snowdata.ai:mcp:live-snow",
+                        "displayName": "Snowdata Live Snow MCP",
+                        "type": "application/mcp-server-card+json",
+                        "url": "https://www.snowdata.ai/.well-known/mcp/live-server-card.json"
+                    },
+                    {
+                        "identifier": "urn:air:api.snowdata.ai:docs:rest-api",
+                        "displayName": "Snowdata REST API",
+                        "type": "application/json",
+                        "url": "https://api.snowdata.ai",
+                        "description": "Developer REST API for resort snow data."
+                    },
+                    {
+                        "identifier": "urn:air:opensourcesnow.com:spec:snow-report",
+                        "displayName": "Open Source Snow Spec",
+                        "type": "application/json",
+                        "url": "https://opensourcesnow.com",
+                        "description": "Apache 2.0 JSON schema for verified resort snow reports."
+                    }
+                ]
+            },
+            "updatedAt": "2026-06-19T18:00:00.000Z",
+            "trustManifest": {
+                "identityType": "did",
+                "identity": "did:web:www.snowdata.ai",
+                "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6d3d3LnNub3dkYXRhLmFpI2tleS0xIiwiYjY0Ijp0cnVlLCJjcml0IjpbImI2NCJdfQ..LgNeTKBnEzEN_4G9HJdnBujQh91sEgt8DLie81RbkpC0FDRySJCH5gpNHOfKqGxIbOED-quS46-szWm9WUItBw"
+            }
+        }
+    ]
+}
