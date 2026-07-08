@@ -1,0 +1,65 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "AgentServices",
+    "identifier": "did:web:agentservices.to"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:agentservices.to:server:mcp",
+      "displayName": "AgentServices MCP Server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://agentservices.to/mcp",
+      "capabilities": [
+        "crypto_prices",
+        "technical_indicators",
+        "defi_yields",
+        "fear_greed",
+        "portfolio_intelligence",
+        "market_pulse",
+        "defi_strategy",
+        "onchain_overview",
+        "arbitrage_scanner",
+        "deep_research",
+        "search",
+        "ai_inference"
+      ],
+      "description": "52-service paid API platform for AI agents. Data, search, market intelligence, DeFi analytics, on-chain insights, and AI inference via x402 nanopayments on Base.",
+      "representativeQueries": [
+        "what is the current price of Bitcoin and Ethereum",
+        "show me DeFi yields ranked by APY with risk assessment",
+        "analyze my crypto portfolio and give a verdict",
+        "scan for cross-DEX arbitrage opportunities",
+        "research the latest developments in AI agent infrastructure"
+      ]
+    },
+    {
+      "identifier": "urn:air:agentservices.to:api:rest",
+      "displayName": "AgentServices REST API",
+      "type": "application/x402-api+json",
+      "url": "https://agentservices.to",
+      "capabilities": [
+        "GET /v1/prices",
+        "GET /v1/indicators/{symbol}",
+        "GET /v1/yields",
+        "GET /v1/fear-greed",
+        "GET /v1/portfolio?symbol={symbol}",
+        "GET /v1/market-pulse",
+        "GET /v1/defi-strategy",
+        "GET /v1/onchain-overview",
+        "GET /v1/arbitrage",
+        "GET /v1/research?q={query}",
+        "GET /v1/search?q={query}",
+        "POST /v1/inference"
+      ],
+      "description": "REST API with x402 payment protocol. 52 endpoints (12 free, 40 paid at $0.01-$0.25/call). Agents discover, pay via USDC on Base, and consume in a single HTTP transaction.",
+      "representativeQueries": [
+        "get technical indicators for ETH",
+        "fetch the fear and greed index",
+        "get a comprehensive market overview",
+        "run deep research on a topic",
+        "generate a response using AI inference"
+      ]
+    }
+  ]
+}
