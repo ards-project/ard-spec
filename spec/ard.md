@@ -393,7 +393,7 @@ Publishers advertise their capability manifests via the following mechanisms:
 * **Well-Known URI**: Hosting the manifest at https://{domain}/.well-known/ai-catalog.json.  
 * **Agentmap Directive**: Adding an entry in robots.txt (e.g., Agentmap: https://example.com/catalog.json).  
 * **HTML Link Tag**: Including \<link rel="ai-catalog" href="..."\> in the \<head\> of a document.  
-* **DNS**: Publishing Service Binding records in the DNS that point directly to either a static capability manifest (e.g., \_catalog.\_agents.example.com) or a dynamic Agent Registry search endpoint (e.g., \_search.\_agents.example.com).
+* **DNS**: Publishing Service Binding (SVCB) records, with an optional fallback to Text (TXT) records, in the DNS that point directly to either a static capability manifest (e.g., `{agent-name}.example.com IN SVCB . well-known=/not-well-known/ai-catalog.json` or a dynamic Agent Registry search endpoint (e.g., `_index._agents.example.com 3600 IN SVCB 1 agent-search.example.com`). For more details, follow [DNS-AID](https://datatracker.ietf.org/doc/html/draft-mozleywilliams-dnsop-dnsaid)
 
 ### 6.2 Ingestion Pipelines
 
