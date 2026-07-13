@@ -1,0 +1,46 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "National Oceanic and Atmospheric Administration",
+    "identifier": "did:web:noaa.gov",
+    "documentationUrl": "https://www.ncdc.noaa.gov/cdo-web/webservices/v2"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:noaa.gov:api:climate-data-online",
+      "displayName": "NOAA Climate Data Online (CDO) API",
+      "type": "application/mcp-server-card+json",
+      "url": "https://www.ncdc.noaa.gov/cdo-web/api/v2/metadata.json",
+      "description": "Official NOAA Climate Data Online API providing access to comprehensive weather and climate datasets including historical weather observations, climate normals, and severe weather records. Requires token authentication obtained via email registration.",
+      "representativeQueries": [
+        "get historical temperature data for New York City",
+        "find weather stations near latitude 40.7128 longitude -74.0060",
+        "retrieve precipitation records for January 2024",
+        "search for severe weather events in California",
+        "get climate normals for weather station GHCND:USW00094728"
+      ],
+      "capabilities": ["WeatherDataQuery", "StationLookup", "HistoricalData", "ClimateNormals", "SevereWeatherEvents", "DatasetDiscovery"],
+      "trustManifest": {
+        "identity": "did:web:noaa.gov",
+        "identityType": "did",
+        "attestations": [
+          {
+            "type": "Official-Government-API",
+            "uri": "https://www.noaa.gov/information-technology/open-data-dissemination",
+            "mediaType": "text/html"
+          },
+          {
+            "type": "Data-Source-Verification",
+            "uri": "https://www.ncdc.noaa.gov/cdo-web/webservices/v2",
+            "mediaType": "text/html"
+          },
+          {
+            "type": "API-Documentation",
+            "uri": "https://www.ncdc.noaa.gov/cdo-web/webservices/v2#gettingStarted",
+            "mediaType": "text/html"
+          }
+        ]
+      }
+    }
+  ]
+}
