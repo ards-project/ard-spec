@@ -1,0 +1,97 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Bob's Plumbing & Drain",
+    "identifier": "did:web:bobs-plumbing.example",
+    "documentationUrl": "https://bobs-plumbing.example"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:bobs-plumbing.example:agent:assistant",
+      "displayName": "Bob's Plumbing & Drain AI Assistant",
+      "type": "application/a2a-agent-card+json",
+      "mediaType": "application/a2a-agent-card+json",
+      "url": "https://bobs-plumbing.example/.well-known/agent-card.json",
+      "description": "Conversational A2A agent for a family-owned plumbing company in Minneapolis, MN. Answers service questions, checks technician availability, and books appointments over the A2A protocol.",
+      "tags": ["local-business", "plumbing", "home-services"],
+      "representativeQueries": [
+        "find an emergency plumber in Minneapolis",
+        "talk to Bob's Plumbing about a water heater replacement",
+        "book a drain cleaning appointment for tomorrow morning",
+        "connect me to the AI assistant for Bob's Plumbing & Drain"
+      ],
+      "metadata": {
+        "schemaOrgType": "Plumber",
+        "address": "4519 Excelsior Blvd, Minneapolis, MN 55416, US",
+        "telephone": "+1-612-555-0148",
+        "areaServed": "Minneapolis; St. Paul; Bloomington",
+        "openingHours": "Mo-Fr 07:00-18:00; Sa 08:00-14:00"
+      },
+      "trustManifest": {
+        "identity": "did:web:bobs-plumbing.example",
+        "identityType": "did",
+        "attestations": [
+          {
+            "type": "State-Contractor-License",
+            "uri": "https://license-lookup.example/contractors/bobs-plumbing",
+            "mediaType": "text/html"
+          },
+          {
+            "type": "Liability-Insurance-Certificate",
+            "uri": "https://bobs-plumbing.example/trust/insurance-certificate.pdf",
+            "mediaType": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "identifier": "urn:air:bobs-plumbing.example:mcp:storefront",
+      "displayName": "Bob's Plumbing & Drain Storefront Tools",
+      "type": "application/mcp-server-card+json",
+      "mediaType": "application/mcp-server-card+json",
+      "description": "MCP server card for the business storefront: structured tools to check technician availability, request a quote, and look up hours and service area. Embedded inline via the data field (value-or-reference, ARD 3.4).",
+      "tags": ["local-business", "booking", "quotes"],
+      "capabilities": ["check_availability", "request_quote", "get_business_hours"],
+      "representativeQueries": [
+        "is a plumber available this afternoon near Minneapolis",
+        "get a quote for replacing a sump pump",
+        "what are the business hours for Bob's Plumbing & Drain"
+      ],
+      "data": {
+        "name": "bobs-plumbing-storefront",
+        "description": "Storefront MCP server for Bob's Plumbing & Drain (Minneapolis, MN). Availability checks, quote requests, and business-hours lookups for plumbing and drain services.",
+        "tools": [
+          {
+            "name": "check_availability",
+            "description": "Check whether a technician is available for a given service and time window.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "service": { "type": "string", "description": "Service requested, e.g. 'drain cleaning'" },
+                "requested_window": { "type": "string", "description": "Requested time window (ISO 8601 interval)" }
+              },
+              "required": ["service"]
+            }
+          },
+          {
+            "name": "request_quote",
+            "description": "Request a quote for a plumbing job. Returns a ticket ID that a human dispatcher follows up on.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "job_description": { "type": "string", "description": "Plain-language description of the job" },
+                "callback_phone": { "type": "string", "description": "Customer callback number" }
+              },
+              "required": ["job_description"]
+            }
+          },
+          {
+            "name": "get_business_hours",
+            "description": "Current business hours, including holiday exceptions.",
+            "inputSchema": { "type": "object", "properties": {} }
+          }
+        ]
+      }
+    }
+  ]
+}
