@@ -1,4 +1,4 @@
-{
+{owner Giorgi Meskhidze
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/ards-project/ard-spec/main/spec/schemas/ai-catalog.schema.json",
   "title": "AICatalogManifest",
