@@ -53,7 +53,7 @@ Probes and validates a live running Agent Registry REST API server.
 ./bin/conformance-test registry http://localhost:9010/api
 ```
 
-For private or self-hosted registries that require request headers, pass one or more `--header` options. Headers are applied to all Registry API probes (`GET /agents`, `POST /search`, and `POST /explore`):
+For private or self-hosted registries that require request headers, pass one or more `--header` options. Headers are applied to all Registry API probes (`GET /agents`, `GET /agents/{identifier}`, `POST /search`, and `POST /explore`):
 
 ```bash
 ARD_REGISTRY_TOKEN=...
@@ -62,6 +62,13 @@ ARD_REGISTRY_TOKEN=...
 ```
 
 This is a conformance tooling option only; it does not require authentication for public registries or define a Registry API security model.
+
+The tester normally obtains an identifier for the successful exact-lookup probe from List or Search. If neither returns an entry, provide a known locally indexed identifier explicitly:
+
+```bash
+./bin/conformance-test registry https://registry.example.com/api/ard \
+  --lookup-identifier "urn:air:example.com:agent:assistant"
+```
 
 ---
 
@@ -89,6 +96,11 @@ When checking a live Agent Registry server, the tool executes the following prob
   * Contacts the GET endpoint to check if the registry supports deterministic browsing.
   * If supported (returns `200 OK`), it validates that the response contains the paginated `"items"` structure.
   * If not supported (returns `404` or `501`), it marks this as compliant since deterministic listing is optional.
+* **GET `/agents/{identifier}` (Mandatory Exact Lookup Probe)**:
+  * URL-encodes a known full URN as one path segment and verifies a `200 OK` canonical `CatalogEntry` response with the exact identifier.
+  * Verifies that Search-only fields such as `score` and `source` are absent.
+  * Verifies that an unknown valid URN returns the standard `404` / `NOT_FOUND` error envelope.
+  * Verifies that a malformed identifier returns the standard `400` / `INVALID_ARGUMENT` error envelope.
 * **POST `/search` (Mandated Search Probe)**:
   * Probes the search route which is required for dynamic semantic capability discovery.
   * Sends a mock natural-language query payload with required `query` string and optional `filter` / `limit` parameters.

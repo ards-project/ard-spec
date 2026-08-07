@@ -65,7 +65,7 @@ provenance-link = {
   ? sourceDigest: tstr
 }
 
-; --- The Search and Explore Registry API Payloads ---
+; --- The Registry API Payloads ---
 
 query-model = {
   ? text: tstr,
@@ -136,6 +136,8 @@ list-response = {
   ? total: uint,
   ? pageToken: tstr
 }
+
+lookup-response = catalog-entry
 
 error-response = {
   errorCode: tstr,

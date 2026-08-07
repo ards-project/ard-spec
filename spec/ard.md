@@ -404,7 +404,7 @@ Agent Registry instances populate their indexes through ingestion pipelines:
 
 ## 7\. The ARD API
 
-An Agent Registry **MUST** expose a standard HTTP REST search interface to guarantee universal federation. The operational base URL for these endpoints is discovered dynamically by identifying catalog entries within the static ai-catalog.json manifest that carry the application/ai-registry+json media type, as defined in §4.1.
+An Agent Registry **MUST** expose the standard HTTP REST Search (§7.2) and Retrieve (§7.4) interfaces. Search guarantees universal discovery and federation; Retrieve provides deterministic resolution of a known identifier. The operational base URL for these endpoints is discovered dynamically by identifying catalog entries within the static ai-catalog.json manifest that carry the application/ai-registry+json media type, as defined in §4.1.
 
 ### 7.1 The Query Model
 
@@ -578,7 +578,36 @@ Facets are computed over the full matched set, not a single page. For semantic t
 
 Explore does not federate; it is scoped to the registry queried. Federated discovery is the role of Search (§8). A registry that does not implement Explore returns a `501 Not Implemented` HTTP status code.
 
-### 7.4 List (GET /agents) — Optional
+### 7.4 Retrieve (GET /agents/{identifier})
+
+Retrieves one catalog entry by its globally unique `identifier`. Every Agent Registry **MUST** implement this endpoint. Lookup is an exact, case-sensitive primary-key operation after URL decoding; it does not perform semantic matching or relevance ranking.
+
+The client **MUST** encode the complete identifier as one URL path segment using UTF-8 percent-encoding as defined by RFC 3986. For example:
+
+```http
+GET /agents/urn%3Aair%3Aacme.com%3Aagent%3Aassistant
+```
+
+The registry **MUST** percent-decode the path parameter exactly once and then validate it against the identifier syntax in §4.2.1. Invalid percent-encoding or a decoded value that is not a valid ARD identifier returns `400 Bad Request` with error code `INVALID_ARGUMENT`.
+
+Lookup is scoped to entries in the queried registry's index, including entries that the registry has ingested from external publishers. The registry **MUST NOT** query upstream registries while processing this endpoint. A matching entry is returned directly as a Catalog Entry Object (§4.2), without Search-only fields such as `score` or `source`. If the registry's index does not contain an exact match, it returns `404 Not Found` with error code `NOT_FOUND`.
+
+**Response Schema:**
+
+```json
+{
+  "identifier": "urn:air:acme.com:agent:assistant",
+  "displayName": "Corporate Assistant (A2A)",
+  "type": "application/a2a-agent-card+json",
+  "url": "https://api.acme.com/agents/assistant.json"
+}
+```
+
+The endpoint uses the same deployment-defined authentication policy as the other Registry API endpoints. Missing or rejected credentials return `401 Unauthorized` with error code `UNAUTHENTICATED`.
+
+Successful responses are cacheable under standard HTTP caching semantics. Registries **SHOULD** provide explicit freshness information with `Cache-Control` and a validator such as `ETag` or `Last-Modified`; conditional requests and `304 Not Modified` responses follow the HTTP specifications. Responses to authenticated requests **MUST NOT** be stored in a shared cache unless the response explicitly permits it. To avoid stale negative lookups as registry contents change, `404 Not Found` responses **SHOULD** require revalidation or specify a short freshness lifetime.
+
+### 7.5 List (GET /agents) — Optional
 
 Deterministic browsing, designed for developer portals. Highly cacheable, relies on strict database filtering, and does not support relevance-based sorting.
 
@@ -591,7 +620,7 @@ Deterministic browsing, designed for developer portals. Highly cacheable, relies
 | pageSize | Integer | Max results (default: 20, max: 100). |
 | pageToken | String | Pagination token. |
 
-### 7.5 Protocol Wrappers (Optional)
+### 7.6 Protocol Wrappers (Optional)
 
 While the REST API is mandated as the floor for interoperability, a Registry **MAY** additionally expose its search capability natively via an MCP Tool or an A2A Skill to preserve native orchestrator flows.
 
@@ -730,7 +759,7 @@ npx ajv-cli validate -s spec/schemas/ai-catalog.schema.json -d path/to/ai-catalo
 
 ### D.3 The Registry REST API Specification (OpenAPI)
 
-The HTTP query interfaces (`POST /search`, `POST /explore`, and `GET /agents`) exposed by compliant Agent Registries are formally defined using the **OpenAPI 3.1.0 Specification** in YAML.
+The HTTP query interfaces (`POST /search`, `POST /explore`, `GET /agents/{identifier}`, and `GET /agents`) exposed by compliant Agent Registries are formally defined using the **OpenAPI 3.1.0 Specification** in YAML.
 
 * **Authoritative Specification File**: [`spec/schemas/ard.openapi.yaml`](schemas/ard.openapi.yaml)
 * **Key Integration Benefits**:
@@ -746,7 +775,7 @@ To simplify development and guarantee complete compliance, this repository provi
 
 #### Features:
 * **Manifest validation mode**: Parses JSON manifests, runs strict JSON Schema checks (using the Python `jsonschema` library if installed), and executes custom semantic checks (e.g., URN formatting rules, Value-or-Reference enforcement, `representativeQueries` sizing).
-* **Registry validation mode**: Probes live endpoints (`POST /search` and `GET /agents`), sends spec-compliant search requests, and validates status codes, pagination envelopes, search result scores, and catalog entry structures.
+* **Registry validation mode**: Probes live endpoints (`POST /search`, `POST /explore`, `GET /agents/{identifier}`, and `GET /agents`), sends spec-compliant requests, and validates status codes, exact identifier lookup behavior, pagination envelopes, search result scores, and catalog entry structures.
 
 #### Usage Examples:
 
@@ -770,7 +799,7 @@ To instantly run a complete end-to-end verification suite utilizing a pre-bundle
 ```bash
 ./conformance/bin/run-conformance-demo
 ```
-This script performs manifest schema validation, launches a mock registry server in the background, executes live search and listing queries against it using the conformance tester, and gracefully terminates the server when finished.
+This script performs manifest schema validation, launches a mock registry server in the background, executes live search, lookup, exploration, and listing queries against it using the conformance tester, and gracefully terminates the server when finished.
 
 ## Acknowledgements
 
