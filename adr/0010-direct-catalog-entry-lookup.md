@@ -23,5 +23,5 @@ A successful lookup returns the canonical Catalog Entry Object without Search-on
 - Clients can resolve a retained ARD identifier in one deterministic request.
 - OpenAPI clients receive a typed identifier parameter and Catalog Entry response.
 - Registries need an indexed exact-match route in addition to semantic Search.
-- Clients use the `source` supplied by Search when they need to resolve a federated result at its originating registry.
+- Clients retaining federated Search results should retain `source` with the identifier and use it to resolve the entry at its originating registry.
 - Conformance testing verifies encoded success, malformed identifiers, and unknown identifiers.

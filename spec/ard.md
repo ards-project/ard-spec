@@ -590,7 +590,7 @@ GET /agents/urn%3Aair%3Aacme.com%3Aagent%3Aassistant
 
 The registry **MUST** percent-decode the path parameter exactly once and then validate it against the identifier syntax in §4.2.1. Invalid percent-encoding or a decoded value that is not a valid ARD identifier returns `400 Bad Request` with error code `INVALID_ARGUMENT`.
 
-Lookup is scoped to entries in the queried registry's index, including entries that the registry has ingested from external publishers. The registry **MUST NOT** query upstream registries while processing this endpoint. A matching entry is returned directly as a Catalog Entry Object (§4.2), without Search-only fields such as `score` or `source`. If the registry's index does not contain an exact match, it returns `404 Not Found` with error code `NOT_FOUND`.
+Lookup is scoped to entries in the queried registry's index, including entries that the registry has ingested from external publishers. The registry **MUST NOT** query upstream registries while processing this endpoint. Clients that retain an identifier from a federated Search result **SHOULD** also retain its `source` and send subsequent Retrieve requests to that registry. A matching entry is returned directly as a Catalog Entry Object (§4.2), without Search-only fields such as `score` or `source`. If the registry's index does not contain an exact match, it returns `404 Not Found` with error code `NOT_FOUND`.
 
 **Response Schema:**
 
