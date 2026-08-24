@@ -365,7 +365,17 @@ Provides verifiable proof of a claim (e.g., compliance certifications).
 | :---- | :---- | :---- |
 | type | String | **Required**. Attestation type (e.g., "SOC2-Type2", "HIPAA-Audit"). |
 | uri | String | **Required**. Location of the attestation document. |
+| mediaType | String | **Required**. Format of the attestation document (e.g., "application/pdf", "application/sarif+json"). |
 | digest | String | Optional. Cryptographic hash for integrity verification. |
+
+Attestation `type` values fall into two semantically distinct classes:
+
+* **Compliance attestations** (e.g., `SOC2-Type2`, `HIPAA-Audit`) attest to an organizational process or control environment. They are a statement about the publisher, not about the specific artifact in the entry.
+* **Scan attestations** attest to the result of an automated security analysis of the artifact's own content — for example, screening a tool or agent manifest for tool-poisoning, hidden-capability, or prompt-injection patterns. Unlike a compliance attestation, a scan attestation is a claim about this artifact, bounded by the scanning standard and ruleset it was produced under. This specification names the class; it does not define or register type names for it.
+
+A registry or orchestrator MUST NOT present a compliance attestation, or a `filter` match on one (§7.1), as a safety or security assessment of the artifact in the entry. This is the counterpart, at the trust layer, to the relevance-scoring caveats in §7.2 and §7.3: just as a relevance score MUST NOT be read as a safety judgment, neither may a compliance attestation. A scan attestation is the form of this object that carries an artifact-scoped safety claim.
+
+A publisher that lists a scan attestation SHOULD ensure the referenced document names the standard and ruleset the scan was produced under, so a consumer can interpret the coverage and limits of the claim. That document SHOULD itself identify the scanned subject by cryptographic digest — as in-toto statements and SARIF `artifacts[].hashes` both do — so the claim cannot be silently reattached to an artifact it was not computed over. Note that the `digest` member above covers the attestation document, not the artifact.
 
 ### 5.3 Provenance Link Object
 
