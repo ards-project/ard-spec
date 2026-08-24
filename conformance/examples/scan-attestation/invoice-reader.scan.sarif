@@ -1,0 +1,51 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "example-agent-scanner",
+          "version": "2.3.0",
+          "informationUri": "https://scanner.example.com/",
+          "rules": [
+            {
+              "id": "EX-TOOL-POISONING-001",
+              "name": "ToolDescriptionInstructionInjection",
+              "shortDescription": {
+                "text": "Tool description contains instructions directed at the model."
+              }
+            },
+            {
+              "id": "EX-HIDDEN-CAPABILITY-002",
+              "name": "UndeclaredNetworkEgress",
+              "shortDescription": {
+                "text": "Tool performs network egress not declared in its schema."
+              }
+            }
+          ]
+        }
+      },
+      "artifacts": [
+        {
+          "location": {
+            "uri": "invoice-reader.json"
+          },
+          "hashes": {
+            "sha-256": "d27f6473cd6b4a8ec3623a9ec01e8b42d0c607b0bc416237720f20a28f114a5b"
+          }
+        }
+      ],
+      "results": [],
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "properties": {
+            "rulesetName": "example-agent-ruleset",
+            "rulesetVersion": "2026.08"
+          }
+        }
+      ]
+    }
+  ]
+}

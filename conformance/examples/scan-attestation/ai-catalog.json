@@ -1,0 +1,37 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Example Tool Publisher",
+    "identifier": "did:web:tools.example.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:tools.example.com:server:invoice-reader",
+      "displayName": "Invoice Reader",
+      "type": "application/mcp-server-card+json",
+      "url": "https://tools.example.com/mcp/invoice-reader.json",
+      "description": "Reads uploaded invoices and returns structured line items.",
+      "representativeQueries": [
+        "extract the line items from this invoice",
+        "what is the total on the attached invoice"
+      ],
+      "trustManifest": {
+        "identity": "spiffe://tools.example.com/mcp/invoice-reader",
+        "identityType": "spiffe",
+        "attestations": [
+          {
+            "type": "SOC2-Type2",
+            "uri": "https://tools.example.com/trust/soc2-2026.pdf",
+            "mediaType": "application/pdf"
+          },
+          {
+            "type": "agent-threat-scan",
+            "uri": "https://tools.example.com/trust/invoice-reader.scan.sarif",
+            "mediaType": "application/sarif+json",
+            "digest": "sha256:cdbd706458d30031292cb80c697357257e2fcb739917dc68d67c7b8925d3bee3"
+          }
+        ]
+      }
+    }
+  ]
+}
