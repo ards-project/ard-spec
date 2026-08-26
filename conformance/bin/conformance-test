@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Agentic Resource Discovery & ai-catalog Conformance Testing Tool
-Autonomously validates capability manifests and Registry REST API implementations.
+Agentic Resource Discovery (ARD) Conformance Testing Tool
+Validates ARD manifests, publisher well-known resolution, and Registry REST API
+implementations against the ARD specification (v0.91).
 """
 
 import os
@@ -11,6 +12,11 @@ import json
 import urllib.request
 import urllib.error
 import urllib.parse
+
+# Ensure UTF-8 output on Windows (cp1252 default cannot encode ✓/✗/⚠)
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 # Strict URN Regex matching urn:air:<publisher>:<namespace>:<agent-name>
 URN_REGEX = re.compile(r"^urn:air:([a-zA-Z0-9.-]+)(?::([a-zA-Z0-9._:-]+))?:([a-zA-Z0-9._-]+)$")
@@ -76,31 +82,31 @@ class ConformanceTester:
         self.warnings.append(msg)
         print_warning(msg)
 
-    def validate_catalog_entry(self, entry, label):
+    def validate_ard_entry(self, entry, label):
         if not isinstance(entry, dict):
-            self.add_error(f"[{label}] Catalog entry must be a JSON object.")
+            self.add_error(f"[{label}] ARD entry must be a JSON object.")
             return False
 
         valid = True
         identifier = entry.get("identifier")
         if not identifier:
-            self.add_error(f"[{label}] Catalog entry is missing 'identifier'.")
+            self.add_error(f"[{label}] ARD entry is missing 'identifier'.")
             valid = False
         elif not URN_REGEX.match(identifier):
-            self.add_error(f"[{label}] Catalog entry identifier '{identifier}' is not a valid ARD URN.")
+            self.add_error(f"[{label}] ARD entry identifier '{identifier}' is not a valid ARD URN.")
             valid = False
 
         if not entry.get("displayName"):
-            self.add_error(f"[{label}] Catalog entry is missing 'displayName'.")
+            self.add_error(f"[{label}] ARD entry is missing 'displayName'.")
             valid = False
         if not entry.get("type"):
-            self.add_error(f"[{label}] Catalog entry is missing 'type'.")
+            self.add_error(f"[{label}] ARD entry is missing 'type'.")
             valid = False
 
         has_url = "url" in entry
         has_data = "data" in entry
         if has_url == has_data:
-            self.add_error(f"[{label}] Catalog entry must contain exactly one of 'url' or 'data'.")
+            self.add_error(f"[{label}] ARD entry must contain exactly one of 'url' or 'data'.")
             valid = False
 
         return valid
@@ -129,30 +135,62 @@ class ConformanceTester:
 
         return valid
 
+    def _load_entry_schema(self):
+        """The ARD entry schema is authoritative for entry structure (spec Appendix D.1)."""
+        schema_path = os.path.join(os.path.dirname(__file__), "../../spec/schemas/ard-entry.schema.json")
+        if not os.path.exists(schema_path):
+            self.add_warning(f"Schema file not found at {schema_path}. Skipping JSON Schema validation.")
+            return None
+        with open(schema_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+
     def run_json_schema_validation(self, manifest_data):
+        """Validate the manifest as an ArdManifest, then every entry as an ArdEntry."""
         if not self.jsonschema_available:
             print_warning("Python 'jsonschema' package not installed. Skipping strict JSON Schema check.")
             print_bullet("Tip: Run 'pip install jsonschema' to enable strict schema-level checking.")
             return True
 
         import jsonschema
-        schema_path = os.path.join(os.path.dirname(__file__), "../../spec/schemas/ai-catalog.schema.json")
-        if not os.path.exists(schema_path):
-            print_warning(f"Schema file not found at {schema_path}. Skipping JSON Schema validation.")
+        try:
+            schema_data = self._load_entry_schema()
+        except Exception as e:
+            self.add_warning(f"Failed to read ARD entry schema: {e}")
+            return True
+        if schema_data is None:
             return True
 
+        def as_def(name):
+            variant = dict(schema_data)
+            variant["$ref"] = f"#/$defs/{name}"
+            return variant
+
+        ok = True
         try:
-            with open(schema_path, 'r') as f:
-                schema_data = json.load(f)
-            jsonschema.validate(instance=manifest_data, schema=schema_data)
-            print_success("Strict JSON Schema validation passed.")
-            return True
+            jsonschema.validate(instance=manifest_data, schema=as_def("ArdManifest"))
+            print_success("Manifest validates against ArdManifest.")
         except jsonschema.exceptions.ValidationError as e:
-            self.add_error(f"JSON Schema Validation Failed: {e.message} at path '{'.'.join(map(str, e.absolute_path))}'")
-            return False
+            self.add_error(f"ArdManifest validation failed: {e.message} at path '{'.'.join(map(str, e.absolute_path))}'")
+            ok = False
         except Exception as e:
             self.add_warning(f"Failed to run JSON Schema validator: {e}")
             return True
+
+        entries = manifest_data.get("entries")
+        if isinstance(entries, list):
+            entry_schema = as_def("ArdEntry")
+            bad = 0
+            for idx, entry in enumerate(entries):
+                label = (entry.get("displayName") or entry.get("identifier") or f"Entry #{idx}") if isinstance(entry, dict) else f"Entry #{idx}"
+                try:
+                    jsonschema.validate(instance=entry, schema=entry_schema)
+                except jsonschema.exceptions.ValidationError as e:
+                    self.add_error(f"[{label}] ArdEntry validation failed: {e.message} at path '{'.'.join(map(str, e.absolute_path))}'")
+                    bad += 1
+                    ok = False
+            if not bad:
+                print_success(f"All {len(entries)} entries validate against ArdEntry.")
+        return ok
 
     def validate_manifest(self, raw_content, source_label):
         print_header(f"Validating Manifest: {source_label}")
@@ -171,11 +209,11 @@ class ConformanceTester:
         # 3. Custom Semantic and Protocol-Specific Validation
         print_bullet("Running custom semantic checks...")
         
-        spec_ver = data.get("specVersion")
-        if not spec_ver:
-            self.add_error("Missing required 'specVersion' root property.")
-        elif spec_ver != "1.0":
-            self.add_warning(f"Unrecognized 'specVersion': {spec_ver}. Expected '1.0'.")
+        # ARD requires only 'entries' at the top level (§5.1). Other members are
+        # transport-defined and ignored, so their presence is noted, never an error.
+        extra_roots = [k for k in data.keys() if k != "entries"]
+        if extra_roots:
+            print_bullet(f"Top-level members ignored by ARD (transport-defined): {', '.join(sorted(extra_roots))}.")
 
         entries = data.get("entries")
         if entries is None:
@@ -235,9 +273,11 @@ class ConformanceTester:
             else:
                 print_success(f"[{label}] Correct Value-or-Reference delivery format (using {'url' if has_url else 'data'}).")
 
-            # Custom constraints for representativeQueries
+            # Custom constraints for representativeQueries (§4.2, §D.2)
             queries = entry.get("representativeQueries")
-            if queries is not None:
+            if queries is None:
+                self.add_warning(f"[{label}] No 'representativeQueries'. The semantic index is built from this term, so the entry will not be found by search — it is a valid catalog entry but not a discoverable ARD entry.")
+            else:
                 if not isinstance(queries, list):
                     self.add_error(f"[{label}] 'representativeQueries' must be an array of strings.")
                 else:
@@ -259,9 +299,50 @@ class ConformanceTester:
 
         # Top-level deprecated property check
         if "collections" in data:
-            self.add_error("Deprecated field check: Found 'collections' array at root. Top-level collections were REMOVED in ADR-0003. Catalog hierarchies MUST be modeled inside 'entries' using 'type: application/ai-catalog+json'.")
+            self.add_warning("Found 'collections' at root. Top-level collections were removed in ADR-0003; ARD ignores unrecognized top-level members, so this does not invalidate the manifest, but hierarchies should be modeled inside 'entries'.")
 
         return len(self.errors) == 0
+
+    def resolve_publisher(self, target):
+        """Resolve a publisher's entries the way a conformant consumer does (§5.1).
+
+        A consumer MUST fetch /.well-known/ard.json. Consulting the predecessor
+        /.well-known/ai-catalog.json is permitted (MAY) but not required, so a
+        publisher reachable only there is flagged: it may not be discovered.
+        """
+        origin = target.rstrip('/')
+        if not origin.startswith(("http://", "https://")):
+            origin = "https://" + origin
+
+        print_header(f"Resolving publisher: {origin}")
+
+        def fetch(path):
+            url = f"{origin}/.well-known/{path}"
+            try:
+                with urllib.request.urlopen(url, timeout=10) as response:
+                    return response.read().decode('utf-8'), url, None
+            except urllib.error.HTTPError as e:
+                return None, url, f"{e.code} {e.reason}"
+            except Exception as e:
+                return None, url, str(e)
+
+        content, ard_url, ard_err = fetch("ard.json")
+        if content is not None:
+            print_success(f"Found {ard_url} — the path consumers are required to fetch.")
+            return content, ard_url
+
+        print_warning(f"No manifest at {ard_url} ({ard_err}).")
+        legacy, legacy_url, legacy_err = fetch("ai-catalog.json")
+        if legacy is not None:
+            self.add_warning(
+                f"Reachable only at {legacy_url}. This is the predecessor path; consulting it is optional "
+                f"for consumers (§5.1), so this publisher may not be discovered. Serve the manifest at "
+                f"/.well-known/ard.json — a copy, symlink, or 301 is sufficient.")
+            return legacy, legacy_url
+
+        self.add_error(
+            f"No manifest found at /.well-known/ard.json ({ard_err}) or /.well-known/ai-catalog.json ({legacy_err}).")
+        return None, None
 
     def validate_registry(self, registry_base_url, request_headers=None, lookup_identifier=None):
         print_header(f"Validating Agent Registry: {registry_base_url}")
@@ -358,9 +439,18 @@ class ConformanceTester:
                             if not source:
                                 self.add_error(f"[{label}] Missing required SearchResultItem field 'source'.")
                                 
-                            self.validate_catalog_entry(item, label)
-                            if lookup_identifier is None and URN_REGEX.match(item.get("identifier", "")):
-                                lookup_identifier = item["identifier"]
+                            # In a response, only 'identifier' is required (§5.3.2).
+                            # A registry MAY omit any other term; 'identifier' names
+                            # the authoritative entry.
+                            ident = item.get("identifier")
+                            if not ident:
+                                self.add_error(f"[{label}] Result is missing required 'identifier'.")
+
+                            for optional_term in ("displayName", "type"):
+                                if not item.get(optional_term):
+                                    print_bullet(f"[{label}] Omits '{optional_term}' (permitted; results carry only what selection needs).")
+                            if lookup_identifier is None and URN_REGEX.match(ident or ""):
+                                lookup_identifier = ident
                 else:
                     self.add_error(f"POST /search returned unexpected HTTP status: {response.status}")
         except urllib.error.HTTPError as e:
@@ -381,7 +471,7 @@ class ConformanceTester:
                     if response.status != 200:
                         self.add_error(f"GET /agents/{{identifier}} returned unexpected HTTP status: {response.status}")
                     else:
-                        valid_entry = self.validate_catalog_entry(data, "Lookup response")
+                        valid_entry = self.validate_ard_entry(data, "Lookup response")
                         if valid_entry:
                             if data["identifier"] != lookup_identifier:
                                 self.add_error(
@@ -397,7 +487,7 @@ class ConformanceTester:
                                     )
                                     valid_entry = False
                         if valid_entry:
-                            print_success("GET /agents/{identifier} returned the exact catalog entry for an encoded URN.")
+                            print_success("GET /agents/{identifier} returned the exact ARD entry for an encoded URN.")
             except urllib.error.HTTPError as e:
                 self.add_error(f"GET /agents/{{identifier}} request failed: {e.code} {e.reason}")
             except (UnicodeDecodeError, json.JSONDecodeError) as e:
@@ -501,10 +591,11 @@ class ConformanceTester:
 
 def main():
     if len(sys.argv) < 3:
-        print(f"{COLOR_BOLD}Agentic Resource Discovery Conformance CLI v0.5.0{COLOR_RESET}")
+        print(f"{COLOR_BOLD}Agentic Resource Discovery Conformance CLI v0.9.1{COLOR_RESET}")
         print("Usage:")
-        print("  conformance-test manifest <local_file_path_or_url>")
-        print("  conformance-test registry <registry_base_url> [--header 'Name: value']... [--lookup-identifier <urn>]")
+        print("  conformance-test manifest  <local_file_path_or_url>")
+        print("  conformance-test publisher <domain>   # resolves /.well-known/ard.json per §5.1")
+        print("  conformance-test registry  <registry_base_url> [--header 'Name: value']... [--lookup-identifier <urn>]")
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -537,6 +628,15 @@ def main():
             except Exception as e:
                 print_failure(f"Failed to read local file: {e}")
                 sys.exit(1)
+    elif command == "publisher":
+        if args:
+            print_failure(f"Unexpected arguments for publisher command: {' '.join(args)}")
+            sys.exit(1)
+        content, source = tester.resolve_publisher(target)
+        if content is None:
+            success = False
+        else:
+            success = tester.validate_manifest(content, source)
     elif command == "registry":
         header_args = []
         lookup_identifier = None
@@ -577,7 +677,7 @@ def main():
             lookup_identifier=lookup_identifier
         )
     else:
-        print_failure(f"Unknown test suite command '{command}'. Must be 'manifest' or 'registry'.")
+        print_failure(f"Unknown test suite command '{command}'. Must be 'manifest', 'publisher', or 'registry'.")
         sys.exit(1)
 
     # Summary reporting

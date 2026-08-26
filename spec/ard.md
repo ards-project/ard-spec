@@ -2,9 +2,9 @@
 
 **Federated Discovery and Search for Agentic Resources**
 
-**Version**: v0.9 (Draft)  
-**Status**: Proposal  
-**Date**: May 28, 2026
+**Version**: v0.91
+**Status**: Proposal
+**Date**: August 26, 2026
 
 **Authors**:
 
@@ -12,21 +12,23 @@
 - R.V.Guha — Microsoft
 - Shaun Smith — Hugging Face
 
-## 1\. Overview
+## 1. Overview
 
 LLMs increasingly rely on external capabilities — MCP tools, A2A agents, skills, and other callable services — to extend their functionality. In this document, we refer to these generically as agentic resources.
 
-The **Agentic Resource Discovery Specification (ARD)** defines how AI artifacts are cataloged, discovered, and searched across federated networks.
+The **Agentic Resource Discovery Specification (ARD)** defines how agentic resources are described, discovered, and searched across federated networks.
 
-This version (v0.9) aligns the discovery framework with the broader ai-catalog standard, shifting towards a media-type-driven approach and mandating standard web protocols (REST) for discovery interfaces to ensure maximum interoperability.
+This version (v0.91) restates the description layer in terms of JSON-LD and namespaces. An entry is a JSON-LD node whose terms come from a default namespace unless it declares otherwise. This is a repositioning, not a redefinition: existing manifests remain valid entries unchanged. What it adds is a `@context` seam, so an entry MAY draw terms from additional namespaces, and those terms become available to discovery without any change to this specification. Which namespaces beyond the default are recognized is left open and expected to grow over time; that evolution does not affect entries written today.
 
-## 2\. Motivation
+## 2. Motivation
 
-The prevailing model requires users or developers to explicitly “install” or hardcode each agent before use. As the ecosystem scales to thousands or millions of agents, we need a model where LLMs can discover and invoke agents dynamically, similar to how search engines discover web pages.
+The prevailing model requires users or developers to explicitly "install" or hardcode each agent before use. As the ecosystem scales to thousands or millions of agents, we need a model where LLMs can discover and invoke agents dynamically, similar to how search engines discover web pages.
 
 Agent descriptions tend to be generic, and most LLMs currently select tools by including all descriptions in the context window — which does not scale. ARD addresses this by moving discovery outside the LLM into a dedicated search service, where richer signals (representative queries, publisher identity, compliance metadata, usage patterns) can be leveraged without consuming context window tokens.
 
-## 3\. Core Design Principles
+Grounding the description layer in JSON-LD extends the same reasoning. A resource is described once, on its own domain; a discovery service indexes the terms it recognizes and preserves the rest; and a publisher can enrich an entry with domain-specific vocabulary without waiting for a revision of this specification.
+
+## 3. Core Design Principles
 
 ARD is guided by the following core design principles to ensure scalability, interoperability, and ease of adoption:
 
@@ -38,18 +40,15 @@ Rather than requiring users or systems to pre-install agents (analogous to the m
 
 Traditional tool selection relies on injecting all descriptions into the LLM's context window, which does not scale. ARD moves the selection problem outside the LLM into a dedicated search service, leveraging information retrieval techniques to scale to thousands or millions of capabilities without consuming context window tokens.
 
-### 3.3 Artifact Agnostic Envelope
+### 3.3 Artifact-Agnostic Envelope
 
-The specification does not define or constrain the internal schema of specific agent types (MCP, A2A, etc.). Instead, it acts as a clean envelope that uses a `type` field (formatted as an IANA Media Type) to identify what an artifact is, delegating the definition of artifact-specific metadata to the respective protocol specifications.
+The specification does not define or constrain the internal schema of specific agent types (MCP, A2A, etc.). Instead, it acts as a clean envelope that uses a `type` term (formatted as an IANA Media Type) to identify what an artifact is, delegating the definition of artifact-specific metadata to the respective protocol specifications.
 
-\[\!NOTE\] **IANA Registration Status**: The types application/a2a-agent-card+json and application/mcp-server-card+json used in this specification are de-facto community standards tracking towards formal registration. Implementers should note that while well-known path directories (like /.well-known/agent-card.json) are officially registered permanent entries, full type registrations are pending working group joint submission and the format may change. In the meantime, omit strict verification of these types by intermediaries.
+> **[!NOTE] IANA Registration Status**: The types `application/a2a-agent-card+json` and `application/mcp-server-card+json` used in this specification are de-facto community standards tracking towards formal registration. Implementers should note that while well-known path directories (like `/.well-known/agent-card.json`) are officially registered permanent entries, full type registrations are pending working group joint submission and the format may change. In the meantime, omit strict verification of these types by intermediaries.
 
-### 3.4 Strict Value-or-Reference
+### 3.4 JSON-LD Entries and Namespaces
 
-To ensure safe parsing and predictable behavior in enterprise environments, a catalog entry must contain exactly one of two mutually exclusive keys for its content delivery:
-
-* **url**: A remote reference to the artifact document.  
-* **data**: An embedded JSON object containing the full artifact document.
+An entry is a JSON-LD node. Terms written plainly, without a prefix, belong to the default namespace — the same terms a manifest uses today, interpreted the same way. Through the entry's `@context`, a publisher MAY additionally draw terms from other namespaces to describe the resource. A consumer processes the terms it recognizes and preserves the others (§5.3.1). This keeps a single entry model while making the vocabulary open at the edges rather than closed.
 
 ### 3.5 Universal Baseline for Federation
 
@@ -59,364 +58,175 @@ To guarantee that any system can participate in discovery regardless of its exec
 
 To maintain a clean and implementable standard, the protocol delegates operational details:
 
-* **Authentication is Delegated**: Agent authentication is handled by the specific artifact protocol, not the discovery layer.  
+* **Authentication is Delegated**: Agent authentication is handled by the specific artifact protocol, not the discovery layer.
 * **Distribution is Infrastructure**: Mechanisms for physical delivery (OCI, npm, etc.) are left to backend implementation and are not part of the discovery record.
 
-## 4\. The Data Model
+## 4. The ARD Entry
 
-The capability manifest (the file publishers host to advertise their agents) is the central data model. This manifest structure builds upon and extends the schema defined by the [ai-catalog](https://github.com/Agent-Card/ai-catalog) specification, introducing specialized discovery attributes (such as domain-anchored URN identifiers, root-level capabilities, and representative queries) to ensure high-performance search and compatibility across the broader agent ecosystem.
+The unit ARD describes, indexes, and returns is the **ARD entry** — the description of a single agentic resource in a form that can be found by search. ARD is defined over ARD entries; the container an entry travels in (a hosted manifest, a web page, an API response) is a transport concern, addressed in §5.
 
-### 4.1 The Capability Manifest (ai-catalog.json)
+**This specification defines the ARD entry.** An ARD entry is not the same object as a catalog entry, and the two should not be conflated. A catalog entry is a publisher's listing of a resource: its obligation is to accommodate whatever the publisher wishes to describe, so it commits to as little as possible. An ARD entry is a description carrying the signals a search service requires in order to make resources comparable across publishers who have never coordinated: its obligation is to guarantee that those signals are present and uniformly addressable.
 
-A manifest file hosted at /.well-known/ai-catalog.json lists the available artifacts.
+The two are related but distinct. ARD adopts the core terms of the default namespace (§4.2) and layers on the terms discovery depends on — chiefly `representativeQueries`, which an ARD entry is expected to carry. It follows that **every ARD entry is a well-formed catalog entry, but not every catalog entry is an ARD entry** — a listing that omits the discovery terms remains a perfectly valid catalog entry and is simply not discoverable through ARD. ARD keeps this expectation soft at the schema level: a missing or under-populated `representativeQueries` is flagged by conformance tooling as a warning, not a hard validation failure, so entries emitted by existing tooling still validate (§4.2).
 
-```json
-{
-  "specVersion": "1.0",
-  "host": {
-    "displayName": "Acme Enterprise AI",
-    "identifier": "did:web:acme.com"
-  },
-  "entries": [
-    {
-      "identifier": "urn:air:acme.com:agent:assistant",
-      "displayName": "Corporate Assistant (A2A)",
-      "type": "application/a2a-agent-card+json",
-      "url": "https://api.acme.com/agents/assistant.json",
-      "description": "General-purpose corporate A2A assistant.",
-      "representativeQueries": [
-        "help me draft an email to the security working group",
-        "summarize my unread messages from Todd"
-      ]
-    },
-    {
-      "identifier": "urn:air:acme.com:server:weather",
-      "displayName": "Weather Data Node",
-      "type": "application/mcp-server-card+json",
-      "url": "https://api.acme.com/mcp/weather.json",
-      "capabilities": ["WeatherTool", "ForecastTool"],
-      "description": "Enterprise weather MCP server for live telemetry.",
-      "representativeQueries": [
-        "what is the current wind speed in Chicago",
-        "get the 5-day forecast for Seattle"
-      ]
-    },
-    {
-      "identifier": "urn:air:acme.com:plugin:finance-suite",
-      "displayName": "Finance Tool Bundle",
-      "type": "application/ai-catalog+json",
-      "description": "A static nested bundle containing an A2A agent and its required market dataset.",
-      "tags": ["finance", "bundle"],
-      "data": {
-        "specVersion": "1.0",
-        "entries": [
-          {
-            "identifier": "urn:air:acme.com:finance:a2a",
-            "displayName": "Finance Trading Agent",
-            "type": "application/a2a-agent-card+json",
-            "url": "https://api.acme.com/agents/finance-trader.json"
-          },
-          {
-            "identifier": "urn:air:acme.com:market:2026",
-            "displayName": "Market Dataset 2026",
-            "type": "application/parquet",
-            "url": "https://data.acme.com/market-2026.parquet"
-          }
-        ]
-      }
-    },
-    {
-      "identifier": "urn:air:acme.com:registry:global",
-      "displayName": "Acme Global Agent Registry",
-      "type": "application/ai-registry+json",
-      "url": "https://registry.acme.com/api/v1/",
-      "description": "Dynamic REST API search interface to discover all approved enterprise agents.",
-      "tags": ["registry", "search", "dynamic"],
-      "trustManifest": {
-        "identity": "spiffe://acme.com/registry/global",
-        "identityType": "spiffe",
-        "attestations": [
-          {
-            "type": "SPIFFE-X509",
-            "uri": "https://acme.com/.well-known/spiffe/jwks"
-          },
-          {
-            "type": "SOC2-Type2",
-            "uri": "https://trust.acme.com/reports/soc2.pdf"
-          }
-        ]
-      }
-    },
-    {
-      "identifier": "urn:air:acme.com:catalog:engineering",
-      "displayName": "Engineering Department Catalogs",
-      "type": "application/ai-catalog+json",
-      "url": "https://acme.com/catalogs/engineering.json",
-      "description": "Sub-catalogs containing CI/CD and internal deployment agents."
-    }
-  ]
-}
-```
+Because the definitions are separate, each specification's conformance is self-contained: a change to what a catalog entry requires does not change what an ARD entry requires, and vice versa.
 
-### 4.2 Catalog Entry Object
+Within this specification, "entry" means "ARD entry" unless stated otherwise.
 
-Each object in the entries array MUST contain:
+### 4.1 An ARD Entry Is a JSON-LD Node
 
-| Field | Type | Description |
-| :---- | :---- | :---- |
-| identifier | String | Globally unique logical identifier for discovery. MUST use a domain-anchored URN namespace format (`urn:air:<publisher>:<namespace>:<agent-name>`) where `<publisher>` is a verifiable domain name. This guarantees cross-network uniqueness, nomenclature stability, and decentralized trust binding. See [§4.2.1](#421-agent-identifier-identifier-format-and-rationale) for detailed format specifications and architectural rationale. |
-| displayName | String | Human-readable name. |
-| type | String | Type of the AI artifact. |
+An entry is a JSON-LD node describing an agentic resource. Its terms acquire meaning through the **ARD base context**, published at `https://agenticresourcediscovery.org/context/v1`, which maps the core terms to IRIs under the default namespace (`https://agenticresourcediscovery.org/ns#`).
 
-Exactly one of the following MUST be present:
+A conforming consumer MUST expand an entry with the ARD base context as the initial expansion context (the JSON-LD `expandContext` option). An entry's own `@context`, when present, is applied after the base context: it MAY add or override namespaces but does not remove the base. Under this rule the core terms resolve to their IRIs and namespaced terms (e.g. `okf:taxonomy`) resolve through the prefixes the entry declares.
 
-| Field | Type | Description |
-| :---- | :---- | :---- |
-| url | String | URL to retrieve the full artifact. |
-| data | Object | The complete artifact document inline. |
+Carrying `@context` in the entry itself is OPTIONAL. An entry that omits it — including every entry published against the predecessor format — is interpreted by any consumer that applies the base context, and needs no changes. An entry SHOULD include `"@context": "https://agenticresourcediscovery.org/context/v1"` (optionally as the first element of an array whose later elements add local namespaces) when it may be read by generic JSON-LD tooling that has not been told to apply the base context — most importantly when embedded as in-page markup. The consequence is deliberate: an entry with no `@context` is interpretable only by a consumer that knows it is an ARD entry and applies the base context. That is the trade for terse authoring and backward compatibility.
 
-Optional fields:
+### 4.2 Entry Terms
 
-| Field | Type | Description |
-| :---- | :---- | :---- |
-| description | String | Short description. |
-| tags | Array | Keywords for filtering. |
-| capabilities | Array | Strings representing specific skills or tools (e.g., \["WeatherTool"\]) to enable fast discovery database filtering without full artifact lookup. |
-| representativeQueries | Array | Sample natural-language queries (e.g., \["find me a flight booking agent"\]). Used by registries to build semantic vector embeddings for search ranking. SHOULD contain 2–5 examples. |
-| version | String | Version of the artifact. |
-| updatedAt | String | ISO 8601 timestamp. |
-| metadata | Map | Custom metadata key-value pairs. |
-| trustManifest | Object | Verifiable identity and trust metadata. |
+The default namespace supplies definitions for the terms below; ARD determines which of them an entry is required to carry. An ARD entry MUST carry:
 
-### 4.2.1 Agent Identifier (identifier) Format and Rationale
+| Term | Requirement | Notes |
+| :--- | :--- | :--- |
+| identifier | MUST | Globally unique discovery handle. Domain-anchored URN form (`urn:air:<publisher>:<namespace>:<agent-name>`); see Appendix C. The JSON-LD `@id` MAY mirror it. |
+| displayName | MUST | Human-readable name. |
+| type | MUST | Artifact type as an IANA Media Type (§3.3). |
+| url _or_ data | MUST (exactly one) | Value-or-reference (§4.3). |
 
-The identifier field serves as the primary logical handle for an agent or capability across federated discovery networks. It MUST follow a standardized, domain-anchored URN format complying with IETF RFC 8141:
+An ARD entry SHOULD additionally carry `representativeQueries`, and `capabilities` is recommended where it applies; these are the discovery signals, so they are described in full here rather than by reference.
 
-```
-urn:air:<publisher>:<namespace>:<agent-name>
-```
+| Term | Requirement | Description |
+| :--- | :--- | :--- |
+| representativeQueries | SHOULD | Sample natural-language queries a user might issue that this resource can serve — the signal a registry builds its semantic index from. An entry without it cannot be found by search, which is what distinguishes an ARD entry from a bare catalog entry. SHOULD contain 2–5 examples. It is not hard-required: the schema does not reject an entry that omits it or supplies a different count — the conformance tester flags those as warnings (§D.2), so output from existing tooling still validates. |
+| capabilities | MAY | Short skill or tool tokens (e.g. `["WeatherTool"]`) enabling fast structured filtering without fetching the full artifact. |
 
-#### Format Structure
+The remaining terms are optional and descriptive.
 
-* **urn**: Mandatory prefix indicating a Uniform Resource Name.  
-* **air**: The Namespace Identifier (NID), designating the AI artifact and agent discovery ecosystem.  
-* **`<publisher>`**: The Namespace Specific String (NSS) root. MUST be a fully qualified domain name (FQDN) representing the publisher or host organization (e.g., acme.com, github.com). This domain acts as the organizational trust anchor and MUST be verifiable against the cryptographic workload identity in the trustManifest.  
-* **`<namespace>`**: Optional hierarchical segments separated by : (e.g., finance:trading, weather:telemetry). Allows publishers to categorize capabilities by department, team, or product line without altering infrastructure routing.  
-* **`<agent-name>`**: Mandatory terminal segment representing the specific, logical short name of the agent or tool (e.g., assistant, pptx-creator).
+| Term | Description |
+| :--- | :--- |
+| description, tags, version, updatedAt, metadata, trustManifest | Descriptive terms. `trustManifest` is discussed in §4.5; ARD does not constrain its internal schema beyond `identity`, but registries are expected to inspect and verify it. |
 
-#### Please see more details at [Architectural Rationale for URN Restriction](#appendix-c:-agent-naming-urn-format)
+Terms from any additional namespace declared in the entry's `@context` MAY also appear and become available as filter dimensions (§5.3.1) with no change to this specification.
 
-### 4.3 Host Info Object
+### 4.3 Value or Reference
 
-Describes the operator of the catalog.
-
-| Field | Type | Description |
-| :---- | :---- | :---- |
-| displayName | String | Human-readable name of the host. |
-| identifier | String | Optional. Verifiable identifier (DID or domain). |
-| documentationUrl | String | Optional. URL to documentation. |
-| logoUrl | String | Optional. URL to logo. |
-| trustManifest | Object | Optional. Trust metadata for the host. |
+An entry's artifact content is delivered by exactly one of two mutually exclusive terms — `url` (a reference to the artifact document) or `data` (the document inline). An entry MUST NOT carry both.
 
 ### 4.4 Examples
 
-#### The Solo Developer Path
-
-No complex identity ceremony or cloud account required.
-
-An agent hosted on Hugging Face Spaces (MCP), published in a manifest:
+A plain entry — no `@context`, so its terms resolve to the default namespace:
 
 ```json
 {
-  "specVersion": "1.0",
-  "host": { "displayName": "Alice's AI Tools" },
-  "entries": [
-    {
-      "identifier": "urn:air:hf.co:alice-dev:weather-agent",
-      "displayName": "Weather Agent",
-      "type": "application/mcp-server-card+json",
-      "data": {
-        "name": "Weather Agent",
-        "description": "Simple weather lookup using open data",
-        "tools": [
-          {
-            "name": "get_weather",
-            "description": "Get current weather for a city",
-            "inputSchema": {
-              "type": "object",
-              "properties": { "city": { "type": "string" } },
-              "required": ["city"]
-            }
-          }
-        ]
-      }
-    }
+  "identifier": "urn:air:acme.com:server:weather",
+  "displayName": "Weather Data Node",
+  "type": "application/mcp-server-card+json",
+  "url": "https://api.acme.com/mcp/weather.json",
+  "capabilities": ["WeatherTool", "ForecastTool"],
+  "description": "Enterprise weather MCP server for live telemetry.",
+  "representativeQueries": [
+    "what is the current wind speed in Chicago",
+    "get the 5-day forecast for Seattle"
   ]
 }
 ```
 
-A skill hosted on GitHub, published in a manifest:
+The same entry enriched with terms from an additional namespace via `@context`. Unprefixed terms remain in the default namespace; the prefixed terms (here, a publisher's own extension namespace) become filter dimensions:
 
 ```json
 {
-  "specVersion": "1.0",
-  "host": { "displayName": "Alice's AI Tools" },
-  "entries": [
-    {
-      "identifier": "urn:air:github.com:alice-dev:pptx-creator",
-      "displayName": "pptx-creator",
-      "type": "application/ai-skill",
-      "url": "https://github.com/alice-dev/pptx-creator",
-      "description": "Create professional PowerPoint presentations following brand guidelines."
-    }
-  ]
-}
-```
-
-Discovery via GitHub Pages (combining the above):
-
-```json
-{
-  "specVersion": "1.0",
-  "host": { "displayName": "Alice's AI Tools" },
-  "entries": [
-    {
-      "identifier": "urn:air:hf.co:alice-dev:weather-agent",
-      "displayName": "Weather Agent",
-      "type": "application/mcp-server-card+json",
-      "url": "https://alice-dev.github.io/weather-agent/entry.json"
-    },
-    {
-      "identifier": "urn:air:github.com:alice-dev:pptx-creator",
-      "displayName": "pptx-creator",
-      "type": "application/ai-skill+md",
-      "url": "https://github.com/alice-dev/pptx-creator"
-    }
-  ]
-}
-```
-
-#### Enterprise Example
-
-Using trustManifest for compliance, published in a manifest.
-
-```json
-{
-  "specVersion": "1.0",
-  "host": {
-    "displayName": "Acme Enterprise AI",
-    "identifier": "did:web:acme.com"
+  "@context": {
+    "acme": "https://acme.com/vocab#"
   },
-  "entries": [
-    {
-      "identifier": "urn:air:acme.com:travel:concierge",
-      "displayName": "Travel Concierge",
-      "type": "application/a2a-agent-card+json",
-      "url": "https://api.acme.com/travel/concierge.json",
-      "description": "AI-powered travel planning",
-      "trustManifest": {
-        "identity": "spiffe://acme.com/travel/concierge",
-        "identityType": "spiffe",
-        "attestations": [
-          {
-            "type": "SPIFFE-X509",
-            "uri": "https://acme.com/.well-known/spiffe/jwks"
-          },
-          {
-            "type": "SOC2-Type2",
-            "uri": "https://trust.acme.com/reports/soc2.pdf"
-          },
-          {
-            "type": "GDPR",
-            "uri": "https://trust.acme.com/compliance/gdpr"
-          }
-        ]
-      }
-    }
+  "identifier": "urn:air:acme.com:server:weather",
+  "displayName": "Weather Data Node",
+  "type": "application/mcp-server-card+json",
+  "url": "https://api.acme.com/mcp/weather.json",
+  "capabilities": ["WeatherTool", "ForecastTool"],
+  "description": "Enterprise weather MCP server for live telemetry.",
+  "representativeQueries": [
+    "what is the current wind speed in Chicago",
+    "get the 5-day forecast for Seattle"
+  ],
+  "acme:serviceTier": "enterprise",
+  "acme:region": ["us-east", "eu-west"]
+}
+```
+
+A skill entry from a solo developer, no trust ceremony required:
+
+```json
+{
+  "identifier": "urn:air:github.com:alice-dev:pptx-creator",
+  "displayName": "pptx-creator",
+  "type": "application/ai-skill+md",
+  "url": "https://github.com/alice-dev/pptx-creator",
+  "description": "Create professional PowerPoint presentations following brand guidelines.",
+  "representativeQueries": [
+    "turn these bullet points into a branded slide deck",
+    "make a PowerPoint from this outline"
   ]
 }
 ```
 
-### 4.5 Description Vocabulary
+### 4.5 Identity and Trust
 
-Catalog entries MAY use Schema.org vocabulary (or comparable structured schemas) in their descriptive fields. Any Schema.org-based markup used to describe the agent can be leveraged as filter dimensions in the Search API. This allows domain-specific structured metadata (pricing, geographic coverage, supported languages, certifications) to be attached to records and queried against.
+Identity binding, compliance attestations, provenance, and cryptographic signatures are carried in the optional `trustManifest` term. This keeps the entry lightweight for simple use cases while providing a robust hook for enterprise compliance, separate from the artifact's native operational metadata. ARD requires only `trustManifest.identity`, for the binding rule in §4.5.1, and does not constrain the envelope's internal schema, so a trust manifest defined by any framework — SPIFFE, a DID method, an enterprise PKI — is structurally valid. This is agnosticism about the framework, not indifference to trust: a federated registry is expected to inspect the trust manifest and verify it according to the framework it declares (§4.5.2). Its attestations, provenance, and signature are inputs to verification and to trust-aware filtering and ranking — not a black box to be passed through unread.
 
-## 5\. Identity and Trust
+#### 4.5.1 Publisher Authority Binding
 
-Identity binding, compliance attestations, provenance, and cryptographic signatures are consolidated into the optional trustManifest object, as defined in the ai-catalog specification. This keeps the core entry lightweight for simple use cases while providing a robust hook for enterprise compliance, entirely separate from the artifact's native operational metadata.
+The cryptographic trust domain asserted in `trustManifest.identity` MUST align with the `<publisher>` domain embedded in the entry's discovery identifier (Appendix C). This is ARD's defense against namespace squatting: an entry claiming `urn:air:google.com:...` is rejected by a verifying registry unless it can produce a verifiable attestation issued by `google.com`. The discovery identifier and the security principal are otherwise decoupled — the former is a stable searchable handle, the latter a dynamic cryptographic credential.
 
-### 5.1 The Trust Manifest Object
+#### 4.5.2 Verification
 
-The trustManifest object sits alongside the artifact content in a catalog entry and contains the following key members:
+ARD does not define a signing or verification procedure of its own. The signed payload, its canonicalization, signature processing, and key resolution are defined by the trust framework the manifest declares in `trustManifest.trustSchema` (through its `governanceUri` and `verificationMethods`). ARD mandates only the publisher-authority binding of §4.5.1; two implementations verifying the same manifest defer to the same declared framework. A future ARD profile MAY pin a concrete default scheme, but this specification does not. A federated registry SHOULD run the verification its declared framework specifies and MAY use the outcome in filtering, ranking, and admission decisions; a registry that passes an unverified trust manifest through untouched forfeits the trust the federation depends on.
 
-| Field | Type | Description |
-| :---- | :---- | :---- |
-| identity | String | **Required**. Globally unique cryptographic workload identifier (e.g., a SPIFFE ID, DID, or HTTPS FQDN URI). Decoupled from the entry's discovery identifier. The cryptographic trust domain inside this identity MUST align with the authority domain root embedded in the discovery identifier namespace. |
-| identityType | String | Optional. Type hint for the identity URI (e.g., "did", "spiffe", "https"). |
-| attestations | Array | Optional. List of Attestation objects providing verifiable claims. |
-| provenance | Array | Optional. List of Provenance Link objects recording lineage. |
-| signature | String | Optional. Detached JWS signature computed over the Trust Manifest content. |
+A relevance score returned by Search (§5.3.2) reflects semantic relevance only and MUST NOT be interpreted as a trust, compliance, or safety judgment; trust evaluation is fully decoupled.
 
-### 5.2 Attestation Object
+## 5. Discovery
 
-Provides verifiable proof of a claim (e.g., compliance certifications).
+Discovery is what ARD is fundamentally about, and it spans this entire section: how entries are published and ingested (§5.1–5.2), how a client searches the resulting index (the search API, §5.3), and how registries compose across a federation (§5.4). It operates in two layers:
 
-| Field | Type | Description |
-| :---- | :---- | :---- |
-| type | String | **Required**. Attestation type (e.g., "SOC2-Type2", "HIPAA-Audit"). |
-| uri | String | **Required**. Location of the attestation document. |
-| digest | String | Optional. Cryptographic hash for integrity verification. |
+1. **Static Discovery**: A decentralized publishing mechanism where developers and enterprises publish entries as static documents or in-page markup.
+2. **Dynamic Discovery**: Active, searchable services (Registries) that index published entries and expose the dynamic search API.
 
-### 5.3 Provenance Link Object
+### 5.1 Discovery Mechanisms
 
-Records lineage and source information.
+Publishers advertise entries via the following mechanisms. Each points a consumer at a source of entries; the entries themselves follow §4 regardless of how they are found.
 
-| Field | Type | Description |
-| :---- | :---- | :---- |
-| relation | String | **Required**. Relationship type (e.g., "derivedFrom", "publishedFrom"). |
-| sourceId | String | **Required**. Identifier of the source artifact or data. |
-| sourceDigest | String | Optional. Digest of the source for verification. |
+* **Well-Known URI**: Hosting a manifest of entries at `https://{domain}/.well-known/ard.json`. The manifest is a JSON document with an `entries` array of ARD entries (§4); any other top-level members are transport-defined and ignored by ARD. Its shape is given by the `ardManifest` definition in the entry schema (Appendix D).
+* **In-page markup**: Embedding entry JSON-LD in a web page describing the resource, discoverable by ordinary web crawling.
+* **Agentmap Directive**: Adding an entry-source directive in `robots.txt` (e.g. `Agentmap: https://example.com/entries.json`).
+* **HTML Link Tag**: Including `<link rel="ard" href="...">` in the `<head>` of a document.
+* **DNS**: Publishing Service Binding records that point to either a static entry source (e.g. `_entries._agents.example.com`) or a dynamic Agent Registry search endpoint (e.g. `_search._agents.example.com`).
 
-For full verification procedures (signature checking, key resolution), refer to the core ai-catalog specification.
+**Consumer resolution (normative).** A consumer resolving a domain's entries MUST fetch `/.well-known/ard.json`, and MUST honour a `rel="ard"` link. ARD's predecessor specified the path `/.well-known/ai-catalog.json` and the link relation `ai-catalog`; a consumer MAY additionally consult these, and a consumer that does treats them as equivalent entry sources. Consulting the predecessor names is a courtesy to resources published before this revision, not a conformance requirement: a consumer that resolves only `ard.json` and `rel="ard"` is fully conformant.
 
-## 6\. Discovery
+**Publishing (informative).** Publishers publish entries at `/.well-known/ard.json` and emit `rel="ard"`. There is no need to serve the predecessor path or relation as well; ARD defines one path, and a publisher serving it is discoverable by every conformant consumer. A resource that remains only at `/.well-known/ai-catalog.json` may not be found, since consulting that path is optional for consumers — a publisher on the predecessor path SHOULD move to `ard.json`.
 
-The discovery specification supports two operational layers:
-
-1. **Static Discovery**: A decentralized publishing mechanism where developers and enterprises host static JSON manifests.  
-2. **Dynamic Discovery**: Active, searchable services (Registries) that index static catalogs and expose dynamic search endpoints.
-
-### 6.1 Discovery Mechanisms
-
-Publishers advertise their capability manifests via the following mechanisms:
-
-* **Well-Known URI**: Hosting the manifest at https://{domain}/.well-known/ai-catalog.json.  
-* **Agentmap Directive**: Adding an entry in robots.txt (e.g., Agentmap: https://example.com/catalog.json).  
-* **HTML Link Tag**: Including \<link rel="ai-catalog" href="..."\> in the \<head\> of a document.  
-* **DNS**: Publishing Service Binding (SVCB) records, with an optional fallback to Text (TXT) records, in the DNS that point directly to either a static capability manifest (e.g., `{agent-name}.example.com IN SVCB . well-known=/not-well-known/ai-catalog.json` or a dynamic Agent Registry search endpoint (e.g., `_index._agents.example.com 3600 IN SVCB 1 agent-search.example.com`). For more details, follow [DNS-AID](https://datatracker.ietf.org/doc/html/draft-mozleywilliams-dnsop-dnsaid)
-
-### 6.2 Ingestion Pipelines
+### 5.2 Ingestion Pipelines
 
 Agent Registry instances populate their indexes through ingestion pipelines:
 
-* **Web Ingestion (Required)**: Crawling ai-catalog.json files from discovered URIs. All ARD implementations MUST support this.  
+* **Web Ingestion (Required)**: Crawling entry sources — hosted manifests and in-page markup — from discovered URIs. All ARD implementations MUST support this.
 * **Additional Pipelines (Optional)**: Registries may support scanning git repositories, npm registries, or OCI registries as indicated by their configuration.
 
-## 7\. The ARD API
+### 5.3 The Search API
 
-An Agent Registry **MUST** expose the standard HTTP REST Search (§7.2) and Retrieve (§7.4) interfaces. Search guarantees universal discovery and federation; Retrieve provides deterministic resolution of a known identifier. The operational base URL for these endpoints is discovered dynamically by identifying catalog entries within the static ai-catalog.json manifest that carry the application/ai-registry+json media type, as defined in §4.1.
+The Registry API is the dynamic half of discovery. An Agent Registry **MUST** expose the standard HTTP REST Search (§5.3.2) and Retrieve (§5.3.4) interfaces. Search guarantees universal discovery and federation; Retrieve provides deterministic resolution of a known identifier. The operational base URL for these endpoints is discovered dynamically by identifying entries whose `type` is `application/ai-registry+json`.
 
-### 7.1 The Query Model
+#### 5.3.1 The Query Model
 
-The `POST /search` and `POST /explore` endpoints accept a common `query` object with two members, `text` and `filter`. Each endpoint defines its own additional parameters alongside `query` (see §7.2 and §7.3) and its own presence requirements for `text` and `filter`.
+The `POST /search` and `POST /explore` endpoints accept a common `query` object with three members: `@context`, `text`, and `filter`. Each endpoint defines its own additional parameters alongside `query` (see §5.3.2 and §5.3.3) and its own presence requirements for `text` and `filter`.
 
 ```json
 {
   "query": {
+    "@context": { "okf": "https://openknowledgeformat.org/ns#" },
     "text": "find me a flight booking agent",
     "filter": {
       "type": ["application/a2a-agent-card+json"],
       "tags": ["finance"],
+      "okf:taxonomy": ["us-gaap"],
       "trustManifest.attestations.type": ["SOC2-Type2"]
     }
   }
@@ -424,23 +234,28 @@ The `POST /search` and `POST /explore` endpoints accept a common `query` object 
 ```
 
 | Field | Type | Description |
-| :---- | :---- | :---- |
+| :--- | :--- | :--- |
+| @context | Object/String | Optional. Binds the prefixes used in `filter` keys, exactly as an entry's `@context` binds the terms it carries. Layered on the ARD base context (§4.1); absent, only the base context applies. |
 | text | String | Natural-language description of the need. Narrows the result set by semantic relevance. |
-| filter | Object | Structured constraints. Keys are field paths into the catalog entry; values are arrays (a bare scalar is accepted as a single-element array). |
+| filter | Object | Structured constraints. Keys are term paths; values are arrays (a bare scalar is accepted as a single-element array). |
 
 `text` and `filter` compose: an entry is in the matched set if it satisfies the relevance criteria for `text` (when present) AND every constraint in `filter` (when present).
 
-**Filter Semantics**: Field paths are dot-separated to address nested fields (e.g. `trustManifest.attestations.type`). When the value at a path is an array, a constraint matches if any element satisfies it. Within a single key, values are combined with OR; across keys, with AND.
+**Term resolution.** A filter key that names a term is resolved to its IRI through the query's effective context — the ARD base context plus the query's `@context` — and matched against entries by that IRI, not by the literal key string. This is what makes namespaced filtering work across publishers: a client filtering on `okf:taxonomy` matches any entry whose author bound the same namespace, regardless of the prefix that author chose (`okf:`, `openknowledge:`, …), because both sides resolve to the same IRI. Core terms (`type`, `tags`, `capabilities`, `version`, …) resolve through the base context and need no `@context`.
 
-**Extensibility**: Any attribute present in a catalog entry MAY be used as a filter key — standard fields (type, tags, capabilities, publisher, version, …), nested fields under `trustManifest` or `host`, custom `metadata.*` fields, and `Schema.org`-vocabulary fields (§4.5). New attributes become filterable without changes to this specification.
+**Path segments into non-expanded members.** ARD does not expand `trustManifest`, `metadata`, or inline `data` into the JSON-LD graph (§4.1); dot-paths *into* them (e.g. `trustManifest.attestations.type`, `metadata.location`) are literal JSON paths on the raw member, not IRI-resolved. The leading segment is still an IRI-resolved term; the remainder is a literal path. (Not expanding a member is a statement about the graph, not about inspection — registries verify `trustManifest` per §4.5.2.)
 
-The `publisher` key is derived from the `<publisher>` segment of an entry's URN identifier (§4.2.1), not a stored field; registries extract it from the identifier.
+**Filter Semantics**: When the value at a resolved key or path is an array, a constraint matches if any element satisfies it. Within a single key, values are combined with OR; across keys, with AND.
 
-**Registry Support**: Registries SHOULD support filtering on common standard fields; support for `metadata.*` and other extension fields is registry-defined. A registry MAY reject a filter that references an unsupported field path with a 400 error.
+**Extensibility**: Any term an entry carries MAY be used as a filter key with no specification change — core terms, non-expanded-member paths, and any namespaced term the query binds in `@context`. A registry that indexes a term makes it filterable.
 
-### 7.2 Search (POST /search)
+The `publisher` key is derived from the `<publisher>` segment of an entry's URN identifier (Appendix C), not a stored term; registries extract it.
 
-Accepts a `query` (§7.1) and returns catalog entries ranked by relevance. For Search, `text` is required; `filter` is optional.
+**Registry Support**: Registries SHOULD support filtering on common standard terms; support for `metadata.*` and other extension terms is registry-defined. A registry MAY reject a filter that references an unsupported term path with a 400 error.
+
+#### 5.3.2 Search (POST /search)
+
+Accepts a `query` (§5.3.1) and returns entries ranked by relevance. For Search, `text` is required; `filter` is optional.
 
 **Request Schema:**
 
@@ -457,17 +272,19 @@ Accepts a `query` (§7.1) and returns catalog entries ranked by relevance. For S
 }
 ```
 
-In addition to the `query` object (§7.1), Search accepts:
+In addition to the `query` object (§5.3.1), Search accepts:
 
 | Field | Type | Description |
-| :---- | :---- | :---- |
+| :--- | :--- | :--- |
 | federation | String | Optional. auto (default), referrals, or none. |
 | pageSize | Integer | Optional (root-level). Max results to return per page (default: 10, max: 100). |
 | pageToken | String | Optional (root-level). Pagination token to retrieve the next page. |
 
 **Response Schema:**
 
-The response returns standard catalog entries with additional relevance scores, plus optional referrals. The score parameter denotes **semantic relevance ranking** (0-100) computed by the search registry, indicating how well the entry satisfies the natural language query criteria. It is strictly an informational relevance metric and MUST NOT be interpreted by orchestrators as a cryptographic trust, compliance, or safety rating. Trust evaluation is fully decoupled and handled independently via the verification procedures in the trustManifest layer.
+The response returns entries with additional relevance scores, plus optional referrals. The `score` parameter denotes semantic relevance ranking (0–100) computed by the search registry, indicating how well the entry satisfies the natural language query. It is strictly an informational relevance metric and MUST NOT be interpreted by orchestrators as a cryptographic trust, compliance, or safety rating. Trust evaluation is fully decoupled and handled independently via the trust manifest (§4.5).
+
+In a response, an entry MUST carry `identifier`; every other term is at the registry's discretion. A registry returns what is useful for selecting among results and MAY omit the rest — `representativeQueries` in particular serve indexing rather than presentation and are normally omitted. A result is therefore not necessarily a complete ARD entry (§4.2); its `identifier` names the authoritative one. Note that `url`, where present, addresses the artifact (an Agent Card, Server Card, and so on) — not the ARD entry that describes it. A client retrieves the complete entry from the result's `source` registry using `GET /agents/{identifier}` (§5.3.4).
 
 ```json
 {
@@ -502,20 +319,20 @@ The response returns standard catalog entries with additional relevance scores, 
 }
 ```
 
-### 7.2.1 Query Processing and Resolution (Informative)
+##### 5.3.2.1 Query Processing and Resolution (Informative)
 
 While this specification mandates the REST interface for interoperability, implementations may employ advanced techniques to resolve natural language queries to specific agent endpoints. An example flow, drawing from research on Agent Naming Services (ANS) and Federated Registries, involves the following steps:
 
-1. **Semantic Translation & Embedding**:  
-   * **LLM Query Interpretation**: The Registry uses an LLM to extract specific multi-dimensional requirements from the natural language text field, translating it into structured capability attributes (e.g., domain: travel, skill: flight_booking, constraints: meal_preference).  
-   * **Vector Embeddings**: The Registry may also convert the query description into a dense vector embedding to understand semantic meaning (e.g., matching "foreign exchange" to "forex" or "international money transfer").  
-2. **Global Discovery via Federated Routing**:  
-   * Advanced implementations may execute this query against a federated network. For example, using semantic attributes or embedding vectors to perform a search across a Distributed Hash Table (DHT) (e.g., an extended IPFS Kademlia DHT) or by leveraging **DNS-AID** to discover authoritative registries for specific domains.  
+1. **Semantic Translation & Embedding**:
+   * **LLM Query Interpretation**: The Registry uses an LLM to extract specific multi-dimensional requirements from the natural language `text` field, translating it into structured capability attributes (e.g. domain: travel, skill: flight_booking, constraints: meal_preference).
+   * **Vector Embeddings**: The Registry may also convert the query description into a dense vector embedding to understand semantic meaning (e.g. matching "foreign exchange" to "forex" or "international money transfer").
+2. **Global Discovery via Federated Routing**:
+   * Advanced implementations may execute this query against a federated network. For example, using semantic attributes or embedding vectors to perform a search across a Distributed Hash Table (DHT) (e.g. an extended IPFS Kademlia DHT) or by leveraging DNS-AID to discover authoritative registries for specific domains.
    * This maps the semantic capabilities to cryptographic digests or endpoints of agents that possess those skills across the federated network.
 
-### 7.3 Explore (POST /explore) — Optional
+#### 5.3.3 Explore (POST /explore) — Optional
 
-Accepts a `query` (§7.1) and returns an aggregation over the matched set rather than ranked entries. Explore lets clients introspect a registry — for example, "which media types are available?" — and obtain facet breakdowns narrowed by the same `text` and `filter` as Search. For Explore, `text` and `filter` are both optional; when both are absent, the aggregation covers the entire registry.
+Accepts a `query` (§5.3.1) and returns an aggregation over the matched set rather than ranked entries. Explore lets clients introspect a registry — for example, "which artifact types are available?" — and obtain facet breakdowns narrowed by the same `text` and `filter` as Search. For Explore, `text` and `filter` are both optional; when both are absent, the aggregation covers the entire registry.
 
 **Request Schema:**
 
@@ -536,17 +353,17 @@ Accepts a `query` (§7.1) and returns an aggregation over the matched set rather
 }
 ```
 
-In addition to the `query` object (§7.1), Explore accepts:
+In addition to the `query` object (§5.3.1), Explore accepts:
 
 | Field | Type | Description |
-| :---- | :---- | :---- |
+| :--- | :--- | :--- |
 | resultType | Object | Required. The shape of result to compute. The only defined shape is facets (below); future shapes such as counts or sample extend this field without protocol changes. |
 
 Each element of `resultType.facets`:
 
 | Field | Type | Description |
-| :---- | :---- | :---- |
-| field | String | Required. Field path to aggregate (same syntax as filter keys, §7.1). |
+| :--- | :--- | :--- |
+| field | String | Required. Term path to aggregate (same syntax as filter keys, §5.3.1). |
 | limit | Integer | Optional. Maximum number of buckets returned. Default: 20. |
 | minCount | Integer | Optional. Suppress buckets with counts below this threshold. |
 
@@ -574,13 +391,13 @@ Each element of `resultType.facets`:
 
 Each bucket carries `value` and SHOULD carry `count` (the number of matching entries; a registry MAY omit it where counts cannot be computed efficiently). `otherCount` reports the number of matching entries in buckets beyond `limit`.
 
-Facets are computed over the full matched set, not a single page. For semantic text queries, the registry applies a relevance cutoff: entries whose relevance falls below the cutoff are excluded from the matched set. The cutoff is registry-defined, but within a single registry the same cutoff governs both Search results and Explore facets. The cutoff and the relevance score (§7.2) reflect relevance only and MUST NOT be interpreted as a trust, compliance, or safety judgment.
+Facets are computed over the full matched set, not a single page. For semantic text queries, the registry applies a relevance cutoff: entries whose relevance falls below the cutoff are excluded from the matched set. The cutoff is registry-defined, but within a single registry the same cutoff governs both Search results and Explore facets. The cutoff and the relevance score (§5.3.2) reflect relevance only and MUST NOT be interpreted as a trust, compliance, or safety judgment.
 
-Explore does not federate; it is scoped to the registry queried. Federated discovery is the role of Search (§8). A registry that does not implement Explore returns a `501 Not Implemented` HTTP status code.
+Explore does not federate; it is scoped to the registry queried. Federated discovery is the role of Search (§5.3.2), via its federation modes (§5.4). A registry that does not implement Explore returns a `501 Not Implemented` HTTP status code.
 
-### 7.4 Retrieve (GET /agents/{identifier})
+#### 5.3.4 Retrieve (GET /agents/{identifier})
 
-Retrieves one catalog entry by its globally unique `identifier`. Every Agent Registry **MUST** implement this endpoint. Lookup is an exact, case-sensitive primary-key operation after URL decoding; it does not perform semantic matching or relevance ranking.
+Retrieves one complete ARD entry by its globally unique `identifier`. Every Agent Registry **MUST** implement this endpoint. Lookup is an exact, case-sensitive primary-key operation after URL decoding; it does not perform semantic matching or relevance ranking.
 
 The client **MUST** encode the complete identifier as one URL path segment using UTF-8 percent-encoding as defined by RFC 3986. For example:
 
@@ -588,9 +405,9 @@ The client **MUST** encode the complete identifier as one URL path segment using
 GET /agents/urn%3Aair%3Aacme.com%3Aagent%3Aassistant
 ```
 
-The registry **MUST** percent-decode the path parameter exactly once and then validate it against the identifier syntax in §4.2.1. Invalid percent-encoding or a decoded value that is not a valid ARD identifier returns `400 Bad Request` with error code `INVALID_ARGUMENT`.
+The registry **MUST** percent-decode the path parameter exactly once and then validate it against the identifier syntax in Appendix C. Invalid percent-encoding or a decoded value that is not a valid ARD identifier returns `400 Bad Request` with error code `INVALID_ARGUMENT`.
 
-Lookup is scoped to entries in the queried registry's index, including entries that the registry has ingested from external publishers. The registry **MUST NOT** query upstream registries while processing this endpoint. Clients that retain an identifier from a federated Search result **SHOULD** also retain its `source` and send subsequent Retrieve requests to that registry. A matching entry is returned directly as a Catalog Entry Object (§4.2), without Search-only fields such as `score` or `source`. If the registry's index does not contain an exact match, it returns `404 Not Found` with error code `NOT_FOUND`.
+Lookup is scoped to entries in the queried registry's index, including entries that the registry has ingested from external publishers. The registry **MUST NOT** query upstream registries while processing this endpoint. Clients that retain an identifier from a federated Search result **SHOULD** also retain its `source` and send subsequent Retrieve requests to that registry. A matching entry is returned directly as a complete ARD entry (§4), without Search-only fields such as `score` or `source`. If the registry's index does not contain an exact match, it returns `404 Not Found` with error code `NOT_FOUND`.
 
 **Response Schema:**
 
@@ -607,36 +424,36 @@ The endpoint uses the same deployment-defined authentication policy as the other
 
 Successful responses are cacheable under standard HTTP caching semantics. Registries **SHOULD** provide explicit freshness information with `Cache-Control` and a validator such as `ETag` or `Last-Modified`; conditional requests and `304 Not Modified` responses follow the HTTP specifications. Responses to authenticated requests **MUST NOT** be stored in a shared cache unless the response explicitly permits it. To avoid stale negative lookups as registry contents change, `404 Not Found` responses **SHOULD** require revalidation or specify a short freshness lifetime.
 
-### 7.5 List (GET /agents) — Optional
+#### 5.3.5 List (GET /agents) — Optional
 
 Deterministic browsing, designed for developer portals. Highly cacheable, relies on strict database filtering, and does not support relevance-based sorting.
 
 **Parameters:**
 
 | Parameter | Type | Description |
-| :---- | :---- | :---- |
+| :--- | :--- | :--- |
 | filter | String | EBNF filter expression. |
-| orderBy | String | Sorting fields (e.g., name, created_at DESC). |
+| orderBy | String | Sorting fields (e.g. name, created_at DESC). |
 | pageSize | Integer | Max results (default: 20, max: 100). |
 | pageToken | String | Pagination token. |
 
-### 7.6 Protocol Wrappers (Optional)
+#### 5.3.6 Protocol Wrappers (Optional)
 
 While the REST API is mandated as the floor for interoperability, a Registry **MAY** additionally expose its search capability natively via an MCP Tool or an A2A Skill to preserve native orchestrator flows.
 
-The return response from these protocol-specific wrappers **MUST** follow the same catalog entry format as defined in this specification. However, the request format for these wrappers may differ slightly to accommodate protocol-specific conventions and is pending further definition.
+The return response from these protocol-specific wrappers **MUST** follow the same entry model as defined in this specification. However, the request format for these wrappers may differ slightly to accommodate protocol-specific conventions and is pending further definition.
 
-## 8\. Federation
+### 5.4 Federation
 
 Because the REST API is mandated, Registry-to-Registry routing (federation) becomes a simple HTTP operation. The client controls federation through the federation query parameter:
 
-* **auto**: The Registry queries upstream registries automatically, merges their results with its own, and returns a unified response. The client gets a single merged result set.  
-* **referrals**: The Registry returns its results plus catalog entries for other Registries the client may query. The client decides which to follow.  
+* **auto**: The Registry queries upstream registries automatically, merges their results with its own, and returns a unified response. The client gets a single merged result set.
+* **referrals**: The Registry returns its results plus entries for other Registries the client may query. The client decides which to follow.
 * **none**: The Registry searches only its own index.
 
 This gives the client full control over the federation topology without requiring complex protocol translation layers.
 
-### Example: Referrals Mode
+#### Example: Referrals Mode
 
 **Request:**
 
@@ -667,27 +484,27 @@ This gives the client full control over the federation topology without requirin
     {
       "identifier": "urn:air:nlweb.ai:registry:public",
       "displayName": "Public Agent Finder",
-      "type": "application/ai-registry",
+      "type": "application/ai-registry+json",
       "url": "https://finder.nlweb.ai/search"
     },
     {
       "identifier": "urn:air:example.com:registry:travel",
       "displayName": "Travel Agent Finder",
-      "type": "application/ai-registry",
+      "type": "application/ai-registry+json",
       "url": "https://travel.finder.example/search"
     }
   ]
 }
 ```
 
-## 9\. Integration Example
+## 6. Integration Example
 
-A user asks an orchestrator: “Book me a flight to Tokyo and file the travel expense report.”
+A user asks an orchestrator: "Book me a flight to Tokyo and file the travel expense report."
 
-1. The orchestrator queries the enterprise Agent Registry with federation: "referrals".  
-2. The Registry returns an internal expense agent, plus referrals to other Registries.  
-3. The orchestrator follows a referral to a public Agent Registry and queries it for flight booking agents.  
-4. The orchestrator now has both capabilities and can proceed to invoke them using their respective protocols (e.g., A2A for booking, MCP for expense filing).
+1. The orchestrator queries the enterprise Agent Registry with federation: "referrals".
+2. The Registry returns an internal expense agent, plus referrals to other Registries.
+3. The orchestrator follows a referral to a public Agent Registry and queries it for flight booking agents.
+4. The orchestrator now has both capabilities and can proceed to invoke them using their respective protocols (e.g. A2A for booking, MCP for expense filing).
 
 ---
 
@@ -696,7 +513,7 @@ A user asks an orchestrator: “Book me a flight to Tokyo and file the travel ex
 The filter parameter in the List API (GET /agents) uses a simple EBNF-like format for structured constraints.
 
 | Filter Field | Type | Description |
-| :---- | :---- | :---- |
+| :--- | :--- | :--- |
 | displayName | String | Case-insensitive name filter. |
 | type | String | Comma-separated media types (OR logic). |
 | publisherId | String | Comma-separated publisher IDs (OR logic). |
@@ -708,84 +525,78 @@ Logical AND is used across different parameters; OR is used within a single para
 ## Appendix B: Standard Error Codes
 
 | HTTP Code | Error Code | Description |
-| :---- | :---- | :---- |
-| 400 | INVALID\_ARGUMENT | Malformed query or invalid filter syntax. |
+| :--- | :--- | :--- |
+| 400 | INVALID_ARGUMENT | Malformed query or invalid filter syntax. |
 | 401 | UNAUTHENTICATED | Invalid or missing credentials. |
-| 404 | NOT\_FOUND | Non-existent agent or registry. |
-| 429 | RATE\_LIMIT\_EXCEEDED | Too many requests. |
-| 500 | INTERNAL\_ERROR | Internal server failure. |
+| 404 | NOT_FOUND | Non-existent agent or registry. |
+| 429 | RATE_LIMIT_EXCEEDED | Too many requests. |
+| 500 | INTERNAL_ERROR | Internal server failure. |
 
-## Appendix C: Agent Naming URN format {#appendix-c:-agent-naming-urn-format}
+## Appendix C: Agent Naming URN Format {#appendix-c:-agent-naming-urn-format}
 
-Restricting the discovery identifier to this specific URN format, rather than allowing arbitrary URIs (such as https://... or spiffe://...), provides fundamental architectural benefits for federated agent discovery:
+The discovery identifier uses a domain-anchored URN form, `urn:air:<publisher>:<namespace>:<agent-name>`, where `<publisher>` is a fully qualified domain name. Restricting the discovery identifier to this form, rather than allowing arbitrary URIs, provides fundamental architectural benefits for federated discovery:
 
-1. **Nomenclature Stability (Immutable Noun vs. Mutable Location)**: Arbitrary URIs, particularly HTTP URLs, conflate the *logical identity* of a capability with its *physical network location*. If an enterprise migrates workloads across cloud providers, restructures its API gateway, or alters its deployment clusters, an HTTP URL breaks. The urn:air: identifier acts as an abstract, permanent contract (the "noun"). Physical distribution and transport bindings are decoupled into the url or data fields, allowing underlying infrastructure to evolve without breaking client discovery, indexing, or orchestration code.  
-2. **Strict Separation of Concerns**: Federated search registries require a clean, stable primary key to index capabilities efficiently across global networks. Conversely, zero-trust execution runtimes require dynamic, verifiable cryptographic tokens (SPIFFE IDs, DIDs, X.509 certificates) to authenticate workloads. Forcing a single URI to serve both roles creates an architectural bottleneck. The urn:air: format cleanly decouples the searchable discovery handle from the security principal, allowing the discovery index and the security mesh to operate independently.  
-3. **Decentralized Trust and Authority Binding**: In a globally federated open discovery network, search registries must prevent malicious actors from claiming namespaces they do not own (e.g., an untrusted publisher claiming urn:air:google.com:tax-agent). Mandating that `<publisher>` be a valid FQDN establishes an immediate, verifiable authority anchor. Registries and orchestrators programmatically extract the domain from the URN (google.com) and cross-reference it with the cryptographic claim in trustManifest.identity. If the workload cannot produce a valid cryptographic attestation (e.g., mTLS certificate or SPIFFE SVID) issued by google.com, the capability is rejected. This ensures decentralized, zero-trust verification without requiring a centralized naming committee.  
-4. **Search and Discovery Ergonomics (The @ Resolution Pattern)**: Users and LLMs require intuitive, semantic handles for capabilities (e.g., Assistant@Acme). The structured hierarchy of `urn:air:<publisher>:<namespace>:<agent-name>` allows search engines and federated registries to parse components deterministically. Registries can easily match natural language queries to the publisher domain (Acme) and the terminal short name (Assistant), enabling high-performance semantic filtering, aggregation, and conflict resolution (e.g., displaying Assistant with a verified Acme shield).  
-5. **Cross-Network Uniqueness and Federation Scalability**: Domain-anchored URNs guarantee global uniqueness across disparate federated registries without requiring centralized registration databases. Because domain names are already globally unique via the DNS root, anchoring the URN to a domain eliminates collision risks when merging catalogs from multiple upstream registries in auto or referrals federation modes.
+1. **Nomenclature Stability (Immutable Noun vs. Mutable Location)**: Arbitrary URIs, particularly HTTP URLs, conflate the logical identity of a capability with its physical network location. The `urn:air:` identifier acts as an abstract, permanent contract; physical distribution and transport bindings are decoupled into the `url` or `data` term, allowing infrastructure to evolve without breaking client discovery, indexing, or orchestration code.
+2. **Strict Separation of Concerns**: Federated registries require a stable primary key to index capabilities; zero-trust runtimes require dynamic cryptographic tokens (SPIFFE IDs, DIDs, X.509 certificates) to authenticate workloads. The `urn:air:` form cleanly decouples the searchable discovery handle from the security principal, allowing the discovery index and the security mesh to operate independently.
+3. **Decentralized Trust and Authority Binding**: Mandating that `<publisher>` be a valid FQDN establishes a verifiable authority anchor. Registries extract the domain and cross-reference it with the cryptographic claim in `trustManifest.identity` (§4.5.1); a workload that cannot produce a valid attestation issued by that domain is rejected, without a centralized naming committee.
+4. **Search and Discovery Ergonomics (The @ Resolution Pattern)**: The structured hierarchy lets registries parse publisher and terminal short name deterministically (e.g. `Assistant@Acme`), enabling high-performance semantic filtering, aggregation, and conflict resolution (e.g. displaying `Assistant` with a verified `Acme` shield).
+5. **Cross-Network Uniqueness and Federation Scalability**: Domain-anchored URNs guarantee global uniqueness across federated registries without centralized registration, because domain names are already globally unique via the DNS root — eliminating collision risks when merging catalogs in auto or referrals federation modes.
 
----
+The JSON-LD `@id` of an entry MAY be set to the same identifier (or to an IRI that resolves to the resource); when both are present they MUST denote the same resource.
 
 ## Appendix D: Formal Schema Definitions
 
-To support automated validation, testing, and machine-readable compliance checking, this specification defines formal schemas for both the catalog metadata manifests and the Registry REST API. 
+To support automated validation, testing, and machine-readable compliance checking, this specification defines its own entry schema.
 
-The schema specifications are provided across three distinct formats, serving different operational roles within the systems architecture:
-1. **CDDL (Appendix D.1)**: The authoritative, abstract structural syntax definition. It provides an extremely concise, human-readable algebraic grammar optimized for formal IETF standards-track drafts, supporting both JSON and CBOR binary encodings natively.
-2. **JSON Schema (Appendix D.2)**: The active web data validation schema, optimized for automated runtime client and server compliance checking in JSON-native development environments.
-3. **OpenAPI (Appendix D.3)**: The REST endpoint specification, defining HTTP parameters, paths, status codes, and error schemas for integration with standard web gateways and client code-generators.
+### D.1 The ARD Entry Schema
 
-### D.1 The Authoritative CDDL Specification (RFC 8610)
+The ARD entry — its required terms, the value-or-reference rule, and the `trustManifest` envelope — is formally defined in JSON Schema (Draft 2020-12). Because ARD defines the ARD entry (§4), this schema is authoritative for it and does not derive from any catalog schema; the two evolve independently.
 
-The core data structures for the `ai-catalog.json` manifest, `CatalogEntry` models, zero-trust `trustManifest` security envelope, and Search Registry API payloads are formally specified using **Concise Data Definition Language (CDDL - RFC 8610)**. 
+* **Authoritative schema**: [`spec/schemas/ard-entry.schema.json`](schemas/ard-entry.schema.json) — defines `ArdEntry` and `ArdManifest` (the `/.well-known/ard.json` document, §5.1).
+* **Base context**: [`spec/schemas/ard.context.jsonld`](schemas/ard.context.jsonld) — the initial expansion context of §4.1, served at `https://agenticresourcediscovery.org/context/v1`.
+* **Structural grammar (CDDL, RFC 8610)**: [`spec/schemas/ard.cddl`](schemas/ard.cddl)
 
-* **Authoritative Schema File**: [`spec/schemas/ard.cddl`](schemas/ard.cddl)
+Note that the schema sets `additionalProperties: true` by design. Terms drawn from namespaces declared in an entry's `@context` (§4.1) are valid and become filter dimensions; a closed schema would defeat the extension mechanism. The `trustManifest` envelope is likewise open — ARD reads only `identity` (§4.5).
 
-### D.2 The `ai-catalog.json` Manifest Schema (JSON Schema)
-
-The JSON representation of the capability manifest hosted at `/.well-known/ai-catalog.json` and individual catalog entries are formally defined using the **JSON Schema (Draft 2020-12)** standard. 
-
-* **Authoritative Schema File**: [`spec/schemas/ai-catalog.schema.json`](schemas/ai-catalog.schema.json)
-* **Key Validation Enforcements**:
-  * Pattern matching URN compliance rules for the logical `identifier` format (`^urn:air:...`).
-  * Strict Value-or-Reference exclusion logic (`oneOf` matching either `url` or `data`, preventing duplicate definitions).
-  * Struct checking for SPIFFE/DID compliance in `trustManifest` and `attestations` objects.
-
-To validate local catalog manifest JSON files on a system using AJV CLI:
+To validate an entry with AJV CLI:
 ```bash
-npx ajv-cli validate -s spec/schemas/ai-catalog.schema.json -d path/to/ai-catalog.json
+npx ajv-cli validate -s spec/schemas/ard-entry.schema.json -d path/to/entry.json
 ```
+
+### D.2 ARD Discovery Constraints
+
+Beyond structural validity, conformance checks the following:
+
+* `representativeQueries` is present and contains 2–5 examples (§4.2) — **warning**, not error: an entry that omits it or supplies a different count still validates structurally, but is flagged, since it will not be found by search.
+* The URN publisher domain MUST align with `trustManifest.identity` (§4.5.1).
+* `capabilities` are treated as structured filter tokens (§5.3.1).
 
 ### D.3 The Registry REST API Specification (OpenAPI)
 
 The HTTP query interfaces (`POST /search`, `POST /explore`, `GET /agents/{identifier}`, and `GET /agents`) exposed by compliant Agent Registries are formally defined using the **OpenAPI 3.1.0 Specification** in YAML.
 
 * **Authoritative Specification File**: [`spec/schemas/ard.openapi.yaml`](schemas/ard.openapi.yaml)
-* **Key Integration Benefits**:
-  * Integrates paths, queries, status responses, and paging logic directly.
-  * References the JSON Schema `ai-catalog.schema.json` schema files to ensure search and list return types are statically bound to the specification's schema constraints.
-  * Allows automated router middleware enforcement and client/server stub generation (using tools like OpenAPI Generator).
 
 ### D.4 Official Conformance Testing Tool
 
-To simplify development and guarantee complete compliance, this repository provides an official, zero-dependency **Conformance Testing CLI Tool** written in Python. It allows publishers to test their manifests and registry developers to validate their REST API servers.
+To simplify development and guarantee compliance, this repository provides an official, zero-dependency **Conformance Testing CLI Tool**. It allows publishers to test their entries and registry developers to validate their REST API servers.
 
 * **Testing Tool Executable**: [`conformance/bin/conformance-test`](../conformance/bin/conformance-test)
 
 #### Features:
-* **Manifest validation mode**: Parses JSON manifests, runs strict JSON Schema checks (using the Python `jsonschema` library if installed), and executes custom semantic checks (e.g., URN formatting rules, Value-or-Reference enforcement, `representativeQueries` sizing).
-* **Registry validation mode**: Probes live endpoints (`POST /search`, `POST /explore`, `GET /agents/{identifier}`, and `GET /agents`), sends spec-compliant requests, and validates status codes, exact identifier lookup behavior, pagination envelopes, search result scores, and catalog entry structures.
+* **Manifest validation mode**: Parses a JSON manifest, validates it against `ArdManifest` and each of its entries against `ArdEntry` (§D.1), and executes ARD's discovery constraints (§D.2) — URN formatting, value-or-reference enforcement, `representativeQueries` presence and sizing.
+* **Publisher resolution mode**: Given a domain, performs the resolution of §5.1 — fetches `/.well-known/ard.json`, falls back to the predecessor path with a warning that consumers are not required to consult it, and validates whatever it resolves.
+* **Registry validation mode**: Probes live endpoints (`POST /search`, `POST /explore`, `GET /agents/{identifier}`, and `GET /agents`), sends spec-compliant requests, and validates status codes, exact identifier lookup behavior, pagination envelopes, relevance scores, and returned entries.
 
 #### Usage Examples:
 
-Validate a local or remote `ai-catalog.json` manifest:
+Validate a local or remote `ard.json` manifest:
 ```bash
-# Validate a local catalog file
-./conformance/bin/conformance-test manifest path/to/ai-catalog.json
+# Validate a local manifest
+./conformance/bin/conformance-test manifest path/to/ard.json
 
 # Validate a remote well-known catalog manifest
-./conformance/bin/conformance-test manifest https://example.com/.well-known/ai-catalog.json
+./conformance/bin/conformance-test manifest https://example.com/.well-known/ard.json
 ```
 
 Validate a running Agent Registry REST API:

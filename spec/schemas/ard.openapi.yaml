@@ -123,12 +123,12 @@ paths:
 
   /agents/{identifier}:
     get:
-      summary: Retrieve Catalog Entry
+      summary: Retrieve ARD Entry
       description: |
-        Retrieves one locally indexed catalog entry by exact, case-sensitive identifier.
+        Retrieves one complete, locally indexed ARD entry by exact, case-sensitive identifier.
         The identifier is UTF-8 percent-encoded as one path segment. This operation
         does not perform semantic matching or query upstream registries.
-      operationId: getCatalogEntry
+      operationId: getArdEntry
       parameters:
         - name: identifier
           in: path
@@ -142,11 +142,11 @@ paths:
           example: "urn:air:acme.com:agent:assistant"
       responses:
         '200':
-          description: Exact catalog entry match.
+          description: Exact ARD entry match.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CatalogEntry'
+                $ref: '#/components/schemas/ArdEntry'
         '304':
           description: The cached representation is still current.
         '400':
@@ -162,12 +162,23 @@ paths:
 
 components:
   schemas:
-    CatalogEntry:
-      $ref: './ai-catalog.schema.json#/$defs/catalogEntry'
+    ArdEntry:
+      $ref: './ard-entry.schema.json#/$defs/ArdEntry'
 
     QueryModel:
       type: object
       properties:
+        "@context":
+          description: |
+            Optional JSON-LD context binding the prefixes used in filter keys, layered on the
+            ARD base context. Filter keys that name terms are resolved to IRIs through this
+            effective context and matched by IRI, so namespaced filtering works across publishers
+            regardless of the prefix each author chose. Absent, only the base context applies.
+          oneOf:
+            - type: string
+              format: uri
+            - type: object
+            - type: array
         text:
           type: string
           description: Natural language description narrows the set by semantic relevance.
@@ -175,7 +186,9 @@ components:
         filter:
           type: object
           description: |
-            Structured constraints. Keys are field paths (can be dot-separated for nested fields). 
+            Structured constraints. Term keys are IRI-resolved through the query's effective
+            context (base context + query @context); dot-paths into opaque members
+            (trustManifest.*, metadata.*, data.*) are literal JSON paths.
             Values are arrays or scalar values.
           additionalProperties:
             oneOf:
@@ -311,9 +324,11 @@ components:
 
     SearchResultItem:
       allOf:
-        - $ref: './ai-catalog.schema.json#/$defs/catalogEntry'
+        - $ref: './ard-entry.schema.json#/$defs/EntryFields'
       type: object
+      description: "An entry as returned in search results. A registry returns the terms useful for selecting among results and MAY omit any other; only `identifier` is required."
       required:
+        - identifier
         - score
         - source
       properties:
@@ -363,7 +378,10 @@ components:
         items:
           type: array
           items:
-            $ref: './ai-catalog.schema.json#/$defs/catalogEntry'
+            allOf:
+              - $ref: './ard-entry.schema.json#/$defs/EntryFields'
+            required:
+              - identifier
         total:
           type: integer
           description: Total count of matching entries in the registry.
@@ -400,7 +418,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
     404NotFound:
-      description: No catalog entry has the requested identifier.
+      description: No ARD entry has the requested identifier.
       content:
         application/json:
           schema:

@@ -20,7 +20,7 @@ jobs:
         python-version: '3.11'
 
     - name: Run manifest validation without dependencies
-      run: python -S ./conformance/bin/conformance-test manifest ./conformance/examples/basic/ai-catalog.json
+      run: python -S ./conformance/bin/conformance-test manifest ./conformance/examples/basic/ard.json
 
     - name: Install dependencies
       run: |

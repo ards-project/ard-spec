@@ -20,7 +20,7 @@ PORT = 9010
 URN_REGEX = re.compile(r"^urn:air:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$")
 INVALID_PERCENT_ENCODING = re.compile(r"%(?![0-9A-Fa-f]{2})")
 
-# Mock catalog database seeded from ./ai-catalog.json
+# Mock catalog database seeded from ./ard.json
 MOCK_CATALOG_ENTRIES = [
   {
     "identifier": "urn:air:acme.com:agent:assistant",
@@ -122,7 +122,7 @@ class MockRegistryHandler(BaseHTTPRequestHandler):
             if entry is None:
                 error_response = {
                     "errorCode": "NOT_FOUND",
-                    "message": f"Catalog entry '{identifier}' was not found."
+                    "message": f"ARD entry '{identifier}' was not found."
                 }
                 self._send_json(404, error_response, {"Cache-Control": "no-cache"})
                 return

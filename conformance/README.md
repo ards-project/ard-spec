@@ -2,7 +2,7 @@
 
 > **Automated compliance checking CLI to validate capability manifests and Registry REST API implementations.**
 
-This directory contains the official, zero-dependency **Conformance Testing CLI Tool** designed to verify that catalogs and discovery registries conform strictly to the **Agentic Resource Discovery** and **ai-catalog** specifications.
+This directory contains the official, zero-dependency **Conformance Testing CLI Tool** designed to verify that manifests, publishers, and discovery registries conform strictly to the **Agentic Resource Discovery** specification.
 
 ---
 
@@ -21,7 +21,7 @@ You can instantly verify both manifest validation and Registry API probing using
 ```bash
 ./bin/run-conformance-demo
 ```
-This script validates a mock spec-compliant `ai-catalog.json` manifest, starts a lightweight mock registry API server in the background, executes live conformance probes against it, and automatically cleans up on completion.
+This script validates a mock spec-compliant `ard.json` manifest, starts a lightweight mock registry API server in the background, executes live conformance probes against it, and automatically cleans up on completion.
 
 ### 3. Run Manual CLI Checks
 You can also run the tester directly without arguments to view its manual commands:
@@ -33,20 +33,27 @@ You can also run the tester directly without arguments to view its manual comman
 
 ## 📖 Usage Instructions
 
-The tool operates in two distinct verification modes:
+The tool operates in three distinct verification modes:
 
 ### A. Manifest Validation Mode
-Validates a local file or a remote live HTTP URL pointing to an `ai-catalog.json` capability manifest.
+Validates a local file or a remote live HTTP URL pointing to an ARD manifest.
 
 ```bash
-# Validate a local catalog manifest file
-./bin/conformance-test manifest examples/basic/ai-catalog.json
+# Validate a local manifest file
+./bin/conformance-test manifest examples/basic/ard.json
 
-# Validate a remote well-known catalog manifest hosted on a web server
-./bin/conformance-test manifest https://example.com/.well-known/ai-catalog.json
+# Validate a remote well-known manifest hosted on a web server
+./bin/conformance-test manifest https://example.com/.well-known/ard.json
 ```
 
-### B. Registry API Validation Mode
+### B. Publisher Resolution Mode
+Resolves a domain the way a conformant consumer does (§5.1), then validates whatever it finds. A consumer **MUST** fetch `/.well-known/ard.json`; consulting the predecessor `/.well-known/ai-catalog.json` is permitted but **not required**, so a publisher reachable only there is flagged as possibly undiscoverable.
+
+```bash
+./bin/conformance-test publisher example.com
+```
+
+### C. Registry API Validation Mode
 Probes and validates a live running Agent Registry REST API server.
 
 ```bash
@@ -75,21 +82,32 @@ The tester normally obtains an identifier for the successful exact-lookup probe 
 ## 🔍 What It Validates
 
 ### 1. Manifest Validation Mode
-When checking a capability manifest (`ai-catalog.json`), the tool executes the following validations:
+When checking an ARD manifest (`ard.json`), the tool executes the following validations:
 
 * **JSON Structural Integrity**: Parses the manifest payload to ensure it is valid, uncorrupted JSON.
-* **JSON Schema Draft 2020-12 Conformance**: If the Python `jsonschema` library is installed (`pip install jsonschema`), the tool automatically runs a strict schema-level validation using the official [ai-catalog.schema.json](../spec/schemas/ai-catalog.schema.json) file.
+* **JSON Schema Draft 2020-12 Conformance**: If the Python `jsonschema` library is installed (`pip install jsonschema`), the tool validates the document against `ArdManifest` and then every entry against `ArdEntry`, both from the authoritative [ard-entry.schema.json](../spec/schemas/ard-entry.schema.json).
 * **Strict URN Pattern Matching**: Enforces that each entry's `identifier` adheres strictly to the domain-anchored URN namespace format defined in the spec:
   `urn:air:<publisher>:<namespace>:<agent-name>` (RFC 8141).
 * **Value-or-Reference Delivery**: Enforces the mutual exclusivity constraint of the specification. Each entry **MUST** contain precisely one of either `"url"` (remote reference) or `"data"` (embedded payload), and will fail if both or neither are provided.
-* **Ecosystem Attributes Validation**:
-  * Checks that `"representativeQueries"` contains between **2 to 5** natural-language queries to ensure high-performance semantic vector embeddings.
-  * Verifies that standard properties (`specVersion`, `entries`, `displayName`, `type`) are correctly typed.
-* **Deprecated Field Detection**: Ensures the catalog does **NOT** use the deprecated `"collections"` root property (removed under **ADR-0003** in favor of recursive catalog `entries` using `type: application/ai-catalog+json`).
+* **Discovery Constraints (§D.2)**:
+  * Warns when `"representativeQueries"` is **absent** — the semantic index is built from it, so such an entry is a valid catalog entry but not a discoverable ARD entry.
+  * Warns when it is present but does not contain **2 to 5** natural-language queries.
+  * Verifies that standard properties (`entries`, `displayName`, `type`) are correctly typed. ARD requires only `entries` at the top level; other root members are transport-defined, and the tool reports them without failing.
+* **Legacy Field Detection**: Warns (does not fail) on a `"collections"` root property, removed under **ADR-0003**. ARD ignores unrecognized top-level members, so its presence does not invalidate the manifest.
 
 ---
 
-### 2. Registry API Validation Mode
+### 2. Publisher Resolution Mode
+Given a domain, the tool performs the §5.1 resolution a conformant consumer performs:
+
+* Fetches `/.well-known/ard.json` — the path a consumer **MUST** try.
+* On failure, falls back to `/.well-known/ai-catalog.json` and **warns**: consulting that path is optional for consumers, so a publisher reachable only there may not be discovered.
+* Fails only if neither path yields a manifest.
+* Validates whatever it resolves using Manifest Validation Mode above.
+
+---
+
+### 3. Registry API Validation Mode
 When checking a live Agent Registry server, the tool executes the following probes:
 
 * **GET `/agents` (Optional Listing Probe)**:
@@ -97,7 +115,7 @@ When checking a live Agent Registry server, the tool executes the following prob
   * If supported (returns `200 OK`), it validates that the response contains the paginated `"items"` structure.
   * If not supported (returns `404` or `501`), it marks this as compliant since deterministic listing is optional.
 * **GET `/agents/{identifier}` (Mandatory Exact Lookup Probe)**:
-  * URL-encodes a known full URN as one path segment and verifies a `200 OK` canonical `CatalogEntry` response with the exact identifier.
+  * URL-encodes a known full URN as one path segment and verifies a `200 OK` complete `ArdEntry` response with the exact identifier.
   * Verifies that Search-only fields such as `score` and `source` are absent.
   * Verifies that an unknown valid URN returns the standard `404` / `NOT_FOUND` error envelope.
   * Verifies that a malformed identifier returns the standard `400` / `INVALID_ARGUMENT` error envelope.
@@ -105,7 +123,7 @@ When checking a live Agent Registry server, the tool executes the following prob
   * Probes the search route which is required for dynamic semantic capability discovery.
   * Sends a mock natural-language query payload with required `query` string and optional `filter` / `limit` parameters.
   * Verifies a `200 OK` response structure containing a `"results"` array.
-  * Validates that the nested payload structure is a valid `CatalogEntry` (contains `identifier`, `displayName`, `type`, and `url` or `data`).
+  * Validates each result per §5.3.2: only `identifier` is required, since a registry MAY return just what selection needs. Omitted terms are reported, not failed.
 * **POST `/explore` (Optional Introspection Probe)**:
   * Probes the dynamic introspection route for facet and bucketing generation.
   * Sends a mock request requesting facet counts grouped by `type`.

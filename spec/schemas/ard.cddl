@@ -1,41 +1,49 @@
-; CDDL Specification for Agentic Resource Discovery (ai-catalog & Registry schemas)
+; CDDL Specification for Agentic Resource Discovery (ARD entry, manifest & Registry schemas)
 ; Compliant with IETF RFC 8610 (Concise Data Definition Language)
+;
+; This file is a restatement of spec/schemas/ard-entry.schema.json for CBOR/CDDL
+; consumers. Where the two disagree, the JSON Schema is authoritative.
 
-start = ai-catalog-manifest
+start = ard-manifest
 
-; --- The Manifest Schema ---
+; --- The Manifest ---
+; ARD requires only an `entries` array. Any other top-level member is
+; transport-defined and ignored by ARD, hence the trailing wildcard.
 
-ai-catalog-manifest = {
-  specVersion: "1.0",
-  ? host: host-info,
-  entries: [+ catalog-entry]
+ard-manifest = {
+  entries: [* ard-entry],
+  * tstr => any
 }
 
-host-info = {
-  displayName: tstr,
-  ? identifier: tstr,
-  ? documentationUrl: tstr,
-  ? logoUrl: tstr,
-  ? trustManifest: trust-manifest
+; --- The ARD entry ---
+; The unit ARD is defined over. Every ARD entry is a well-formed catalog entry;
+; not every catalog entry is an ARD entry.
+
+ard-entry = {
+  ard-entry-required,
+  ard-entry-descriptive,
+  * tstr => any   ; terms from namespaces declared in @context remain valid
 }
 
-catalog-entry = {
+ard-entry-required = (
   identifier: tstr, ; URN pattern: urn:air:<publisher>:<namespace>:<agent-name>
   displayName: tstr,
-  type: tstr, ; IANA Media Type (e.g. application/mcp-server-card+json)
-  
-  ; Strict Value-or-Reference pattern
-  content-delivery,
-  
+  type: tstr,       ; IANA Media Type (e.g. application/mcp-server-card+json)
+  content-delivery  ; strict value-or-reference
+)
+
+ard-entry-descriptive = (
+  ? "@context" => any,  ; string, object, or array of either
+  ? "@id" => tstr,
   ? description: tstr,
   ? tags: [+ tstr],
   ? capabilities: [+ tstr],
-  ? representativeQueries: [2*5 tstr], ; Between 2 and 5 representative queries
+  ? representativeQueries: [* tstr], ; RECOMMENDED; conformance tester warns if absent or count is not 2-5
   ? version: tstr,
   ? updatedAt: tstr, ; ISO 8601 timestamp
-  ? metadata: {* tstr => any},
+  ? metadata: {* tstr => (tstr / int / float / bool / null)},
   ? trustManifest: trust-manifest
-}
+)
 
 content-delivery = (
   url: tstr //
@@ -43,26 +51,40 @@ content-delivery = (
 )
 
 ; --- The Zero-Trust / Compliance Envelope ---
+; ARD requires only `identity`. The envelope is framework-defined and open:
+; a registry is expected to verify it per the framework named in trustSchema.
 
 trust-manifest = {
   identity: tstr, ; SPIFFE, DID, or FQDN URI
-  ? identityType: "spiffe" / "did" / "https" / "other",
-  ? attestations: [+ attestation],
-  ? provenance: [+ provenance-link],
-  ? signature: tstr
+  ? identityType: tstr, ; hint, e.g. "spiffe" / "did" / "https"
+  ? trustSchema: trust-schema,
+  ? attestations: [* attestation],
+  ? provenance: [* provenance-link],
+  ? signature: tstr,
+  * tstr => any
+}
+
+trust-schema = {
+  ? identifier: tstr,
+  ? version: tstr,
+  ? governanceUri: tstr,
+  ? verificationMethods: [* tstr],
+  * tstr => any
 }
 
 attestation = {
   type: tstr,
   uri: tstr,
-  mediaType: tstr,
-  ? digest: tstr
+  ? mediaType: tstr,
+  ? digest: tstr,
+  * tstr => any
 }
 
 provenance-link = {
-  relation: "derivedFrom" / "publishedFrom" / "copiedFrom",
+  relation: tstr, ; e.g. "derivedFrom" / "publishedFrom" / "copiedFrom"
   sourceId: tstr,
-  ? sourceDigest: tstr
+  ? sourceDigest: tstr,
+  * tstr => any
 }
 
 ; --- The Registry API Payloads ---
@@ -74,6 +96,7 @@ query-model = {
 
 search-query-model = {
   text: tstr,
+  ? "@context" => any,
   ? filter: {* tstr => ([+ tstr] / tstr)}
 }
 
@@ -113,16 +136,28 @@ explore-facet-bucket = {
 }
 
 search-response = {
-  results: [+ search-result-item],
-  ? referrals: [+ registry-referral],
+  results: [* search-result-item],
+  ? referrals: [* registry-referral],
   ? pageToken: tstr
 }
 
 search-result-item = {
-  catalog-entry,
+  result-entry-fields,
   score: 0..100, ; Semantic relevance score
-  source: tstr   ; Registry base URL
+  source: tstr,  ; Registry base URL
+  * tstr => any
 }
+
+result-entry = { result-entry-fields, * tstr => any }
+
+result-entry-fields = (
+  identifier: tstr,
+  ? displayName: tstr,
+  ? type: tstr,
+  ? url: tstr,
+  ? data: {* tstr => any},
+  ard-entry-descriptive
+)
 
 registry-referral = {
   identifier: tstr,
@@ -131,13 +166,16 @@ registry-referral = {
   url: tstr
 }
 
+; In search and list results a registry returns the terms useful for selecting
+; among results and MAY omit any other; only `identifier` is required.
+
 list-response = {
-  items: [+ catalog-entry],
+  items: [* result-entry],
   ? total: uint,
   ? pageToken: tstr
 }
 
-lookup-response = catalog-entry
+lookup-response = ard-entry
 
 error-response = {
   errorCode: tstr,
@@ -146,6 +184,6 @@ error-response = {
 
 ; Helper generic value type
 any = any-cbor / any-json
-any-cbor = bool / int / float / tstr / bstr / [+ any-cbor] / {* any-cbor => any-cbor}
-any-json = bool / int / float / tstr / null / [+ any-json] / {* tstr => any-json}
+any-cbor = bool / int / float / tstr / bstr / [* any-cbor] / {* any-cbor => any-cbor}
+any-json = bool / int / float / tstr / null / [* any-json] / {* tstr => any-json}
 null = nil
