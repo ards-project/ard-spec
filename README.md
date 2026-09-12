@@ -18,6 +18,17 @@ this is the single source of truth.
 - [`adr/`](adr/) — architecture decision records
 - [`conformance/`](conformance/) — conformance test tooling
 
+## Implementations in the wild
+
+Independent deployments that pass this repo's conformance CLI
+(`conformance/bin/conformance-test manifest <url>`) with zero critical errors:
+
+| Implementation | Role | Catalog | Notes |
+|---|---|---|---|
+| [ASM — Agent Service Manifest](https://github.com/YE-YI7/asm-spec) | Publisher | [`/.well-known/ai-catalog.json`](https://asm-spec.onrender.com/.well-known/ai-catalog.json) | 30 tool-selection manifests typed `application/asm+json`; `urn:air:` identifiers, flat `asm:*` metadata, artifacts behind `url`. Emits 30 warnings, all of them the media-type recognition tracked in [#66](https://github.com/ards-project/ard-spec/issues/66). Hosted on a free tier that sleeps when idle — the first request after a quiet period may need a retry. |
+
+Running a conformance-tested deployment? Open a pull request adding it here.
+
 ## Contributing
 
 We'd love your involvement — contributions and feedback are very welcome. To keep
