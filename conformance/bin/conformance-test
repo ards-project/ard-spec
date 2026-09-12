@@ -21,6 +21,68 @@ if hasattr(sys.stdout, 'reconfigure'):
 # Strict URN Regex matching urn:air:<publisher>:<namespace>:<agent-name>
 URN_REGEX = re.compile(r"^urn:air:([a-zA-Z0-9.-]+)(?::([a-zA-Z0-9._:-]+))?:([a-zA-Z0-9._-]+)$")
 
+# RFC 6838 restricted-name for type/subtype plus RFC 9110 parameters.
+RESTRICTED_NAME = r"[0-9A-Za-z][0-9A-Za-z!#$&^_.+\-]{0,126}"
+TOKEN = r"[!#$%&'*+\-.^_`|~0-9A-Za-z]+"
+QUOTED_STRING = r'"(?:[\t !#-\[\]-~]|\\[\t !-~])*"'
+MEDIA_TYPE_REGEX = re.compile(
+    rf"(?P<type>{RESTRICTED_NAME})/(?P<subtype>{RESTRICTED_NAME})"
+    rf"(?P<parameters>(?:[ \t]*;[ \t]*{TOKEN}[ \t]*=[ \t]*(?:{TOKEN}|{QUOTED_STRING}))*)"
+)
+MEDIA_TYPE_PARAMETER_REGEX = re.compile(
+    rf"[ \t]*;[ \t]*(?P<name>{TOKEN})[ \t]*=[ \t]*"
+    rf"(?P<value>{TOKEN}|{QUOTED_STRING})"
+)
+
+def parse_media_type(media_type):
+    match = MEDIA_TYPE_REGEX.fullmatch(media_type)
+    if match is None:
+        return None
+
+    base_media_type = (
+        f"{match.group('type').lower()}/{match.group('subtype').lower()}"
+    )
+    parameters = tuple(
+        sorted(
+            (
+                parameter.group("name").lower(),
+                parameter.group("value"),
+            )
+            for parameter in MEDIA_TYPE_PARAMETER_REGEX.finditer(
+                match.group("parameters")
+            )
+        )
+    )
+    parameter_names = [name for name, _ in parameters]
+    if len(parameter_names) != len(set(parameter_names)):
+        return None
+    return base_media_type, parameters
+
+STANDARD_MEDIA_TYPES = (
+    "application/ai-catalog+json",
+    "application/agent-card+json",
+    "application/a2a-agent-card+json",
+    "application/mcp-server-card+json",
+    "application/agent-skills+zip",
+    "application/agent-skills+gzip",
+    'text/markdown; profile="urn:air:agent-skills"',
+    "application/ai-registry",
+    "application/ai-registry+json",
+)
+STANDARD_MEDIA_TYPE_KEYS = frozenset(
+    parse_media_type(media_type) for media_type in STANDARD_MEDIA_TYPES
+)
+STANDARD_BASE_MEDIA_TYPES = frozenset(
+    base_media_type for base_media_type, _ in STANDARD_MEDIA_TYPE_KEYS
+)
+STANDARD_PARAMETERS_BY_BASE = {
+    base_media_type: dict(parameters)
+    for base_media_type, parameters in STANDARD_MEDIA_TYPE_KEYS
+}
+DEPRECATED_MEDIA_TYPES = {
+    "application/mcp-server+json": "application/mcp-server-card+json",
+}
+
 # Colors for beautiful CLI output
 COLOR_RESET = "\033[0m"
 COLOR_BOLD = "\033[1m"
@@ -41,8 +103,81 @@ def print_failure(msg):
 def print_warning(msg):
     print(f"  {COLOR_YELLOW}⚠{COLOR_RESET} {msg}")
 
+def print_info(msg):
+    print(f"  {COLOR_CYAN}ℹ{COLOR_RESET} {msg}")
+
 def print_bullet(msg):
     print(f"  • {msg}")
+
+def classify_media_type(media_type):
+    if not isinstance(media_type, str):
+        return (
+            "warning",
+            f"Media type must be a string; got {type(media_type).__name__}.",
+        )
+
+    parsed_media_type = parse_media_type(media_type)
+    if parsed_media_type is None:
+        return (
+            "warning",
+            f"Media type '{media_type}' is not a valid IANA media type. "
+            "Expected 'type/subtype' with optional parameters.",
+        )
+
+    base_media_type, parameters = parsed_media_type
+    if parsed_media_type in STANDARD_MEDIA_TYPE_KEYS:
+        return None
+
+    replacement = DEPRECATED_MEDIA_TYPES.get(base_media_type)
+    if replacement is not None:
+        return (
+            "warning",
+            f"Media type '{media_type}' was renamed by ADR-0008. "
+            f"Use '{replacement}'.",
+        )
+
+    if base_media_type in STANDARD_BASE_MEDIA_TYPES:
+        expected_parameters = STANDARD_PARAMETERS_BY_BASE[base_media_type]
+        actual_parameters = dict(parameters)
+        missing_parameters = [
+            f"{name}={value}"
+            for name, value in expected_parameters.items()
+            if actual_parameters.get(name) != value
+        ]
+        unrecognized_parameters = [
+            name
+            for name, value in parameters
+            if expected_parameters.get(name) != value
+        ]
+        differences = []
+        if missing_parameters:
+            differences.append(
+                "missing required parameters: " + ", ".join(missing_parameters)
+            )
+        if unrecognized_parameters:
+            differences.append(
+                "unrecognized parameters: "
+                + ", ".join(unrecognized_parameters)
+            )
+        return (
+            "warning",
+            f"Media type '{media_type}' is based on standard discovery type "
+            f"'{base_media_type}' but has "
+            f"{'; '.join(differences)}.",
+        )
+
+    if base_media_type.startswith("application/"):
+        return (
+            "info",
+            f"Media type '{media_type}' is a valid application extension media type. "
+            "ARD permits extension types without core registration.",
+        )
+
+    return (
+        "warning",
+        f"Media type '{media_type}' is not one of standard discovery types: "
+        f"{list(STANDARD_MEDIA_TYPES)}.",
+    )
 
 def parse_request_headers(header_args):
     headers = {}
@@ -67,6 +202,7 @@ class ConformanceTester:
     def __init__(self):
         self.errors = []
         self.warnings = []
+        self.infos = []
         self.jsonschema_available = False
         try:
             import jsonschema
@@ -134,6 +270,10 @@ class ConformanceTester:
             valid = False
 
         return valid
+
+    def add_info(self, msg):
+        self.infos.append(msg)
+        print_info(msg)
 
     def _load_entry_schema(self):
         """The ARD entry schema is authoritative for entry structure (spec Appendix D.1)."""
@@ -249,19 +389,13 @@ class ConformanceTester:
             if not media_type:
                 self.add_error(f"[{label}] Missing required 'type' (mediaType).")
             else:
-                valid_types = [
-                    "application/ai-catalog+json",
-                    "application/agent-card+json",
-                    "application/a2a-agent-card+json",
-                    "application/mcp-server-card+json",
-                    "application/agent-skills+zip",
-                    "application/agent-skills+gzip",
-                    "text/markdown; profile=\"urn:air:agent-skills\"",
-                    "application/ai-registry",
-                    "application/ai-registry+json"
-                ]
-                if media_type not in valid_types:
-                    self.add_warning(f"[{label}] Media type '{media_type}' is not one of standard discovery types: {valid_types}.")
+                diagnostic = classify_media_type(media_type)
+                if diagnostic is not None:
+                    severity, message = diagnostic
+                    if severity == "info":
+                        self.add_info(f"[{label}] {message}")
+                    else:
+                        self.add_warning(f"[{label}] {message}")
 
             # Strict Value-or-Reference checks
             has_url = "url" in entry
@@ -684,7 +818,13 @@ def main():
     print_header("Conformance Validation Summary")
     if success:
         print(f"{COLOR_BOLD}{COLOR_GREEN}CONFORMANCE STATUS: PASS{COLOR_RESET}")
-        print(f"Validated with 0 critical specification errors and {len(tester.warnings)} warnings.")
+        summary = (
+            f"Validated with 0 critical specification errors and "
+            f"{len(tester.warnings)} warnings"
+        )
+        if tester.infos:
+            summary += f" and {len(tester.infos)} informational messages"
+        print(f"{summary}.")
         sys.exit(0)
     else:
         print(f"{COLOR_BOLD}{COLOR_RED}CONFORMANCE STATUS: FAIL{COLOR_RESET}")

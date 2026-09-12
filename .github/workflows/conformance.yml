@@ -22,10 +22,24 @@ jobs:
     - name: Run manifest validation without dependencies
       run: python -S ./conformance/bin/conformance-test manifest ./conformance/examples/basic/ard.json
 
+    - name: Run conformance tool tests without dependencies
+      run: python -S ./conformance/tests/test_media_type_diagnostics.py -v
+
+    - name: Validate extension media-type fixture without dependencies
+      run: python -S ./conformance/bin/conformance-test manifest ./conformance/tests/fixtures/extension-media-types.json
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install jsonschema
+
+    - name: Validate extension media-type fixture with JSON Schema
+      run: python ./conformance/bin/conformance-test manifest ./conformance/tests/fixtures/extension-media-types.json
+
+    - name: Run conformance tool tests with JSON Schema
+      run: python ./conformance/tests/test_media_type_diagnostics.py -v
+      env:
+        ARD_REQUIRE_JSONSCHEMA: "1"
 
     - name: Make scripts executable
       run: |

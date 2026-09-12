@@ -89,6 +89,13 @@ When checking an ARD manifest (`ard.json`), the tool executes the following vali
 * **Strict URN Pattern Matching**: Enforces that each entry's `identifier` adheres strictly to the domain-anchored URN namespace format defined in the spec:
   `urn:air:<publisher>:<namespace>:<agent-name>` (RFC 8141).
 * **Value-or-Reference Delivery**: Enforces the mutual exclusivity constraint of the specification. Each entry **MUST** contain precisely one of either `"url"` (remote reference) or `"data"` (embedded payload), and will fail if both or neither are provided.
+* **Media Type Diagnostics**:
+  * Accepts the standard discovery media types without a diagnostic.
+  * Warns clearly when a standard discovery type is missing required parameters or carries unrecognized parameters.
+  * Reports well-formed, unrecognized `application/*` extension types as informational. ARD's `type` term is intentionally open, so extension types do not require registration in the conformance tool.
+  * Warns when the deprecated `application/mcp-server+json` form from **ADR-0008** is used and names `application/mcp-server-card+json` as its replacement.
+  * Gives a distinct syntax warning for malformed media types.
+  * Retains the existing warning for well-formed, unrecognized types outside the `application` top-level type.
 * **Discovery Constraints (§D.2)**:
   * Warns when `"representativeQueries"` is **absent** — the semantic index is built from it, so such an entry is a valid catalog entry but not a discoverable ARD entry.
   * Warns when it is present but does not contain **2 to 5** natural-language queries.
