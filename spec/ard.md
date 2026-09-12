@@ -9,7 +9,7 @@
 **Authors**:
 
 - Junjie Bu — Google
-- R.V.Guha — Microsoft
+- R.V.Guha
 - Shaun Smith — Hugging Face
 
 ## 1. Overview

@@ -1,0 +1,153 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Nevermined",
+    "identifier": "did:web:nevermined.app",
+    "documentationUrl": "https://docs.nevermined.app",
+    "trustManifest": {
+      "identity": "did:web:nevermined.app",
+      "identityType": "did"
+    }
+  },
+  "entries": [
+    {
+      "@context": {
+        "pay": "https://agenticresourcediscovery.org/ns/payment#",
+        "schema": "https://schema.org/"
+      },
+      "identifier": "urn:air:nevermined.app:agent:legal-analyzer",
+      "displayName": "Legal Document Analyzer",
+      "type": "application/a2a-agent-card+json",
+      "description": "Reviews contracts and legal documents, flags risky clauses, and summarizes obligations. Pay-per-call over x402 in USDC on Base.",
+      "tags": ["legal", "contracts", "compliance"],
+      "capabilities": ["ContractReview", "ClauseExtraction", "RiskFlagging"],
+      "representativeQueries": [
+        "review this NDA for unusual liability terms",
+        "summarize the obligations in this services agreement",
+        "flag auto-renewal clauses in this contract"
+      ],
+      "updatedAt": "2026-08-15T10:00:00Z",
+      "data": {
+        "name": "Legal Document Analyzer",
+        "description": "Reviews contracts and legal documents, flags risky clauses, and summarizes obligations.",
+        "url": "https://nevermined.app/agents/legal-analyzer",
+        "version": "1.0",
+        "capabilities": {
+          "extensions": [
+            {
+              "uri": "urn:nevermined:payment",
+              "required": true,
+              "params": { "paymentProtocol": "x402" }
+            }
+          ]
+        },
+        "defaultInputModes": ["application/json"],
+        "defaultOutputModes": ["application/json"],
+        "skills": []
+      },
+      "pay:protocol": ["x402"],
+      "pay:price": "0.05",
+      "pay:currency": "USDC",
+      "pay:network": "eip155:8453",
+      "pay:accepts": [
+        {
+          "scheme": "exact",
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "payTo": "0x2A9e8Fa1C4b7D6e3F0A1b2C3d4E5f6A7b8C9d0E1",
+          "maxAmountRequired": "50000",
+          "resource": "https://nevermined.app/agents/legal-analyzer",
+          "maxTimeoutSeconds": 120,
+          "extra": { "name": "USD Coin", "version": "2" }
+        }
+      ],
+      "schema:offers": {
+        "@type": "schema:Offer",
+        "schema:price": "0.05",
+        "schema:priceCurrency": "USDC",
+        "schema:category": "x402"
+      },
+      "trustManifest": {
+        "identity": "did:web:nevermined.app",
+        "identityType": "did"
+      }
+    },
+    {
+      "@context": {
+        "pay": "https://agenticresourcediscovery.org/ns/payment#",
+        "schema": "https://schema.org/"
+      },
+      "identifier": "urn:air:nevermined.app:agent:financial-summarizer",
+      "displayName": "Financial Report Summarizer",
+      "type": "application/a2a-agent-card+json",
+      "description": "Summarizes earnings reports and financial filings into plain-language briefs. Pay-per-call by card, settled off-chain.",
+      "tags": ["finance", "research", "summarization"],
+      "capabilities": ["ReportSummary", "EarningsAnalysis"],
+      "representativeQueries": [
+        "summarize this 10-K into a one-page brief",
+        "what were the key risks in this earnings report",
+        "compare revenue guidance across these two filings"
+      ],
+      "updatedAt": "2026-08-20T09:30:00Z",
+      "data": {
+        "name": "Financial Report Summarizer",
+        "description": "Summarizes earnings reports and financial filings into plain-language briefs.",
+        "url": "https://nevermined.app/agents/financial-summarizer",
+        "version": "1.0",
+        "capabilities": {
+          "extensions": [
+            {
+              "uri": "urn:nevermined:payment",
+              "required": true,
+              "params": { "paymentProtocol": "x402" }
+            }
+          ]
+        },
+        "defaultInputModes": ["application/json"],
+        "defaultOutputModes": ["application/json"],
+        "skills": []
+      },
+      "pay:protocol": ["x402"],
+      "pay:price": "0.02",
+      "pay:currency": "USD",
+      "pay:network": "stripe",
+      "schema:offers": {
+        "@type": "schema:Offer",
+        "schema:price": "0.02",
+        "schema:priceCurrency": "USD",
+        "schema:category": "x402"
+      },
+      "trustManifest": {
+        "identity": "did:web:nevermined.app",
+        "identityType": "did"
+      }
+    },
+    {
+      "identifier": "urn:air:nevermined.app:agent:weather-lookup",
+      "displayName": "Open Weather Lookup",
+      "type": "application/a2a-agent-card+json",
+      "description": "Free current-conditions and forecast lookup by city or coordinates. No payment required.",
+      "tags": ["weather", "utility"],
+      "capabilities": ["CurrentConditions", "Forecast"],
+      "representativeQueries": [
+        "what's the weather in Barcelona right now",
+        "give me a 5-day forecast for 37.77,-122.42"
+      ],
+      "updatedAt": "2026-08-10T12:00:00Z",
+      "data": {
+        "name": "Open Weather Lookup",
+        "description": "Free current-conditions and forecast lookup by city or coordinates.",
+        "url": "https://nevermined.app/agents/weather-lookup",
+        "version": "1.0",
+        "capabilities": {},
+        "defaultInputModes": ["application/json"],
+        "defaultOutputModes": ["application/json"],
+        "skills": []
+      },
+      "trustManifest": {
+        "identity": "did:web:nevermined.app",
+        "identityType": "did"
+      }
+    }
+  ]
+}
