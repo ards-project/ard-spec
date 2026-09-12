@@ -212,7 +212,7 @@ Agent Registry instances populate their indexes through ingestion pipelines:
 
 ### 5.3 The Search API
 
-The search API is the dynamic half of discovery. An Agent Registry **MUST** expose a standard HTTP REST search interface to guarantee universal federation. The operational base URL for these endpoints is discovered dynamically by identifying entries whose `type` is `application/ai-registry+json`.
+The Registry API is the dynamic half of discovery. An Agent Registry **MUST** expose the standard HTTP REST Search (§5.3.2) and Retrieve (§5.3.4) interfaces. Search guarantees universal discovery and federation; Retrieve provides deterministic resolution of a known identifier. The operational base URL for these endpoints is discovered dynamically by identifying entries whose `type` is `application/ai-registry+json`.
 
 #### 5.3.1 The Query Model
 
@@ -284,7 +284,7 @@ In addition to the `query` object (§5.3.1), Search accepts:
 
 The response returns entries with additional relevance scores, plus optional referrals. The `score` parameter denotes semantic relevance ranking (0–100) computed by the search registry, indicating how well the entry satisfies the natural language query. It is strictly an informational relevance metric and MUST NOT be interpreted by orchestrators as a cryptographic trust, compliance, or safety rating. Trust evaluation is fully decoupled and handled independently via the trust manifest (§4.5).
 
-In a response, an entry MUST carry `identifier`; every other term is at the registry's discretion. A registry returns what is useful for selecting among results and MAY omit the rest — `representativeQueries` in particular serve indexing rather than presentation and are normally omitted. A result is therefore not necessarily a complete ARD entry (§4.2); its `identifier` names the authoritative one. Note that `url`, where present, addresses the artifact (an Agent Card, Server Card, and so on) — not the ARD entry that describes it. A normative operation for retrieving a complete entry by `identifier` is out of scope for this draft; a client that needs the full entry obtains it from the source that published it.
+In a response, an entry MUST carry `identifier`; every other term is at the registry's discretion. A registry returns what is useful for selecting among results and MAY omit the rest — `representativeQueries` in particular serve indexing rather than presentation and are normally omitted. A result is therefore not necessarily a complete ARD entry (§4.2); its `identifier` names the authoritative one. Note that `url`, where present, addresses the artifact (an Agent Card, Server Card, and so on) — not the ARD entry that describes it. A client retrieves the complete entry from the result's `source` registry using `GET /agents/{identifier}` (§5.3.4).
 
 ```json
 {
@@ -395,7 +395,36 @@ Facets are computed over the full matched set, not a single page. For semantic t
 
 Explore does not federate; it is scoped to the registry queried. Federated discovery is the role of Search (§5.3.2), via its federation modes (§5.4). A registry that does not implement Explore returns a `501 Not Implemented` HTTP status code.
 
-#### 5.3.4 List (GET /agents) — Optional
+#### 5.3.4 Retrieve (GET /agents/{identifier})
+
+Retrieves one complete ARD entry by its globally unique `identifier`. Every Agent Registry **MUST** implement this endpoint. Lookup is an exact, case-sensitive primary-key operation after URL decoding; it does not perform semantic matching or relevance ranking.
+
+The client **MUST** encode the complete identifier as one URL path segment using UTF-8 percent-encoding as defined by RFC 3986. For example:
+
+```http
+GET /agents/urn%3Aair%3Aacme.com%3Aagent%3Aassistant
+```
+
+The registry **MUST** percent-decode the path parameter exactly once and then validate it against the identifier syntax in Appendix C. Invalid percent-encoding or a decoded value that is not a valid ARD identifier returns `400 Bad Request` with error code `INVALID_ARGUMENT`.
+
+Lookup is scoped to entries in the queried registry's index, including entries that the registry has ingested from external publishers. The registry **MUST NOT** query upstream registries while processing this endpoint. Clients that retain an identifier from a federated Search result **SHOULD** also retain its `source` and send subsequent Retrieve requests to that registry. A matching entry is returned directly as a complete ARD entry (§4), without Search-only fields such as `score` or `source`. If the registry's index does not contain an exact match, it returns `404 Not Found` with error code `NOT_FOUND`.
+
+**Response Schema:**
+
+```json
+{
+  "identifier": "urn:air:acme.com:agent:assistant",
+  "displayName": "Corporate Assistant (A2A)",
+  "type": "application/a2a-agent-card+json",
+  "url": "https://api.acme.com/agents/assistant.json"
+}
+```
+
+The endpoint uses the same deployment-defined authentication policy as the other Registry API endpoints. Missing or rejected credentials return `401 Unauthorized` with error code `UNAUTHENTICATED`.
+
+Successful responses are cacheable under standard HTTP caching semantics. Registries **SHOULD** provide explicit freshness information with `Cache-Control` and a validator such as `ETag` or `Last-Modified`; conditional requests and `304 Not Modified` responses follow the HTTP specifications. Responses to authenticated requests **MUST NOT** be stored in a shared cache unless the response explicitly permits it. To avoid stale negative lookups as registry contents change, `404 Not Found` responses **SHOULD** require revalidation or specify a short freshness lifetime.
+
+#### 5.3.5 List (GET /agents) — Optional
 
 Deterministic browsing, designed for developer portals. Highly cacheable, relies on strict database filtering, and does not support relevance-based sorting.
 
@@ -408,7 +437,7 @@ Deterministic browsing, designed for developer portals. Highly cacheable, relies
 | pageSize | Integer | Max results (default: 20, max: 100). |
 | pageToken | String | Pagination token. |
 
-#### 5.3.5 Protocol Wrappers (Optional)
+#### 5.3.6 Protocol Wrappers (Optional)
 
 While the REST API is mandated as the floor for interoperability, a Registry **MAY** additionally expose its search capability natively via an MCP Tool or an A2A Skill to preserve native orchestrator flows.
 
@@ -544,7 +573,7 @@ Beyond structural validity, conformance checks the following:
 
 ### D.3 The Registry REST API Specification (OpenAPI)
 
-The HTTP query interfaces (`POST /search`, `POST /explore`, and `GET /agents`) exposed by compliant Agent Registries are formally defined using the **OpenAPI 3.1.0 Specification** in YAML.
+The HTTP query interfaces (`POST /search`, `POST /explore`, `GET /agents/{identifier}`, and `GET /agents`) exposed by compliant Agent Registries are formally defined using the **OpenAPI 3.1.0 Specification** in YAML.
 
 * **Authoritative Specification File**: [`spec/schemas/ard.openapi.yaml`](schemas/ard.openapi.yaml)
 
@@ -557,7 +586,31 @@ To simplify development and guarantee compliance, this repository provides an of
 #### Features:
 * **Manifest validation mode**: Parses a JSON manifest, validates it against `ArdManifest` and each of its entries against `ArdEntry` (§D.1), and executes ARD's discovery constraints (§D.2) — URN formatting, value-or-reference enforcement, `representativeQueries` presence and sizing.
 * **Publisher resolution mode**: Given a domain, performs the resolution of §5.1 — fetches `/.well-known/ard.json`, falls back to the predecessor path with a warning that consumers are not required to consult it, and validates whatever it resolves.
-* **Registry validation mode**: Probes live endpoints (`POST /search` and `GET /agents`), sends spec-compliant search requests, and validates status codes, pagination envelopes, relevance scores, and returned entries (§5.3.2).
+* **Registry validation mode**: Probes live endpoints (`POST /search`, `POST /explore`, `GET /agents/{identifier}`, and `GET /agents`), sends spec-compliant requests, and validates status codes, exact identifier lookup behavior, pagination envelopes, relevance scores, and returned entries.
+
+#### Usage Examples:
+
+Validate a local or remote `ard.json` manifest:
+```bash
+# Validate a local manifest
+./conformance/bin/conformance-test manifest path/to/ard.json
+
+# Validate a remote well-known catalog manifest
+./conformance/bin/conformance-test manifest https://example.com/.well-known/ard.json
+```
+
+Validate a running Agent Registry REST API:
+```bash
+./conformance/bin/conformance-test registry http://localhost:9010/api
+```
+
+#### One-Click Conformance Demo
+
+To instantly run a complete end-to-end verification suite utilizing a pre-bundled spec-compliant catalog manifest and a lightweight running mock Registry REST API server, run the automated demo script:
+```bash
+./conformance/bin/run-conformance-demo
+```
+This script performs manifest schema validation, launches a mock registry server in the background, executes live search, lookup, exploration, and listing queries against it using the conformance tester, and gracefully terminates the server when finished.
 
 ## Acknowledgements
 

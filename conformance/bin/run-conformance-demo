@@ -52,7 +52,8 @@ sleep 1.5
 
 # 3. Validate live running registry server
 echo -e "\n${BOLD}[Step 3/3] Probing and validating live example registry API...${RESET}"
-"$PROJECT_ROOT/conformance/bin/conformance-test" registry "http://127.0.0.1:9010"
+"$PROJECT_ROOT/conformance/bin/conformance-test" registry "http://127.0.0.1:9010" \
+    --lookup-identifier "urn:air:acme.com:agent:assistant"
 REGISTRY_STATUS=$?
 
 if [ $REGISTRY_STATUS -eq 0 ]; then
