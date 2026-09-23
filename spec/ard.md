@@ -174,7 +174,7 @@ Identity binding, compliance attestations, provenance, and cryptographic signatu
 
 #### 4.5.1 Publisher Authority Binding
 
-The cryptographic trust domain asserted in `trustManifest.identity` MUST align with the `<publisher>` domain embedded in the entry's discovery identifier (Appendix C). This is ARD's defense against namespace squatting: an entry claiming `urn:air:google.com:...` is rejected by a verifying registry unless it can produce a verifiable attestation issued by `google.com`. The discovery identifier and the security principal are otherwise decoupled — the former is a stable searchable handle, the latter a dynamic cryptographic credential.
+The cryptographic trust domain asserted in `trustManifest.identity` MUST align with the `<publisher>` domain embedded in the entry's discovery identifier (Appendix C). The trust domain aligns with the publisher when it equals the publisher domain, or is a subdomain of it, after case folding, and the publisher domain is not a public suffix. Domains are compared as A-labels, so an internationalised domain name is converted before the comparison. For example, with the identifier `urn:air:acme.com:server:weather`, the identity `spiffe://prod.acme.com/ns/prod/sa/weather` aligns, while `spiffe://acme.com.evil.example/...` does not; an entry claiming `urn:air:co.uk:...` cannot align with any identity, because `co.uk` is a public suffix. This is ARD's defense against namespace squatting: an entry claiming `urn:air:google.com:...` is rejected by a verifying registry unless it can produce a verifiable attestation issued by `google.com`. The discovery identifier and the security principal are otherwise decoupled — the former is a stable searchable handle, the latter a dynamic cryptographic credential.
 
 #### 4.5.2 Verification
 
@@ -539,7 +539,7 @@ npx ajv-cli validate -s spec/schemas/ard-entry.schema.json -d path/to/entry.json
 Beyond structural validity, conformance checks the following:
 
 * `representativeQueries` is present and contains 2–5 examples (§4.2) — **warning**, not error: an entry that omits it or supplies a different count still validates structurally, but is flagged, since it will not be found by search.
-* The URN publisher domain MUST align with `trustManifest.identity` (§4.5.1).
+* The URN publisher domain MUST align with `trustManifest.identity`, as defined in §4.5.1 (equal to, or a subdomain of, the publisher domain; the publisher is not a public suffix).
 * `capabilities` are treated as structured filter tokens (§5.3.1).
 
 ### D.3 The Registry REST API Specification (OpenAPI)
