@@ -212,7 +212,7 @@ Agent Registry instances populate their indexes through ingestion pipelines:
 
 ### 5.3 The Search API
 
-The search API is the dynamic half of discovery. An Agent Registry **MUST** expose a standard HTTP REST search interface to guarantee universal federation. The operational base URL for these endpoints is discovered dynamically by identifying entries whose `type` is `application/ai-registry+json`.
+The search API is the dynamic half of discovery. An Agent Registry **MUST** expose a standard HTTP REST search interface to guarantee universal federation. The operational base URL for these endpoints is discovered dynamically by identifying entries whose `type` is `application/ai-registry+json`. The `url` of such a well-known entry is the registry's **base URL**, and a client appends the endpoint path (for example `/search`). The `url` of a `RegistryReferral` in a search response's `referrals[]` is instead the referred registry's **search endpoint**, already complete, and a client MUST NOT append `/search` to it.
 
 #### 5.3.1 The Query Model
 
