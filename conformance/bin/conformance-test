@@ -379,7 +379,7 @@ class ConformanceTester:
 
         # Top-level deprecated property check
         if "collections" in data:
-            self.add_warning("Found 'collections' at root. Top-level collections were removed in ADR-0003; ARD ignores unrecognized top-level members, so this does not invalidate the manifest, but hierarchies should be modeled inside 'entries'.")
+            self.add_warning("Found 'collections' at root. Top-level collections were removed; ARD ignores unrecognized top-level members, so this does not invalidate the manifest, but hierarchies should be modeled inside 'entries'.")
 
         return len(self.errors) == 0
 

@@ -93,7 +93,7 @@ When checking an ARD manifest (`ard.json`), the tool executes the following vali
   * Warns when `"representativeQueries"` is **absent** — the semantic index is built from it, so such an entry is a valid catalog entry but not a discoverable ARD entry.
   * Warns when it is present but does not contain **2 to 5** natural-language queries.
   * Verifies that standard properties (`entries`, `displayName`, `type`) are correctly typed. ARD requires only `entries` at the top level; other root members are transport-defined, and the tool reports them without failing.
-* **Legacy Field Detection**: Warns (does not fail) on a `"collections"` root property, removed under **ADR-0003**. ARD ignores unrecognized top-level members, so its presence does not invalidate the manifest.
+* **Legacy Field Detection**: Warns (does not fail) on a `"collections"` root property, since removed. ARD ignores unrecognized top-level members, so its presence does not invalidate the manifest.
 
 ---
 
