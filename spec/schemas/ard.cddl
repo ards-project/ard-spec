@@ -126,7 +126,7 @@ explore-response = {
 }
 
 explore-facet-result = {
-  buckets: [+ explore-facet-bucket],
+  buckets: [* explore-facet-bucket],
   ? otherCount: uint
 }
 
