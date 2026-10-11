@@ -62,9 +62,13 @@ STANDARD_MEDIA_TYPES = (
     "application/agent-card+json",
     "application/a2a-agent-card+json",
     "application/mcp-server-card+json",
+    "application/agent-skills+json",
+    "application/agent-skills+md",
     "application/agent-skills+zip",
     "application/agent-skills+gzip",
     'text/markdown; profile="urn:air:agent-skills"',
+    "application/agent-plugins+zip",
+    "application/agent-plugins+gzip",
     "application/ai-registry",
     "application/ai-registry+json",
 )

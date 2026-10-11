@@ -42,9 +42,21 @@ Traditional tool selection relies on injecting all descriptions into the LLM's c
 
 ### 3.3 Artifact-Agnostic Envelope
 
-The specification does not define or constrain the internal schema of specific agent types (MCP, A2A, etc.). Instead, it acts as a clean envelope that uses a `type` term (formatted as an IANA Media Type) to identify what an artifact is, delegating the definition of artifact-specific metadata to the respective protocol specifications.
+The specification does not define or constrain the internal schema of specific agent types (MCP, A2A, etc.). Instead, it acts as a clean envelope that uses a `type` term (formatted as an RFC 6838 / IANA Media Type) to identify what an artifact is, delegating the definition of artifact-specific metadata to the respective protocol specifications.
 
-> **[!NOTE] IANA Registration Status**: The types `application/a2a-agent-card+json` and `application/mcp-server-card+json` used in this specification are de-facto community standards tracking towards formal registration. Implementers should note that while well-known path directories (like `/.well-known/agent-card.json`) are officially registered permanent entries, full type registrations are pending working group joint submission and the format may change. In the meantime, omit strict verification of these types by intermediaries.
+The `type` term is an open media-type string: any syntactically valid media type is accepted. For common agentic resources and discovery services, the standard recognized types are:
+
+* `application/mcp-server-card+json` — MCP Server Card
+* `application/a2a-agent-card+json` — A2A Agent Card
+* `application/agent-card+json` — generic Agent Card
+* `application/agent-skills+json` — Agent Skill metadata descriptor (JSON)
+* `application/agent-skills+md` — Agent Skill defined in Markdown (or `text/markdown; profile="urn:air:agent-skills"`)
+* `application/agent-skills+zip` / `application/agent-skills+gzip` — packaged Agent Skill archive
+* `application/agent-plugins+zip` / `application/agent-plugins+gzip` — packaged Agent Plugin archive
+* `application/ai-registry+json` (or `application/ai-registry`) — ARD Registry search service (§5.3)
+* `application/ai-catalog+json` — nested manifest / catalog of entries
+
+> **[!NOTE] IANA Registration Status**: The types above (such as `application/a2a-agent-card+json`, `application/mcp-server-card+json`, and the `agent-skills` / `agent-plugins` types) are de-facto community standards tracking towards formal registration. Implementers should note that while well-known path directories (like `/.well-known/agent-card.json`) are officially registered permanent entries, full type registrations are pending working group joint submission and the format may change. In the meantime, omit strict verification of these types by intermediaries.
 
 ### 3.4 JSON-LD Entries and Namespaces
 
@@ -158,7 +170,7 @@ A skill entry from a solo developer, no trust ceremony required:
 {
   "identifier": "urn:air:github.com:alice-dev:pptx-creator",
   "displayName": "pptx-creator",
-  "type": "application/ai-skill+md",
+  "type": "application/agent-skills+md",
   "url": "https://github.com/alice-dev/pptx-creator",
   "description": "Create professional PowerPoint presentations following brand guidelines.",
   "representativeQueries": [
