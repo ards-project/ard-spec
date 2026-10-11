@@ -11,6 +11,7 @@ import re
 import json
 import urllib.request
 import urllib.error
+import urllib.parse
 
 # Ensure UTF-8 output on Windows (cp1252 default cannot encode ✓/✗/⚠)
 if hasattr(sys.stdout, 'reconfigure'):
@@ -216,6 +217,59 @@ class ConformanceTester:
     def add_warning(self, msg):
         self.warnings.append(msg)
         print_warning(msg)
+
+    def validate_ard_entry(self, entry, label):
+        if not isinstance(entry, dict):
+            self.add_error(f"[{label}] ARD entry must be a JSON object.")
+            return False
+
+        valid = True
+        identifier = entry.get("identifier")
+        if not identifier:
+            self.add_error(f"[{label}] ARD entry is missing 'identifier'.")
+            valid = False
+        elif not URN_REGEX.match(identifier):
+            self.add_error(f"[{label}] ARD entry identifier '{identifier}' is not a valid ARD URN.")
+            valid = False
+
+        if not entry.get("displayName"):
+            self.add_error(f"[{label}] ARD entry is missing 'displayName'.")
+            valid = False
+        if not entry.get("type"):
+            self.add_error(f"[{label}] ARD entry is missing 'type'.")
+            valid = False
+
+        has_url = "url" in entry
+        has_data = "data" in entry
+        if has_url == has_data:
+            self.add_error(f"[{label}] ARD entry must contain exactly one of 'url' or 'data'.")
+            valid = False
+
+        return valid
+
+    def validate_http_error(self, error, expected_status, expected_code, label):
+        valid = True
+        if error.code != expected_status:
+            self.add_error(f"{label} returned {error.code}; expected {expected_status}.")
+            valid = False
+
+        try:
+            data = json.loads(error.read().decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self.add_error(f"{label} did not return a valid JSON error envelope: {exc}")
+            return False
+
+        if not isinstance(data, dict):
+            self.add_error(f"{label} error response must be a JSON object.")
+            return False
+        if data.get("errorCode") != expected_code:
+            self.add_error(f"{label} returned errorCode '{data.get('errorCode')}'; expected '{expected_code}'.")
+            valid = False
+        if not data.get("message"):
+            self.add_error(f"{label} error response is missing 'message'.")
+            valid = False
+
+        return valid
 
     def add_info(self, msg):
         self.infos.append(msg)
@@ -424,7 +478,7 @@ class ConformanceTester:
             f"No manifest found at /.well-known/ard.json ({ard_err}) or /.well-known/ai-catalog.json ({legacy_err}).")
         return None, None
 
-    def validate_registry(self, registry_base_url, request_headers=None):
+    def validate_registry(self, registry_base_url, request_headers=None, lookup_identifier=None):
         print_header(f"Validating Agent Registry: {registry_base_url}")
         base_url = registry_base_url.rstrip('/')
         request_headers = request_headers or {}
@@ -442,8 +496,20 @@ class ConformanceTester:
                     # Check schema conformance
                     if not isinstance(data, dict) or "items" not in data:
                         self.add_error("GET /agents response is not a valid paginated object. Missing 'items' array.")
+                    elif not isinstance(data["items"], list):
+                        self.add_error("GET /agents response 'items' is not a JSON array.")
                     else:
-                        print_success(f"GET /agents response contains valid 'items' list ({len(data.get('items', []))} items).")
+                        items = data["items"]
+                        print_success(f"GET /agents response contains valid 'items' list ({len(items)} items).")
+                        if lookup_identifier is None:
+                            lookup_identifier = next(
+                                (
+                                    item.get("identifier")
+                                    for item in items
+                                    if isinstance(item, dict) and URN_REGEX.match(item.get("identifier", ""))
+                                ),
+                                None
+                            )
                 else:
                     self.add_warning(f"GET /agents returned unexpected status: {response.status}")
         except urllib.error.HTTPError as e:
@@ -517,6 +583,8 @@ class ConformanceTester:
                             for optional_term in ("displayName", "type"):
                                 if not item.get(optional_term):
                                     print_bullet(f"[{label}] Omits '{optional_term}' (permitted; results carry only what selection needs).")
+                            if lookup_identifier is None and URN_REGEX.match(ident or ""):
+                                lookup_identifier = ident
                 else:
                     self.add_error(f"POST /search returned unexpected HTTP status: {response.status}")
         except urllib.error.HTTPError as e:
@@ -524,7 +592,81 @@ class ConformanceTester:
         except Exception as e:
             self.add_error(f"Failed to execute search probe: {e}")
 
-        # 3. Test POST /explore (Optional Introspection Endpoint)
+        # 3. Test GET /agents/{identifier} (Mandatory Exact Lookup Endpoint)
+        if lookup_identifier is not None:
+            encoded_identifier = urllib.parse.quote(lookup_identifier, safe="")
+            lookup_url = f"{base_url}/agents/{encoded_identifier}"
+            print(f"\n  {COLOR_BOLD}Probing GET /agents/{{identifier}} with an encoded known URN...{COLOR_RESET}")
+            try:
+                req = urllib.request.Request(lookup_url, headers=request_headers, method="GET")
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    body = response.read().decode("utf-8")
+                    data = json.loads(body)
+                    if response.status != 200:
+                        self.add_error(f"GET /agents/{{identifier}} returned unexpected HTTP status: {response.status}")
+                    else:
+                        valid_entry = self.validate_ard_entry(data, "Lookup response")
+                        if valid_entry:
+                            if data["identifier"] != lookup_identifier:
+                                self.add_error(
+                                    "GET /agents/{identifier} did not return the exact requested identifier. "
+                                    f"Expected '{lookup_identifier}', got '{data['identifier']}'."
+                                )
+                                valid_entry = False
+                            for search_only_field in ("score", "source"):
+                                if search_only_field in data:
+                                    self.add_error(
+                                        f"GET /agents/{{identifier}} response contains Search-only field "
+                                        f"'{search_only_field}'."
+                                    )
+                                    valid_entry = False
+                        if valid_entry:
+                            print_success("GET /agents/{identifier} returned the exact ARD entry for an encoded URN.")
+            except urllib.error.HTTPError as e:
+                self.add_error(f"GET /agents/{{identifier}} request failed: {e.code} {e.reason}")
+            except (UnicodeDecodeError, json.JSONDecodeError) as e:
+                self.add_error(f"GET /agents/{{identifier}} returned invalid JSON: {e}")
+            except Exception as e:
+                self.add_error(f"Failed to execute exact lookup probe: {e}")
+        else:
+            self.add_warning(
+                "Could not infer a known catalog identifier from List or Search; "
+                "skipping the successful lookup probe. Pass --lookup-identifier to run it."
+            )
+
+        unknown_identifier = "urn:air:ard-conformance.invalid:probe:not-found"
+        unknown_url = f"{base_url}/agents/{urllib.parse.quote(unknown_identifier, safe='')}"
+        print(f"\n  {COLOR_BOLD}Probing GET /agents/{{identifier}} with an unknown URN...{COLOR_RESET}")
+        try:
+            req = urllib.request.Request(unknown_url, headers=request_headers, method="GET")
+            with urllib.request.urlopen(req, timeout=5) as response:
+                self.add_error(
+                    "GET /agents/{identifier} returned "
+                    f"{response.status} for an unknown identifier; expected 404."
+                )
+        except urllib.error.HTTPError as e:
+            if self.validate_http_error(e, 404, "NOT_FOUND", "Unknown identifier lookup"):
+                print_success("Unknown identifier returned 404 NOT_FOUND.")
+        except Exception as e:
+            self.add_error(f"Failed to execute unknown identifier probe: {e}")
+
+        malformed_identifier = "not-a-valid-ard-urn"
+        malformed_url = f"{base_url}/agents/{urllib.parse.quote(malformed_identifier, safe='')}"
+        print(f"\n  {COLOR_BOLD}Probing GET /agents/{{identifier}} with a malformed identifier...{COLOR_RESET}")
+        try:
+            req = urllib.request.Request(malformed_url, headers=request_headers, method="GET")
+            with urllib.request.urlopen(req, timeout=5) as response:
+                self.add_error(
+                    "GET /agents/{identifier} returned "
+                    f"{response.status} for a malformed identifier; expected 400."
+                )
+        except urllib.error.HTTPError as e:
+            if self.validate_http_error(e, 400, "INVALID_ARGUMENT", "Malformed identifier lookup"):
+                print_success("Malformed identifier returned 400 INVALID_ARGUMENT.")
+        except Exception as e:
+            self.add_error(f"Failed to execute malformed identifier probe: {e}")
+
+        # 4. Test POST /explore (Optional Introspection Endpoint)
         explore_url = f"{base_url}/explore"
         print(f"\n  {COLOR_BOLD}Probing POST /explore (Optional Introspection endpoint)...{COLOR_RESET}")
         
@@ -587,7 +729,7 @@ def main():
         print("Usage:")
         print("  conformance-test manifest  <local_file_path_or_url>")
         print("  conformance-test publisher <domain>   # resolves /.well-known/ard.json per §5.1")
-        print("  conformance-test registry  <registry_base_url> [--header 'Name: value']...")
+        print("  conformance-test registry  <registry_base_url> [--header 'Name: value']... [--lookup-identifier <urn>]")
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -631,16 +773,26 @@ def main():
             success = tester.validate_manifest(content, source)
     elif command == "registry":
         header_args = []
+        lookup_identifier = None
         idx = 0
         while idx < len(args):
             arg = args[idx]
-            if arg != "--header":
-                print_failure(f"Unknown registry option '{arg}'. Supported option: --header 'Name: value'")
+            if arg not in ["--header", "--lookup-identifier"]:
+                print_failure(
+                    f"Unknown registry option '{arg}'. Supported options: "
+                    "--header 'Name: value', --lookup-identifier <urn>"
+                )
                 sys.exit(1)
             if idx + 1 >= len(args):
-                print_failure("--header requires a value in 'Name: value' format.")
+                print_failure(f"{arg} requires a value.")
                 sys.exit(1)
-            header_args.append(args[idx + 1])
+            if arg == "--header":
+                header_args.append(args[idx + 1])
+            else:
+                if lookup_identifier is not None:
+                    print_failure("--lookup-identifier may be specified only once.")
+                    sys.exit(1)
+                lookup_identifier = args[idx + 1]
             idx += 2
 
         try:
@@ -649,7 +801,15 @@ def main():
             print_failure(str(e))
             sys.exit(1)
 
-        success = tester.validate_registry(target, request_headers=request_headers)
+        if lookup_identifier is not None and not URN_REGEX.match(lookup_identifier):
+            print_failure("--lookup-identifier must be a valid urn:air: identifier.")
+            sys.exit(1)
+
+        success = tester.validate_registry(
+            target,
+            request_headers=request_headers,
+            lookup_identifier=lookup_identifier
+        )
     else:
         print_failure(f"Unknown test suite command '{command}'. Must be 'manifest', 'publisher', or 'registry'.")
         sys.exit(1)

@@ -3,9 +3,9 @@ info:
   title: Agentic Resource Discovery Registry API
   version: 0.5.0
   description: |
-    Universal federated discovery API specification for AI agents, tools, and capabilities.
-    Allows LLM orchestrators to semantically search and discover registries for relevant capabilities
-    and enables registry-to-registry federated query routing.
+    Universal discovery API specification for AI agents, tools, and capabilities.
+    Allows LLM orchestrators to search semantically, retrieve known catalog entries,
+    explore registries, and use registry-to-registry federated query routing.
 paths:
   /search:
     post:
@@ -121,8 +121,50 @@ paths:
         '500':
           $ref: '#/components/responses/500InternalError'
 
+  /agents/{identifier}:
+    get:
+      summary: Retrieve ARD Entry
+      description: |
+        Retrieves one complete, locally indexed ARD entry by exact, case-sensitive identifier.
+        The identifier is UTF-8 percent-encoded as one path segment. This operation
+        does not perform semantic matching or query upstream registries.
+      operationId: getArdEntry
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: |
+            Complete ARD identifier. Clients percent-encode it as one path segment;
+            servers percent-decode it exactly once before validation and lookup.
+          schema:
+            type: string
+            pattern: '^urn:air:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$'
+          example: "urn:air:acme.com:agent:assistant"
+      responses:
+        '200':
+          description: Exact ARD entry match.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArdEntry'
+        '304':
+          description: The cached representation is still current.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
 components:
   schemas:
+    ArdEntry:
+      $ref: './ard-entry.schema.json#/$defs/ArdEntry'
+
     QueryModel:
       type: object
       properties:
@@ -371,6 +413,12 @@ components:
             $ref: '#/components/schemas/Error'
     401Unauthorized:
       description: Credentials missing or rejected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404NotFound:
+      description: No ARD entry has the requested identifier.
       content:
         application/json:
           schema:
