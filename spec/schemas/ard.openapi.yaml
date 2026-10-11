@@ -367,7 +367,7 @@ components:
         url:
           type: string
           format: uri
-          description: Endpoint URL for the referred registry's search route.
+          description: Complete URL of the referred registry's search endpoint. Unlike the `url` of a well-known `application/ai-registry+json` entry (a base URL, §5.3), clients use this value as-is and do not append `/search`.
           example: "https://finder.nlweb.ai/search"
 
     ListResponse:

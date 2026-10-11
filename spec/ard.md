@@ -87,7 +87,7 @@ The default namespace supplies definitions for the terms below; ARD determines w
 
 | Term | Requirement | Notes |
 | :--- | :--- | :--- |
-| identifier | MUST | Globally unique discovery handle. Domain-anchored URN form (`urn:air:<publisher>:<namespace>:<agent-name>`); see Appendix C. The JSON-LD `@id` MAY mirror it. |
+| identifier | MUST | Globally unique discovery handle. Domain-anchored URN form (`urn:air:<publisher>:[<namespace>:]<agent-name>`, where `<namespace>` is optional and MAY span several segments); see Appendix C. The JSON-LD `@id` MAY mirror it. |
 | displayName | MUST | Human-readable name. |
 | type | MUST | Artifact type as an IANA Media Type (§3.3). |
 | url _or_ data | MUST (exactly one) | Value-or-reference (§4.3). |
@@ -212,7 +212,7 @@ Agent Registry instances populate their indexes through ingestion pipelines:
 
 ### 5.3 The Search API
 
-The Registry API is the dynamic half of discovery. An Agent Registry **MUST** expose the standard HTTP REST Search (§5.3.2) and Retrieve (§5.3.4) interfaces. Search guarantees universal discovery and federation; Retrieve provides deterministic resolution of a known identifier. The operational base URL for these endpoints is discovered dynamically by identifying entries whose `type` is `application/ai-registry+json`.
+The Registry API is the dynamic half of discovery. An Agent Registry **MUST** expose the standard HTTP REST Search (§5.3.2) and Retrieve (§5.3.4) interfaces. Search guarantees universal discovery and federation; Retrieve provides deterministic resolution of a known identifier. The operational base URL for these endpoints is discovered dynamically by identifying entries whose `type` is `application/ai-registry+json`. The `url` of such a well-known entry is the registry's **base URL**, and a client appends the endpoint path (for example `/search` or `/agents/{identifier}`). The `url` of a `RegistryReferral` in a search response's `referrals[]` is instead the referred registry's **search endpoint**, already complete, and a client MUST NOT append `/search` to it.
 
 #### 5.3.1 The Query Model
 
@@ -534,7 +534,7 @@ Logical AND is used across different parameters; OR is used within a single para
 
 ## Appendix C: Agent Naming URN Format {#appendix-c:-agent-naming-urn-format}
 
-The discovery identifier uses a domain-anchored URN form, `urn:air:<publisher>:<namespace>:<agent-name>`, where `<publisher>` is a fully qualified domain name. Restricting the discovery identifier to this form, rather than allowing arbitrary URIs, provides fundamental architectural benefits for federated discovery:
+The discovery identifier uses a domain-anchored URN form, `urn:air:<publisher>:[<namespace>:]<agent-name>`, where `<publisher>` is a fully qualified domain name. `<namespace>` is optional and MAY contain more than one colon-separated segment, so `urn:air:example.com:weather-server` and `urn:air:example.com:finance:trading:trader` are both valid; only `<publisher>` and the terminal `<agent-name>` are required (ADR-0007). Restricting the discovery identifier to this form, rather than allowing arbitrary URIs, provides fundamental architectural benefits for federated discovery:
 
 1. **Nomenclature Stability (Immutable Noun vs. Mutable Location)**: Arbitrary URIs, particularly HTTP URLs, conflate the logical identity of a capability with its physical network location. The `urn:air:` identifier acts as an abstract, permanent contract; physical distribution and transport bindings are decoupled into the `url` or `data` term, allowing infrastructure to evolve without breaking client discovery, indexing, or orchestration code.
 2. **Strict Separation of Concerns**: Federated registries require a stable primary key to index capabilities; zero-trust runtimes require dynamic cryptographic tokens (SPIFFE IDs, DIDs, X.509 certificates) to authenticate workloads. The `urn:air:` form cleanly decouples the searchable discovery handle from the security principal, allowing the discovery index and the security mesh to operate independently.
