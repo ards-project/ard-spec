@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ards-project/ard-spec/main/spec/schemas/ard-change.schema.json",
+  "title": "ArdChangeFeed",
+  "description": "JSON Schema for one page of the ARD change feed (GET /changes, §5.5): the identifiers a registry added, updated, or removed. A change carries an identifier and nothing about the entry; a consumer fetches the entry from the identifier's authority and confirms every delete there.",
+  "$ref": "#/$defs/ChangeFeedResponse",
+  "$defs": {
+    "Cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9._~-]+$",
+      "description": "Opaque position in one registry's log, drawn from the unreserved characters of RFC 3986. Consumers compare cursors for equality only and never parse, construct, or order them."
+    },
+    "Change": {
+      "type": "object",
+      "description": "One change to the set of identifiers a registry holds.",
+      "required": ["cursor", "op", "time", "identifier"],
+      "properties": {
+        "cursor": {
+          "$ref": "#/$defs/Cursor",
+          "description": "This change's position, later than the position of every earlier change in the same registry."
+        },
+        "op": {
+          "type": "string",
+          "enum": ["upsert", "delete"],
+          "description": "upsert: the registry admitted the entry or its content changed. delete: the registry removed it. A consumer skips an op it does not recognize and still advances its cursor; this enum names the ops defined by this revision."
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the registry recorded the change, from its own clock. Informational; ordering is by cursor."
+        },
+        "identifier": {
+          "type": "string",
+          "pattern": "^urn:air:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$",
+          "description": "The entry's identifier (Appendix C). Its <publisher> segment names the authority the consumer fetches the entry from. Same pattern as the identifier in ard-entry.schema.json."
+        }
+      },
+      "additionalProperties": false,
+      "$comment": "additionalProperties is false by design. A change carries no entry content, digest, origin, hop list, or reason; each would create a trust or correctness rule that exists only because a peer's copy of an entry was on the wire. A consumer validating pages from a later revision tolerates an unrecognized op and added members (§5.5.7) rather than treating the page as malformed."
+    },
+    "ChangeFeedResponse": {
+      "type": "object",
+      "description": "One page of the feed.",
+      "required": ["changes", "cursor", "more"],
+      "properties": {
+        "changes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Change" },
+          "maxItems": 1000,
+          "description": "Ordered oldest to newest. MAY be empty."
+        },
+        "cursor": {
+          "$ref": "#/$defs/Cursor",
+          "description": "The position up to which the registry had examined its log when it built this page, at or after the last change returned. Present even when changes is empty; passed back as the cursor query parameter."
+        },
+        "more": {
+          "type": "boolean",
+          "description": "true when further changes were available when the page was built; false when the consumer has reached the tail."
+        },
+        "retention": {
+          "type": "string",
+          "format": "duration",
+          "pattern": "^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+S)?)?$",
+          "description": "ISO 8601 duration of the retention window (§5.5.5). Omitted by a registry that retains every change indefinitely and therefore never answers 410 CURSOR_EXPIRED."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
