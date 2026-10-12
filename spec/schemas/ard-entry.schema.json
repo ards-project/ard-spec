@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/ards-project/ard-spec/main/spec/schemas/ard-entry.schema.json",
-  "title": "ARDEntry",
+  "title": "ArdEntry",
   "description": "JSON Schema for an ARD entry — the description of a single agentic resource in a form that can be found by search. An ARD entry is defined by the ARD specification. It adopts the core descriptive terms of the default namespace and additionally requires the terms discovery depends on. Every ARD entry is a well-formed catalog entry; not every catalog entry is an ARD entry.",
-  "$ref": "#/$defs/ardEntry",
+  "$ref": "#/$defs/ArdEntry",
   "$defs": {
-    "entryFields": {
+    "EntryFields": {
       "type": "object",
-      "description": "The terms an ARD entry may carry. This definition imposes no required terms; ardEntry (a full entry) and ardEntryProjection (a search result) layer their own requirements on top.",
+      "description": "The terms an ARD entry may carry. This definition imposes no required terms; ArdEntry layers its own requirements on top.",
       "properties": {
         "@context": {
           "description": "Optional JSON-LD context. Absent, the entry's unprefixed terms resolve to the default namespace. Present, it MAY declare additional namespaces whose prefixed terms describe the resource and become available as filter dimensions.",
@@ -78,16 +78,16 @@
             "type": ["string", "number", "boolean", "null"]
           }
         },
-        "trustManifest": {
-          "$ref": "#/$defs/trustManifest"
+        "TrustManifest": {
+          "$ref": "#/$defs/TrustManifest"
         }
       },
       "additionalProperties": true,
       "$comment": "additionalProperties is intentionally true. Terms drawn from namespaces declared in the entry's @context (e.g. okf:taxonomy) are valid and become filter dimensions. Constraining this to false would defeat the namespace extension mechanism."
     },
-    "ardEntry": {
+    "ArdEntry": {
       "description": "A complete ARD entry, as published. Requires the discovery-critical terms and exactly one of url/data.",
-      "allOf": [{ "$ref": "#/$defs/entryFields" }],
+      "allOf": [{ "$ref": "#/$defs/EntryFields" }],
       "required": ["identifier", "displayName", "type"],
       "oneOf": [
         {
@@ -100,24 +100,19 @@
         }
       ]
     },
-    "ardEntryProjection": {
-      "description": "An ARD entry as returned in search results — a projection carrying the terms useful for selecting among results. Only `identifier` is required; a registry MAY omit any other term, notably `representativeQueries`, which serve indexing rather than presentation. `identifier` names the authoritative entry; the full entry is obtained from the source that published it.",
-      "allOf": [{ "$ref": "#/$defs/entryFields" }],
-      "required": ["identifier"]
-    },
-    "ardManifest": {
+    "ArdManifest": {
       "type": "object",
       "description": "The document published at /.well-known/ard.json (or any entry source). ARD requires only an `entries` array of ARD entries; any other top-level members are transport-defined and ignored by ARD, so additionalProperties is open.",
       "required": ["entries"],
       "properties": {
         "entries": {
           "type": "array",
-          "items": { "$ref": "#/$defs/ardEntry" }
+          "items": { "$ref": "#/$defs/ArdEntry" }
         }
       },
       "additionalProperties": true
     },
-    "trustManifest": {
+    "TrustManifest": {
       "type": "object",
       "description": "Identity, compliance, and provenance envelope. ARD requires only `identity` (for publisher-authority binding) and does not constrain the internal schema; validation is intentionally permissive (additionalProperties: true) so a trust manifest defined by any framework is structurally valid, including members ARD does not enumerate such as trustSchema. This does not mean consumers ignore it: a federated registry is expected to inspect the manifest and verify it per the framework named in trustSchema (attestations, provenance, signature). Signing and verification procedures are defined by that framework, not by ARD.",
       "required": ["identity"],
@@ -143,7 +138,7 @@
         },
         "attestations": {
           "type": "array",
-          "description": "Verifiable claims (compliance audits, certifications).",
+          "description": "Verifiable claims (e.g., organizational compliance audits, artifact security scans, build provenance, transparency-log receipts, or runtime evaluations).",
           "items": {
             "type": "object",
             "required": ["type", "uri"],

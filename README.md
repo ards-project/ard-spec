@@ -3,8 +3,7 @@
 Canonical home of the **Agentic Resource Discovery** specification — a federated,
 domain-anchored standard for cataloging, searching, and discovering agentic
 resources (MCP servers, A2A agent cards, Skills, APIs, and other callable
-services) across networks of discovery services. It builds on the
-[ai-catalog](https://github.com/Agent-Card/ai-catalog) standard.
+services) across networks of discovery services.
 
 📖 Read the rendered spec at
 **[agenticresourcediscovery.org/spec](https://agenticresourcediscovery.org/spec/)**
@@ -13,7 +12,8 @@ this is the single source of truth.
 
 ## Layout
 
-- [`spec/ard.md`](spec/ard.md) — the specification
+- [`spec/ard.md`](spec/ard.md) — the specification (v0.91)
+- [`spec/ard-v0.9.md`](spec/ard-v0.9.md) — the previous version, kept reachable
 - [`spec/schemas/`](spec/schemas/) — CDDL, JSON Schema, and OpenAPI definitions
 - [`adr/`](adr/) — architecture decision records
 - [`conformance/`](conformance/) — conformance test tooling
@@ -36,7 +36,7 @@ together.
 
 ## Status
 
-**v0.9 (Draft).** The specification is open and evolving; feedback and proposals
+**v0.91.** The specification is open and evolving; feedback and proposals
 are welcome via [issues](https://github.com/ards-project/ard-spec/issues) and,
 for non-normative changes, [pull requests](https://github.com/ards-project/ard-spec/pulls).
 

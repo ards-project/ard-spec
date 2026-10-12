@@ -14,7 +14,7 @@ from urllib.parse import urlparse, parse_qs
 
 PORT = 9010
 
-# Mock catalog database seeded from ./ai-catalog.json
+# Mock catalog database seeded from ./ard.json
 MOCK_CATALOG_ENTRIES = [
   {
     "identifier": "urn:air:acme.com:agent:assistant",

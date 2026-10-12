@@ -1,0 +1,89 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Extension media type conformance fixture",
+    "identifier": "https://media-types.test"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:media-types.test:fixture:standard-mcp",
+      "displayName": "Standard MCP card",
+      "type": "application/mcp-server-card+json",
+      "url": "https://media-types.test/artifacts/standard-mcp",
+      "representativeQueries": [
+        "find the standard MCP fixture",
+        "locate the standard protocol card"
+      ]
+    },
+    {
+      "identifier": "urn:air:media-types.test:fixture:standard-a2a",
+      "displayName": "Standard A2A card",
+      "type": "application/a2a-agent-card+json",
+      "url": "https://media-types.test/artifacts/standard-a2a",
+      "representativeQueries": [
+        "find the standard A2A fixture",
+        "locate the standard agent card"
+      ]
+    },
+    {
+      "identifier": "urn:air:media-types.test:fixture:vendor-card",
+      "displayName": "Vendor extension card",
+      "type": "application/vnd.example.tool-manifest+json",
+      "url": "https://media-types.test/artifacts/vendor-card",
+      "representativeQueries": [
+        "find a vendor extension card",
+        "locate an example tool manifest"
+      ]
+    },
+    {
+      "identifier": "urn:air:media-types.test:fixture:extension-bundle",
+      "displayName": "Extension bundle",
+      "type": "application/example-bundle+zip",
+      "url": "https://media-types.test/artifacts/extension-bundle",
+      "representativeQueries": [
+        "find an extension bundle",
+        "locate an example archive"
+      ]
+    },
+    {
+      "identifier": "urn:air:media-types.test:fixture:extension-widget",
+      "displayName": "Extension widget",
+      "type": "application/x-example-widget",
+      "url": "https://media-types.test/artifacts/extension-widget",
+      "representativeQueries": [
+        "find an extension widget",
+        "locate a custom application artifact"
+      ]
+    },
+    {
+      "identifier": "urn:air:media-types.test:fixture:deprecated-mcp",
+      "displayName": "Deprecated MCP card",
+      "type": "application/mcp-server+json",
+      "url": "https://media-types.test/artifacts/deprecated-mcp",
+      "representativeQueries": [
+        "find the deprecated MCP fixture",
+        "locate the transition media type"
+      ]
+    },
+    {
+      "identifier": "urn:air:media-types.test:fixture:other-top-level",
+      "displayName": "Other top-level type",
+      "type": "text/x-example-notes",
+      "url": "https://media-types.test/artifacts/other-top-level",
+      "representativeQueries": [
+        "find text extension notes",
+        "locate a non-application artifact"
+      ]
+    },
+    {
+      "identifier": "urn:air:media-types.test:fixture:malformed-type",
+      "displayName": "Malformed media type",
+      "type": "application/ example",
+      "url": "https://media-types.test/artifacts/malformed-type",
+      "representativeQueries": [
+        "find the malformed syntax fixture",
+        "locate an invalid media type example"
+      ]
+    }
+  ]
+}

@@ -282,9 +282,11 @@ components:
 
     SearchResultItem:
       allOf:
-        - $ref: './ard-entry.schema.json#/$defs/ardEntryProjection'
+        - $ref: './ard-entry.schema.json#/$defs/EntryFields'
       type: object
+      description: "An entry as returned in search results. A registry returns the terms useful for selecting among results and MAY omit any other; only `identifier` is required."
       required:
+        - identifier
         - score
         - source
       properties:
@@ -323,7 +325,7 @@ components:
         url:
           type: string
           format: uri
-          description: Endpoint URL for the referred registry's search route.
+          description: Complete URL of the referred registry's search endpoint. Unlike the `url` of a well-known `application/ai-registry+json` entry (a base URL, §5.3), clients use this value as-is and do not append `/search`.
           example: "https://finder.nlweb.ai/search"
 
     ListResponse:
@@ -334,7 +336,10 @@ components:
         items:
           type: array
           items:
-            $ref: './ard-entry.schema.json#/$defs/ardEntryProjection'
+            allOf:
+              - $ref: './ard-entry.schema.json#/$defs/EntryFields'
+            required:
+              - identifier
         total:
           type: integer
           description: Total count of matching entries in the registry.

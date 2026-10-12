@@ -1,9 +1,4 @@
 {
-  "specVersion": "1.0",
-  "host": {
-    "displayName": "Example Tool Publisher",
-    "identifier": "did:web:tools.example.com"
-  },
   "entries": [
     {
       "identifier": "urn:air:tools.example.com:server:invoice-reader",
