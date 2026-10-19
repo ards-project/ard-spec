@@ -482,6 +482,20 @@ This gives the client full control over the federation topology without requirin
 }
 ```
 
+### 5.5 Observability (Informative)
+
+Implementations can correlate discovery, federation, consumer-side trust verification, resource selection, policy decisions, and native-protocol handoff using distributed tracing. This subsection is non-normative: tracing is optional and introduces no ARD conformance requirements or changes to entry schemas or Registry API bodies.
+
+For Registry HTTP operations (`POST /search`, `POST /explore`, and `GET /agents`), implementations are encouraged to use [W3C Trace Context](https://www.w3.org/TR/trace-context/) headers (`traceparent` and, where appropriate, `tracestate`). Client and Registry spans can correlate a discovery request with the Registry work it triggers. In automatic federation, a Registry can propagate context on outbound upstream requests; in referrals mode, a client can correlate the referral it follows with the subsequent Registry request.
+
+Federated registries are trust boundaries. Implementations should validate inbound trace context, apply local acceptance and sampling policies, and avoid blindly trusting caller-supplied trace identifiers or sampling flags. Before forwarding context to an external registry or resource, they should filter or omit internal `tracestate` and caller metadata, including baggage. Telemetry collection and export should also minimize sensitive data: queries, credentials, trust-evidence contents, and resource URLs or identifiers may expose private information. The W3C Trace Context specification's security and privacy guidance applies at each boundary.
+
+On the consumer side, telemetry can correlate the discovery result and its contributing Registry with trust-evidence verification, selection or rejection, and any policy or authorization decision before native-protocol invocation. These stages should remain distinguishable: discovery is not authorization, provider acceptance is not a verified outcome, and a rejected candidate should have decision telemetry without a downstream invocation. Trace correlation records that a decision occurred; it does not establish that the decision was valid or that the resource is trustworthy.
+
+For native-protocol handoff, implementations can continue context when discovery and invocation happen inline and the selected protocol supports propagation. When discovery results are cached and invoked later, or work crosses an independent execution boundary, an [OpenTelemetry span link](https://opentelemetry.io/docs/concepts/signals/traces/#span-links) can correlate the invocation with the earlier discovery context. Propagation follows the native protocol's supported mechanisms and local trust policy; where context cannot be propagated, local correlation can identify the handoff boundary without modifying the discovered artifact.
+
+Trace context is operational metadata, not ARD entry data, a `trustManifest` claim, an authorization grant, or an input to relevance `score`. For concrete span names and attributes, implementations should consult applicable [OpenTelemetry semantic conventions](https://opentelemetry.io/docs/specs/semconv/) and AAIF semantic-convention work as it becomes available, rather than treating this subsection as a new ARD telemetry schema.
+
 ## 6. Integration Example
 
 A user asks an orchestrator: "Book me a flight to Tokyo and file the travel expense report."
