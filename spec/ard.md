@@ -71,6 +71,7 @@ To guarantee that any system can participate in discovery regardless of its exec
 To maintain a clean and implementable standard, the protocol delegates operational details:
 
 * **Authentication is Delegated**: Agent authentication is handled by the specific artifact protocol, not the discovery layer.
+* **Discovery is Not Authorization**: Discovery results identify candidate resources, while referrals identify additional registry search endpoints; neither by itself establishes consent or authorization to contact or invoke a discovered resource. Applications evaluate applicable access requirements separately before interacting with a discovered resource.
 * **Distribution is Infrastructure**: Mechanisms for physical delivery (OCI, npm, etc.) are left to backend implementation and are not part of the discovery record.
 
 ## 4. The ARD Entry
