@@ -1,0 +1,42 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "GenTech Labs",
+    "identifier": "did:web:gentechlabs.net",
+    "documentationUrl": "https://gentechlabs.net"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:gentechlabs.net:api:x402-gateway",
+      "displayName": "GenTech x402 Gateway",
+      "type": "application/mcp-server-card+json",
+      "url": "https://api.gentechlabs.net/.well-known/x402-bazaar",
+      "description": "Paid API gateway for AI agents using the x402 protocol. 10 live services across Base, Solana, Avalanche, X Layer, and Algorand: token security scoring, wallet portfolio analysis, DeFi LP analytics, agent discovery (ERC-8004), and more. Pay-per-call via x402 with USDC settlement.",
+      "tags": ["x402", "payments", "api", "defi", "agent-economy", "erc-8004"],
+      "representativeQueries": [
+        "check if a token is a honeypot or has security risks",
+        "analyze a wallet portfolio across chains",
+        "score an LP position efficiency",
+        "discover AI agents registered on ERC-8004",
+        "get a price quote for an x402 API call"
+      ],
+      "capabilities": ["TokenSecurity", "WalletAnalysis", "DefiLpAnalytics", "AgentDiscovery", "X402Payments"],
+      "metadata": {
+        "x402Version": 2,
+        "settlementChains": "base, solana, avalanche, xlayer, algorand",
+        "serviceCount": 10
+      },
+      "trustManifest": {
+        "identity": "did:web:gentechlabs.net",
+        "identityType": "did",
+        "attestations": [
+          {
+            "type": "API-Documentation",
+            "uri": "https://gentechlabs.net",
+            "mediaType": "text/html"
+          }
+        ]
+      }
+    }
+  ]
+}
