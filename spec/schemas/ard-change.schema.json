@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/ards-project/ard-spec/main/spec/schemas/ard-change.schema.json",
   "title": "ArdChangeFeed",
-  "description": "JSON Schema for one page of the ARD change feed (GET /changes, §5.5): the identifiers a registry added, updated, or removed. A change carries an identifier and nothing about the entry; a consumer fetches the entry from the identifier's authority and confirms every delete there.",
+  "description": "JSON Schema for one page of the ARD change feed (GET /changes, §5.6): the identifiers a registry added, updated, or removed. A change carries an identifier and nothing about the entry; a consumer fetches the entry from the identifier's authority and confirms every delete there.",
   "$ref": "#/$defs/ChangeFeedResponse",
   "$defs": {
     "Cursor": {
@@ -38,7 +38,7 @@
         }
       },
       "additionalProperties": false,
-      "$comment": "additionalProperties is false by design. A change carries no entry content, digest, origin, hop list, or reason; each would create a trust or correctness rule that exists only because a peer's copy of an entry was on the wire. A consumer validating pages from a later revision tolerates an unrecognized op and added members (§5.5.7) rather than treating the page as malformed."
+      "$comment": "additionalProperties is false by design. A change carries no entry content, digest, origin, hop list, or reason; each would create a trust or correctness rule that exists only because a peer's copy of an entry was on the wire. A consumer validating pages from a later revision tolerates an unrecognized op and added members (§5.6.7) rather than treating the page as malformed."
     },
     "ChangeFeedResponse": {
       "type": "object",
@@ -63,7 +63,7 @@
           "type": "string",
           "format": "duration",
           "pattern": "^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+S)?)?$",
-          "description": "ISO 8601 duration of the retention window (§5.5.5). Omitted by a registry that retains every change indefinitely and therefore never answers 410 CURSOR_EXPIRED."
+          "description": "ISO 8601 duration of the retention window (§5.6.5). Omitted by a registry that retains every change indefinitely and therefore never answers 410 CURSOR_EXPIRED."
         }
       },
       "additionalProperties": false

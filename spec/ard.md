@@ -198,7 +198,7 @@ A relevance score returned by Search (§5.3.2) reflects semantic relevance only 
 
 ## 5. Discovery
 
-Discovery is what ARD is fundamentally about, and it spans this entire section: how entries are published and ingested (§5.1–5.2), how a client searches the resulting index (the search API, §5.3), how registries compose across a federation (§5.4), and how a registry learns ahead of a query what other registries hold (§5.5). It operates in two layers:
+Discovery is what ARD is fundamentally about, and it spans this entire section: how entries are published and ingested (§5.1–5.2), how a client searches the resulting index (the search API, §5.3), how registries compose across a federation (§5.4), and how a registry learns ahead of a query what other registries hold (§5.6). It operates in two layers:
 
 1. **Static Discovery**: A decentralized publishing mechanism where developers and enterprises publish entries as static documents or in-page markup.
 2. **Dynamic Discovery**: Active, searchable services (Registries) that index published entries and expose the dynamic search API.
@@ -223,7 +223,7 @@ Agent Registry instances populate their indexes through ingestion pipelines:
 
 * **Web Ingestion (Required)**: Crawling entry sources — hosted manifests and in-page markup — from discovered URIs. All ARD implementations MUST support this.
 * **Additional Pipelines (Optional)**: Registries may support scanning git repositories, npm registries, or OCI registries as indicated by their configuration.
-* **Change-Feed Subscription (Optional)**: Consuming other registries' change feeds (§5.5) to learn which identifiers to ingest and when they changed. The feed supplies the frontier and the change signal a crawler lacks; the entries themselves are still fetched from their publishers through web ingestion.
+* **Change-Feed Subscription (Optional)**: Consuming other registries' change feeds (§5.6) to learn which identifiers to ingest and when they changed. The feed supplies the frontier and the change signal a crawler lacks; the entries themselves are still fetched from their publishers through web ingestion.
 
 ### 5.3 The Search API
 
@@ -439,7 +439,7 @@ Because the REST API is mandated, Registry-to-Registry routing (federation) beco
 
 This gives the client full control over the federation topology without requiring complex protocol translation layers.
 
-These modes federate at query time: the work happens on every query, and the answer waits on every upstream. A registry MAY instead, or in addition, federate at index time by consuming other registries' change feeds (§5.5): it learns which identifiers they hold and when they change, fetches each entry from its publisher as §5.2 ingestion does, and answers from one index. The two compose. `federation: none` still means no query-time fan-out, whatever the registry's index was built from.
+These modes federate at query time: the work happens on every query, and the answer waits on every upstream. A registry MAY instead, or in addition, federate at index time by consuming other registries' change feeds (§5.6): it learns which identifiers they hold and when they change, fetches each entry from its publisher as §5.2 ingestion does, and answers from one index. The two compose. `federation: none` still means no query-time fan-out, whatever the registry's index was built from.
 
 #### Example: Referrals Mode
 
@@ -485,7 +485,21 @@ These modes federate at query time: the work happens on every query, and the ans
 }
 ```
 
-### 5.5 Change Feed (GET /changes) — Optional
+### 5.5 Observability (Informative)
+
+Implementations can correlate discovery, federation, consumer-side trust verification, resource selection, policy decisions, and native-protocol handoff using distributed tracing. This subsection is non-normative: tracing is optional and introduces no ARD conformance requirements or changes to entry schemas or Registry API bodies.
+
+For Registry HTTP operations (`POST /search`, `POST /explore`, and `GET /agents`), implementations are encouraged to use [W3C Trace Context](https://www.w3.org/TR/trace-context/) headers (`traceparent` and, where appropriate, `tracestate`). Client and Registry spans can correlate a discovery request with the Registry work it triggers. In automatic federation, a Registry can propagate context on outbound upstream requests; in referrals mode, a client can correlate the referral it follows with the subsequent Registry request.
+
+Federated registries are trust boundaries. Implementations should validate inbound trace context, apply local acceptance and sampling policies, and avoid blindly trusting caller-supplied trace identifiers or sampling flags. Before forwarding context to an external registry or resource, they should filter or omit internal `tracestate` and caller metadata, including baggage. Telemetry collection and export should also minimize sensitive data: queries, credentials, trust-evidence contents, and resource URLs or identifiers may expose private information. The W3C Trace Context specification's security and privacy guidance applies at each boundary.
+
+On the consumer side, telemetry can correlate the discovery result and its contributing Registry with trust-evidence verification, selection or rejection, and any policy or authorization decision before native-protocol invocation. These stages should remain distinguishable: discovery is not authorization, provider acceptance is not a verified outcome, and a rejected candidate should have decision telemetry without a downstream invocation. Trace correlation records that a decision occurred; it does not establish that the decision was valid or that the resource is trustworthy.
+
+For native-protocol handoff, implementations can continue context when discovery and invocation happen inline and the selected protocol supports propagation. When discovery results are cached and invoked later, or work crosses an independent execution boundary, an [OpenTelemetry span link](https://opentelemetry.io/docs/concepts/signals/traces/#span-links) can correlate the invocation with the earlier discovery context. Propagation follows the native protocol's supported mechanisms and local trust policy; where context cannot be propagated, local correlation can identify the handoff boundary without modifying the discovered artifact.
+
+Trace context is operational metadata, not ARD entry data, a `trustManifest` claim, an authorization grant, or an input to relevance `score`. For concrete span names and attributes, implementations should consult applicable [OpenTelemetry semantic conventions](https://opentelemetry.io/docs/specs/semconv/) and AAIF semantic-convention work as it becomes available, rather than treating this subsection as a new ARD telemetry schema.
+
+### 5.6 Change Feed (GET /changes) — Optional
 
 The federation modes of §5.4 do their work at query time. The change feed is the index-time counterpart: it lets a registry learn, ahead of any query, which identifiers another registry holds and which of them changed, so that it can fetch those entries from their publishers through ordinary web ingestion (§5.2) and answer from one index.
 
@@ -493,7 +507,7 @@ The federation modes of §5.4 do their work at query time. The change feed is th
 
 Implementing the feed is OPTIONAL. A registry that does not implement it returns a `501 Not Implemented` HTTP status code, as for Explore (§5.3.3). A registry operated as an upstream for other registries (§5.4) SHOULD implement it. The feed is served at `{base}/changes`, where `{base}` is the registry's base URL (§5.3).
 
-#### 5.5.1 Request
+#### 5.6.1 Request
 
 ```http
 GET {base}/changes?cursor=0192f3a1-7c4e-7d21-9f0a-1b2c3d4e5f60&limit=500
@@ -501,12 +515,12 @@ GET {base}/changes?cursor=0192f3a1-7c4e-7d21-9f0a-1b2c3d4e5f60&limit=500
 
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
-| cursor | String | Optional. An opaque position returned by a previous response from this registry (§5.5.4). Absent, the feed is read from the start of the retention window (§5.5.5), which yields every identifier the registry currently holds. |
+| cursor | String | Optional. An opaque position returned by a previous response from this registry (§5.6.4). Absent, the feed is read from the start of the retention window (§5.6.5), which yields every identifier the registry currently holds. |
 | limit | Integer | Optional. Maximum number of changes per page (1–1000, default: 500). A registry MAY return fewer. |
 
 The feed takes no filters: a change is small, and a consumer filters on its own side. A registry that needs scoped feeds publishes them at distinct base URLs.
 
-#### 5.5.2 Response
+#### 5.6.2 Response
 
 **Response Schema:**
 
@@ -534,46 +548,46 @@ The feed takes no filters: a change is small, and a consumer filters on its own 
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| changes | Array | Required. Change objects (§5.5.3), ordered oldest to newest. MAY be empty. |
+| changes | Array | Required. Change objects (§5.6.3), ordered oldest to newest. MAY be empty. |
 | cursor | String | Required, even when `changes` is empty. The position up to which the registry had examined its log when it built this page, at or after the last change returned. The consumer stores it and passes it back as the `cursor` parameter. |
-| more | Boolean | Required. `true` when further changes were available when the page was built. `false` means the consumer has reached the tail and waits for its poll interval (§5.5.7). |
-| retention | String | ISO 8601 duration of the retention window (§5.5.5). Required unless the registry retains every change indefinitely and therefore never answers `410`, in which case it is omitted. |
+| more | Boolean | Required. `true` when further changes were available when the page was built. `false` means the consumer has reached the tail and waits for its poll interval (§5.6.7). |
+| retention | String | ISO 8601 duration of the retention window (§5.6.5). Required unless the registry retains every change indefinitely and therefore never answers `410`, in which case it is omitted. |
 
-#### 5.5.3 The Change Object
+#### 5.6.3 The Change Object
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| cursor | String | Required. This change's position in the registry's log, later than the position of every earlier change (§5.5.4). |
+| cursor | String | Required. This change's position in the registry's log, later than the position of every earlier change (§5.6.4). |
 | op | String | Required. `upsert` — the registry admitted the entry, or the entry's content changed — or `delete` — the registry removed it. A consumer MUST skip a change whose `op` it does not recognize and still advance its cursor. A resource's lifecycle state (deprecation, for example) is entry data at the authority and surfaces as an `upsert`. |
 | time | String | Required. ISO 8601 timestamp at which this registry recorded the change, from its own clock. Informational; ordering is by `cursor`. |
 | identifier | String | Required. The entry's `identifier` (Appendix C). Its `<publisher>` names the authority the consumer fetches the entry from. |
 
-A change carries no entry content, no digest, no origin, no hop list, and no reason. Each of those would create a trust or correctness rule that exists only because a peer's copy of an entry was on the wire; the identifier alone lets the consumer obtain the entry from its authority (§5.5.7).
+A change carries no entry content, no digest, no origin, no hop list, and no reason. Each of those would create a trust or correctness rule that exists only because a peer's copy of an entry was on the wire; the identifier alone lets the consumer obtain the entry from its authority (§5.6.7).
 
-#### 5.5.4 Cursors and Delivery
+#### 5.6.4 Cursors and Delivery
 
 * A cursor is an opaque string of 1 to 256 characters drawn from the unreserved characters of RFC 3986 (letters, digits, `-`, `.`, `_`, `~`). Consumers MUST NOT parse or construct cursors and MUST NOT assume any ordering between them; comparing two cursors for equality is permitted. A cursor is meaningful only at the registry that issued it, so a consumer keeps one cursor per upstream.
 * **Delivery.** Replaying from a cursor yields, for every identifier changed after that position, at least its latest change as of read time, in cursor order. Delivery is at-least-once: a consumer applies changes idempotently, and a `delete` for an identifier it does not hold is a no-op. A registry MAY elide a change that a later change for the same identifier supersedes, so re-reading a cursor need not return identical content.
-* **Continuation is always valid.** A registry MUST NOT issue a cursor it would reject. Every cursor it returns — including every page of a replay from an absent cursor — MUST be accepted for as long as the retention window (§5.5.5) is honoured.
-* A registry MUST answer `400 INVALID_ARGUMENT` for a malformed cursor. A well-formed cursor the registry cannot place in its log receives `410 CURSOR_EXPIRED` when it predates the retention window (§5.5.5) and `400 INVALID_ARGUMENT` when the registry can determine that it never issued it; a registry that cannot tell the two apart answers `410`.
+* **Continuation is always valid.** A registry MUST NOT issue a cursor it would reject. Every cursor it returns — including every page of a replay from an absent cursor — MUST be accepted for as long as the retention window (§5.6.5) is honoured.
+* A registry MUST answer `400 INVALID_ARGUMENT` for a malformed cursor. A well-formed cursor the registry cannot place in its log receives `410 CURSOR_EXPIRED` when it predates the retention window (§5.6.5) and `400 INVALID_ARGUMENT` when the registry can determine that it never issued it; a registry that cannot tell the two apart answers `410`.
 * A time-ordered unique identifier (UUIDv7, ULID), a monotonic sequence number, or an append-only log position all satisfy these rules, provided a change becomes visible to readers only after every change with an earlier position is visible (informative).
 
-#### 5.5.5 The Retention Window
+#### 5.6.5 The Retention Window
 
 * `retention` names a sliding window ending at the time of the response. Within the window the registry MUST retain every `delete` it recorded that no later change for the same identifier supersedes, and at least one change for every identifier it currently holds.
-* A registry keeps every held identifier inside the window in one of two ways. Either it retains changes indefinitely, never answers `410`, and omits `retention`; or, before the newest change for an identifier would age out of the window, it re-emits that identifier's latest change under a new cursor. Such a **maintenance repeat** reflects no change to the index and requires no fetch by the registry (§5.5.6). The window SHOULD be at least seven days (`P7D`).
+* A registry keeps every held identifier inside the window in one of two ways. Either it retains changes indefinitely, never answers `410`, and omits `retention`; or, before the newest change for an identifier would age out of the window, it re-emits that identifier's latest change under a new cursor. Such a **maintenance repeat** reflects no change to the index and requires no fetch by the registry (§5.6.6). The window SHOULD be at least seven days (`P7D`).
 * **Bootstrap.** Because the window contains every held identifier, a replay from an absent cursor meets every current identifier and reaches the tail without a `410`. No snapshot endpoint is needed.
-* **Expiry.** A request whose `cursor` predates the window receives `410 CURSOR_EXPIRED`. The consumer then replays from an absent cursor into a staging set, after a randomized delay. When the replay reaches `more: false`, an identifier the consumer learned only from this upstream and that the staging set lacks becomes a `delete` hint (§5.5.7). A `410` never empties the live index.
+* **Expiry.** A request whose `cursor` predates the window receives `410 CURSOR_EXPIRED`. The consumer then replays from an absent cursor into a staging set, after a randomized delay. When the replay reaches `more: false`, an identifier the consumer learned only from this upstream and that the staging set lacks becomes a `delete` hint (§5.6.7). A `410` never empties the live index.
 * **Convergence.** Two complete replays taken while the registry is quiescent yield the same set of (`identifier`, latest `op`) pairs, and the identifiers whose latest `op` is `upsert` are exactly the identifiers the registry holds — where the registry implements List (`GET /agents`), the identifiers List enumerates.
 
-#### 5.5.6 Producer Rules
+#### 5.6.6 Producer Rules
 
-* A registry emits an `upsert` for an identifier only when its own index changed because it ingested the entry through a pipeline §5.2 permits — a crawl, a fetch induced by a feed (§5.5.7), or another pipeline it operates — and admitted it, including a change to an entry it already held. It emits a `delete` only when it removed the entry: after confirming withdrawal at the authority, or because its own admission policy rejected the entry.
+* A registry emits an `upsert` for an identifier only when its own index changed because it ingested the entry through a pipeline §5.2 permits — a crawl, a fetch induced by a feed (§5.6.7), or another pipeline it operates — and admitted it, including a change to an entry it already held. It emits a `delete` only when it removed the entry: after confirming withdrawal at the authority, or because its own admission policy rejected the entry.
 * Learning an identifier from another registry's feed is not, by itself, a reason to emit it; fetching the entry from its authority and admitting it is. Because every emitted change describes a first-party ingestion, registries that subscribe to each other converge without a hop list: when A learns X from B, fetches X from its authority, admits it, and emits it, B receives X, fetches it in turn, finds the entry it already holds, changes nothing, and emits nothing.
-* A maintenance repeat (§5.5.5) carries the identifier's existing `op` under a new cursor. A change carries no digest, so a consumer cannot tell a repeat from a content change and treats every `upsert` alike: it fetches from the authority (a conditional request suffices), and when the fetch returns the entry it already holds, its index does not change and it emits nothing. That is why repeats do not propagate.
+* A maintenance repeat (§5.6.5) carries the identifier's existing `op` under a new cursor. A change carries no digest, so a consumer cannot tell a repeat from a content change and treats every `upsert` alike: it fetches from the authority (a conditional request suffices), and when the fetch returns the entry it already holds, its index does not change and it emits nothing. That is why repeats do not propagate.
 * A registry never rewrites an entry's `identifier` on ingestion or emission.
 
-#### 5.5.7 Consumer Rules
+#### 5.6.7 Consumer Rules
 
 * **Entries come from authorities, not peers.** On the strength of a feed, a consumer MUST NOT index or emit an entry it has not itself obtained from the identifier's authority. For a domain-anchored identifier it resolves the `<publisher>` domain as §5.1 directs, selects from the entry sources so reached the entry whose `identifier` matches, and admits it exactly as it would from a crawl: publisher-authority binding (§4.5.1) where a trust manifest exists, verification per the manifest's declared framework (§4.5.2), and the consumer's own admission policy. An identifier whose entry is not reachable from its publisher domain is not indexed on the strength of the feed; the consumer MAY retry it under its ingestion schedule.
 * **Deletes are hints.** A consumer MUST NOT remove an entry on the strength of a `delete` alone; it confirms withdrawal at the authority. Absence from the manifest alone is not withdrawal, since §5.1 permits sources the manifest does not list: withdrawal is confirmed when the manifest and every source the consumer recorded for the entry, requested with the same credentials the consumer used to obtain the entry, either answer successfully without the entry or answer `404` or `410`. Any other outcome — a timeout, a connection or TLS failure, a `401`, a `5xx` — is a failed confirmation; the consumer then keeps the entry and retries with back-off, so a `delete` cannot be timed to an outage of the authority. How long an entry outlives an authority that stays unreachable is the question §5.2 leaves to the registry for crawled entries; the feed inherits that answer.
@@ -584,13 +598,13 @@ A change carries no entry content, no digest, no origin, no hop list, and no rea
 
 **Security.** No field of a change participates in a trust, precedence, or removal decision. A hostile upstream can make a consumer fetch an authority; it cannot make the consumer index anything the authority does not serve, and it cannot remove an entry the authority still serves. A public feed exposes identifiers only. Amplification toward a producer is bounded by the `limit` ceiling, `429` with `Retry-After`, the minimum poll interval, and cursor validation before storage access; reflected load toward authorities is bounded by the consumer's fetch policy.
 
-#### 5.5.8 Errors
+#### 5.6.8 Errors
 
 | HTTP Code | Error Code | When |
 | :--- | :--- | :--- |
 | 400 | INVALID_ARGUMENT | Malformed `cursor`, or one the registry can determine it never issued; `limit` out of range. |
 | 401 | UNAUTHENTICATED | Credentials missing or rejected, where the deployment requires them. |
-| 410 | CURSOR_EXPIRED | The `cursor` predates the retention window (§5.5.5). |
+| 410 | CURSOR_EXPIRED | The `cursor` predates the retention window (§5.6.5). |
 | 429 | RATE_LIMIT_EXCEEDED | Too many requests; SHOULD carry `Retry-After`. |
 | 501 | NOT_IMPLEMENTED | The registry does not offer a change feed. |
 
@@ -626,10 +640,10 @@ Logical AND is used across different parameters; OR is used within a single para
 | 400 | INVALID_ARGUMENT | Malformed query or invalid filter syntax. |
 | 401 | UNAUTHENTICATED | Invalid or missing credentials. |
 | 404 | NOT_FOUND | Non-existent agent or registry. |
-| 410 | CURSOR_EXPIRED | Change-feed cursor predates the retention window (§5.5). |
+| 410 | CURSOR_EXPIRED | Change-feed cursor predates the retention window (§5.6). |
 | 429 | RATE_LIMIT_EXCEEDED | Too many requests. |
 | 500 | INTERNAL_ERROR | Internal server failure. |
-| 501 | NOT_IMPLEMENTED | Optional endpoint not offered by this registry (§5.3.3, §5.5). |
+| 501 | NOT_IMPLEMENTED | Optional endpoint not offered by this registry (§5.3.3, §5.6). |
 
 ## Appendix C: Agent Naming URN Format {#appendix-c:-agent-naming-urn-format}
 

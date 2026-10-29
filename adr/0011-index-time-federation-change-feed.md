@@ -12,7 +12,7 @@ Nothing in v0.91 lets a registry learn what another registry holds before a quer
 
 ## Decision
 
-Add one optional endpoint, `GET /changes` (§5.5): an ordered, cursor-driven, replayable feed of the identifiers a registry added, updated, or removed, and nothing else.
+Add one optional endpoint, `GET /changes` (§5.6): an ordered, cursor-driven, replayable feed of the identifiers a registry added, updated, or removed, and nothing else.
 
 - **Identifiers, not entries.** A change is `{cursor, op, time, identifier}`. A consumer that learns an identifier fetches the entry from the identifier's authority — for the domain-anchored identifier of Appendix C, the `<publisher>` domain resolved as §5.1 directs — and confirms every delete there. The feed says what exists and what changed; the authority says what the entry says.
 - **Cursors are opaque** and compared for equality only. Delivery is at-least-once, latest change per identifier; a registry MAY compact superseded changes. A registry never issues a cursor it would reject.
