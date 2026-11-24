@@ -13,6 +13,8 @@ paths:
       description: |
         Query a registry with natural language to find matching capabilities.
         Accepts a shared semantic and structural query object. Supports multi-hop federation.
+        Returns the latest version of each identifier (§4.6) among the entries satisfying `filter`, selected
+        before relevance applies, unless the query's `filter` has a `version` key.
       operationId: searchAgents
       requestBody:
         required: true
@@ -42,6 +44,8 @@ paths:
       description: |
         Aggregates statistical facets and bucketing over the matched search space. 
         Returns counts instead of ranked catalog entries. 
+        Facets count Search's matched set, including its version selection (§4.6), so each identifier
+        is counted once unless the query's `filter` has a `version` key.
       operationId: exploreRegistry
       requestBody:
         required: true
@@ -77,6 +81,7 @@ paths:
       description: |
         Deterministic, highly cacheable listing endpoint designed for developer portals.
         Relies on strict EBNF database filtering instead of natural language search.
+        Returns one item for each version of an identifier and does not select a latest version (§4.6).
       operationId: listAgents
       parameters:
         - name: filter
@@ -284,12 +289,19 @@ components:
       allOf:
         - $ref: './ard-entry.schema.json#/$defs/EntryFields'
       type: object
-      description: "An entry as returned in search results. A registry returns the terms useful for selecting among results and MAY omit any other; only `identifier` is required."
+      description: "An entry as returned in search results. A registry returns the terms useful for selecting among results and MAY omit any other. `identifier` is required, and `version` and `updatedAt` are required when the entry has them (§5.3.2)."
       required:
         - identifier
         - score
         - source
       properties:
+        version:
+          type: string
+          description: The entry's resolved version (§4.6). MUST be present when the entry has one.
+        updatedAt:
+          type: string
+          format: date-time
+          description: MUST be present when the entry has one, so a merging registry can order results (§5.3.2).
         score:
           type: integer
           minimum: 0
@@ -340,9 +352,13 @@ components:
               - $ref: './ard-entry.schema.json#/$defs/EntryFields'
             required:
               - identifier
+            properties:
+              version:
+                type: string
+                description: The entry's resolved version (§4.6). MUST be present when the entry has one, since List returns one item per version.
         total:
           type: integer
-          description: Total count of matching entries in the registry.
+          description: Total count of matching entries in the registry, counting each version of an identifier.
         pageToken:
           type: string
           description: Token for paginating subsequent results.

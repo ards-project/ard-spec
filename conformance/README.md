@@ -94,6 +94,10 @@ When checking an ARD manifest (`ard.json`), the tool executes the following vali
   * Warns when it is present but does not contain **2 to 5** natural-language queries.
   * Verifies that standard properties (`entries`, `displayName`, `type`) are correctly typed. ARD requires only `entries` at the top level; other root members are transport-defined, and the tool reports them without failing.
 * **Legacy Field Detection**: Warns (does not fail) on a `"collections"` root property, since removed. ARD ignores unrecognized top-level members, so its presence does not invalidate the manifest.
+* **Versions (§4.6)**:
+  * Fails when two entries share an `identifier` and a `version`, or when an entry without `version` shares its `identifier` with another entry. Versions compare as exact strings, so `1.0` and `1.0.0` are distinct.
+  * Warns when some versions of one `identifier` are Semantic Versioning 2.0.0 strings and some are not, because every version is then ordered by `updatedAt`.
+  * Warns when several versions of one `identifier` cannot be ordered: two have equal Semantic Versioning precedence once build metadata is ignored, or not every version is a Semantic Versioning 2.0.0 string and some entry has no valid `updatedAt` with a UTC offset, or two entries have the same `updatedAt`.
 
 ---
 
