@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 """
 Mock Agent Registry REST API Server
-Implements standard v0.4 Agentic Resource Discovery REST endpoints:
+Implements standard Agentic Resource Discovery REST endpoints:
   - POST /search
   - GET /agents
+  - GET /agents/{identifier}
 Zero dependencies, uses Python standard library.
 """
 
+import hashlib
 import sys
 import json
+import re
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+from socketserver import TCPServer
+from urllib.parse import unquote, urlparse
 
 PORT = 9010
+URN_REGEX = re.compile(r"^urn:air:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$")
+INVALID_PERCENT_ENCODING = re.compile(r"%(?![0-9A-Fa-f]{2})")
 
 # Mock catalog database seeded from ./ard.json
 MOCK_CATALOG_ENTRIES = [
@@ -54,14 +60,24 @@ MOCK_CATALOG_ENTRIES = [
   }
 ]
 
+class MockHTTPServer(HTTPServer):
+    def server_bind(self):
+        # HTTPServer performs a reverse DNS lookup here, which can stall offline demos.
+        TCPServer.server_bind(self)
+        host, port = self.server_address[:2]
+        self.server_name = host
+        self.server_port = port
+
 class MockRegistryHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         # Print logs to stderr with a custom marker
         sys.stderr.write(f"  [Mock Registry] {format%args}\n")
 
-    def _send_json(self, status, data):
+    def _send_json(self, status, data, headers=None):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
+        for name, value in (headers or {}).items():
+            self.send_header(name, value)
         self.end_headers()
         self.wfile.write(json.dumps(data).encode('utf-8'))
 
@@ -77,6 +93,54 @@ class MockRegistryHandler(BaseHTTPRequestHandler):
                 "pageToken": None
             }
             self._send_json(200, response)
+        elif parsed_path.path.startswith("/agents/"):
+            raw_identifier = parsed_path.path[len("/agents/"):]
+            try:
+                if not raw_identifier or INVALID_PERCENT_ENCODING.search(raw_identifier):
+                    raise ValueError("invalid percent-encoding")
+                identifier = unquote(raw_identifier, encoding="utf-8", errors="strict")
+            except (UnicodeDecodeError, ValueError):
+                error_response = {
+                    "errorCode": "INVALID_ARGUMENT",
+                    "message": "The identifier path parameter is not valid UTF-8 percent-encoding."
+                }
+                self._send_json(400, error_response)
+                return
+
+            if not URN_REGEX.match(identifier):
+                error_response = {
+                    "errorCode": "INVALID_ARGUMENT",
+                    "message": "The identifier path parameter is not a valid urn:air: identifier."
+                }
+                self._send_json(400, error_response)
+                return
+
+            entry = next(
+                (item for item in MOCK_CATALOG_ENTRIES if item["identifier"] == identifier),
+                None
+            )
+            if entry is None:
+                error_response = {
+                    "errorCode": "NOT_FOUND",
+                    "message": f"ARD entry '{identifier}' was not found."
+                }
+                self._send_json(404, error_response, {"Cache-Control": "no-cache"})
+                return
+
+            canonical_entry = json.dumps(entry, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            etag = f'"{hashlib.sha256(canonical_entry).hexdigest()}"'
+            cache_headers = {
+                "Cache-Control": "public, max-age=60",
+                "ETag": etag
+            }
+            if self.headers.get("If-None-Match") == etag:
+                self.send_response(304)
+                for name, value in cache_headers.items():
+                    self.send_header(name, value)
+                self.end_headers()
+                return
+
+            self._send_json(200, entry, cache_headers)
         else:
             # Return 404 for other routes
             error_response = {
@@ -195,7 +259,7 @@ class MockRegistryHandler(BaseHTTPRequestHandler):
 
 def run_server():
     server_address = ('127.0.0.1', PORT)
-    httpd = HTTPServer(server_address, MockRegistryHandler)
+    httpd = MockHTTPServer(server_address, MockRegistryHandler)
     print(f"🚀 [Mock Registry] Running server on http://127.0.0.1:{PORT}...")
     try:
         httpd.serve_forever()
