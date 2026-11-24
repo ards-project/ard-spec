@@ -23,8 +23,8 @@
         },
         "identifier": {
           "type": "string",
-          "pattern": "^urn:air:[a-zA-Z0-9.-]+(:[a-zA-Z0-9._-]+)+$",
-          "description": "Globally unique discovery handle. Domain-anchored URN: urn:air:<publisher>:<namespace>:<agent-name>. The <publisher> segment is the authority anchor used for publisher-authority binding."
+          "pattern": "^urn:air:[a-zA-Z0-9.-]+:(?:[a-zA-Z0-9._~!$&'()*+,;=@/-]|%[0-9a-fA-F]{2})+(:(?:[a-zA-Z0-9._~!$&'()*+,;=@/-]|%[0-9a-fA-F]{2})+)?$",
+          "description": "Globally unique discovery handle. Domain-anchored URN in AI Catalog's grammar: urn:air:<publisher>:<name>[:<kind>] (Appendix C). The <publisher> component, everything before the first colon after urn:air:, is the authority anchor used for publisher-authority binding."
         },
         "displayName": {
           "type": "string",

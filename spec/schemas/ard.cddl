@@ -26,7 +26,7 @@ ard-entry = {
 }
 
 ard-entry-required = (
-  identifier: tstr, ; URN pattern: urn:air:<publisher>:<namespace>:<agent-name>
+  identifier: tstr, ; URN pattern: urn:air:<publisher>:<name>[:<kind>] (Appendix C)
   displayName: tstr,
   type: tstr,       ; IANA Media Type (e.g. application/mcp-server-card+json)
   content-delivery  ; strict value-or-reference
