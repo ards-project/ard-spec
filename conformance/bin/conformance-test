@@ -17,8 +17,12 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
-# Strict URN Regex matching urn:air:<publisher>:<namespace>:<agent-name>
-URN_REGEX = re.compile(r"^urn:air:([a-zA-Z0-9.-]+)(?::([a-zA-Z0-9._:-]+))?:([a-zA-Z0-9._-]+)$")
+# urn:air:<publisher>:<name>[:<kind>], AI Catalog's grammar (ADR-0011). Colons separate only the three components;
+# the name and kind are RFC 8141 NSS characters other than ":", so a name may carry "/" or "." for its own structure.
+URN_COMPONENT = r"(?:[a-zA-Z0-9._~!$&'()*+,;=@/-]|%[0-9a-fA-F]{2})+"
+URN_REGEX = re.compile(
+    r"^urn:air:(?P<publisher>[a-zA-Z0-9.-]+):(?P<name>" + URN_COMPONENT + r")(?::(?P<kind>" + URN_COMPONENT + r"))?$"
+)
 
 # RFC 6838 restricted-name for type/subtype plus RFC 9110 parameters.
 RESTRICTED_NAME = r"[0-9A-Za-z][0-9A-Za-z!#$&^_.+\-]{0,126}"
@@ -326,10 +330,13 @@ class ConformanceTester:
                 # URN pattern checks
                 match = URN_REGEX.match(ident)
                 if not match:
-                    self.add_error(f"[{label}] Identifier '{ident}' does not match RFC 8141 URN pattern 'urn:air:<publisher>:<namespace>:<agent-name>'.")
+                    self.add_error(f"[{label}] Identifier '{ident}' does not match the URN pattern 'urn:air:<publisher>:<name>[:<kind>]'.")
                 else:
-                    publisher, namespace, name = match.groups()
-                    print_success(f"[{label}] Valid URN format. Publisher: '{publisher}', Name: '{name}'.")
+                    kind = f", Kind: '{match.group('kind')}'" if match.group("kind") else ""
+                    print_success(
+                        f"[{label}] Valid URN format. Publisher: '{match.group('publisher')}', "
+                        f"Name: '{match.group('name')}'{kind}."
+                    )
 
             disp_name = entry.get("displayName")
             if not disp_name:

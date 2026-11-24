@@ -73,7 +73,7 @@ MALFORMED_MEDIA_TYPES = (
 
 def _entry(media_type, index):
     return {
-        "identifier": f"urn:air:media-types.test:fixture:entry-{index}",
+        "identifier": f"urn:air:media-types.test:fixture/entry-{index}",
         "displayName": f"Media type fixture {index}",
         "type": media_type,
         "url": f"https://media-types.test/artifacts/{index}",

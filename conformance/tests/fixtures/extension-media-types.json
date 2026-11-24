@@ -6,7 +6,7 @@
   },
   "entries": [
     {
-      "identifier": "urn:air:media-types.test:fixture:standard-mcp",
+      "identifier": "urn:air:media-types.test:fixture/standard-mcp",
       "displayName": "Standard MCP card",
       "type": "application/mcp-server-card+json",
       "url": "https://media-types.test/artifacts/standard-mcp",
@@ -16,7 +16,7 @@
       ]
     },
     {
-      "identifier": "urn:air:media-types.test:fixture:standard-a2a",
+      "identifier": "urn:air:media-types.test:fixture/standard-a2a",
       "displayName": "Standard A2A card",
       "type": "application/a2a-agent-card+json",
       "url": "https://media-types.test/artifacts/standard-a2a",
@@ -26,7 +26,7 @@
       ]
     },
     {
-      "identifier": "urn:air:media-types.test:fixture:vendor-card",
+      "identifier": "urn:air:media-types.test:fixture/vendor-card",
       "displayName": "Vendor extension card",
       "type": "application/vnd.example.tool-manifest+json",
       "url": "https://media-types.test/artifacts/vendor-card",
@@ -36,7 +36,7 @@
       ]
     },
     {
-      "identifier": "urn:air:media-types.test:fixture:extension-bundle",
+      "identifier": "urn:air:media-types.test:fixture/extension-bundle",
       "displayName": "Extension bundle",
       "type": "application/example-bundle+zip",
       "url": "https://media-types.test/artifacts/extension-bundle",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "identifier": "urn:air:media-types.test:fixture:extension-widget",
+      "identifier": "urn:air:media-types.test:fixture/extension-widget",
       "displayName": "Extension widget",
       "type": "application/x-example-widget",
       "url": "https://media-types.test/artifacts/extension-widget",
@@ -56,7 +56,7 @@
       ]
     },
     {
-      "identifier": "urn:air:media-types.test:fixture:deprecated-mcp",
+      "identifier": "urn:air:media-types.test:fixture/deprecated-mcp",
       "displayName": "Deprecated MCP card",
       "type": "application/mcp-server+json",
       "url": "https://media-types.test/artifacts/deprecated-mcp",
@@ -66,7 +66,7 @@
       ]
     },
     {
-      "identifier": "urn:air:media-types.test:fixture:other-top-level",
+      "identifier": "urn:air:media-types.test:fixture/other-top-level",
       "displayName": "Other top-level type",
       "type": "text/x-example-notes",
       "url": "https://media-types.test/artifacts/other-top-level",
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "identifier": "urn:air:media-types.test:fixture:malformed-type",
+      "identifier": "urn:air:media-types.test:fixture/malformed-type",
       "displayName": "Malformed media type",
       "type": "application/ example",
       "url": "https://media-types.test/artifacts/malformed-type",
