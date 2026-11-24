@@ -78,7 +78,7 @@
             "type": ["string", "number", "boolean", "null"]
           }
         },
-        "TrustManifest": {
+        "trustManifest": {
           "$ref": "#/$defs/TrustManifest"
         }
       },
