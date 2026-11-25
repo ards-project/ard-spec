@@ -7,7 +7,7 @@
   },
   "entries": [
     {
-      "identifier": "urn:air:fda.gov:api:drug-ndc",
+      "identifier": "urn:air:fda.gov:api/drug-ndc",
       "displayName": "FDA Drug NDC Directory API",
       "type": "application/mcp-server-card+json",
       "url": "https://api.fda.gov/drug/ndc.json",

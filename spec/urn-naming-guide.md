@@ -9,8 +9,10 @@ This guide provides architectural best practices and implementation guidance for
 Every agent or capability in the discovery catalog is uniquely identified by a domain-anchored URN namespace (as defined in RFC 8141):
 
 ```text
-urn:air:<publisher>:<namespace>:<agent-name>
+urn:air:<publisher>:<name>[:<kind>]
 ```
+
+This is AI Catalog's `urn:air` grammar (see Appendix C of the specification and [ADR-0011](../adr/0011-adopt-ai-catalog-urn-grammar.md)). Colons separate only the publisher, the name and the optional kind. The name's internal structure is yours: use `/` or `.` to organize it, as in `urn:air:acme.com:finance/tax-agent`.
 
 The absolute foundational principle of this identifier is the separation of **logical identity** from **physical location**:
 * **Identity (The "Noun")**: The URN represents the permanent, abstract logical identity of the agent, establishing a stable primary key for search indexes and clients. It does *not* change based on where the agent is running or deployed.
@@ -21,7 +23,7 @@ The absolute foundational principle of this identifier is the separation of **lo
 ## 2. Why `localhost` is an Anti-Pattern in URNs
 
 When running and testing agents locally, developers may be tempted to structure URNs like:
-`urn:air:localhost:agent:assistant`
+`urn:air:localhost:assistant`
 
 Using `'localhost'` as the URN publisher is not allowed for the following reasons:
 
@@ -39,8 +41,8 @@ The specification provides clear, flexible pathways for developers to construct 
 If you are building and testing an agent that will **only run locally** and will never be published to a shared or public discovery registry, you can use a **placeholder FQDN** to satisfy syntax validators:
 
 * **Recommended Placeholders** (Using RFC 2606 reserved testing domains):
-  * `urn:air:agent.localhost:<namespace>:<agent-name>` (Recommended for local sandboxes — reserved TLD mapping natively to loopback, avoiding `/etc/hosts` changes)
-  * `urn:air:example.com:<namespace>:<agent-name>` (Reserved domain for documentation and static examples)
+  * `urn:air:agent.localhost:<name>[:<kind>]` (Recommended for local sandboxes — reserved TLD mapping natively to loopback, avoiding `/etc/hosts` changes)
+  * `urn:air:example.com:<name>[:<kind>]` (Reserved domain for documentation and static examples)
 
 #### Example Manifest (`ai-catalog.json`):
 ```json
@@ -51,7 +53,7 @@ If you are building and testing an agent that will **only run locally** and will
   },
   "entries": [
     {
-      "identifier": "urn:air:agent.localhost:weather:telemetry",
+      "identifier": "urn:air:agent.localhost:weather/telemetry",
       "displayName": "Local Weather Node",
       "type": "application/mcp-server-card+json",
       "url": "http://localhost:8080/mcp",
@@ -70,10 +72,10 @@ If you are a solo developer who wants to **publicly share** or distribute your c
 Since domain names are already globally unique via the DNS root, anchoring your URN to subdomains or public registries prevents collisions:
 
 1. **Alternative Code Hosts / Package Registries**:
-   If you distribute via other code hosting or packaging platforms, use their domain combined with your user namespace:
-   * GitLab: `urn:air:gitlab.com:your-username:my-agent`
-   * npm: `urn:air:npmjs.com:your-username:my-agent`
-   * PyPI: `urn:air:pypi.org:your-username:my-agent`
+   If you distribute via other code hosting or packaging platforms, use their domain, with your username as the first part of the name:
+   * GitLab: `urn:air:gitlab.com:your-username/my-agent`
+   * npm: `urn:air:npmjs.com:your-username/my-agent`
+   * PyPI: `urn:air:pypi.org:your-username/my-agent`
 
 2. **Free Subdomains**:
    If you host a portfolio, documentation, or personal page using a free hosting provider, use your allocated subdomain:
@@ -88,7 +90,7 @@ For developers inside an enterprise or those who own a custom domain (e.g., `acm
 This ensures that the URN remains completely identical between their local development, staging, and production catalogs, avoiding the need to rewrite downstream orchestration rules or client references.
 
 * **Guidance**:
-  * **URN (Identity)**: Use the real FQDN (e.g., `urn:air:acme.com:finance:tax-agent`).
+  * **URN (Identity)**: Use the real FQDN (e.g., `urn:air:acme.com:finance/tax-agent`).
   * **Physical Endpoint**: Point to `localhost` in the local development manifest, and to the production gateway or API host in the production manifest.
 
 #### Local Manifest Example (`ai-catalog-local.json`):
@@ -101,7 +103,7 @@ This ensures that the URN remains completely identical between their local devel
   },
   "entries": [
     {
-      "identifier": "urn:air:acme.com:finance:tax-agent",
+      "identifier": "urn:air:acme.com:finance/tax-agent",
       "displayName": "Corporate Tax Assistant",
       "type": "application/a2a-agent-card+json",
       "url": "http://localhost:8000/agents/tax-assistant",
@@ -121,7 +123,7 @@ This ensures that the URN remains completely identical between their local devel
   },
   "entries": [
     {
-      "identifier": "urn:air:acme.com:finance:tax-agent",
+      "identifier": "urn:air:acme.com:finance/tax-agent",
       "displayName": "Corporate Tax Assistant",
       "type": "application/a2a-agent-card+json",
       "url": "https://api.acme.com/finance/tax-assistant",
@@ -148,6 +150,6 @@ This ensures that the URN remains completely identical between their local devel
 
 | Deployment Context | Publisher FQDN | URN Example | Physical URL (Endpoint) | Trust Manifest Capability |
 | :--- | :--- | :--- | :--- | :--- |
-| **Enterprise Production** | Fully verified corporate domain | `urn:air:aws.amazon.com:finance:trader` | `https://api.aws.amazon.com/agents/trader` | Fully supported (SPIFFE/mTLS/DID) |
-| **Solo Developer (Public)** | Registered user namespace / free subdomain | `urn:air:gitlab.com:johndoe:weather-tool` | `https://gitlab.com/johndoe/weather-tool` | Basic signatures / web DID |
-| **Local / Private Dev** | Non-resolvable placeholder domain | `urn:air:agent.localhost:testing:analyzer` | `http://localhost:8080/analyzer` | None (Syntax verification only) |
+| **Enterprise Production** | Fully verified corporate domain | `urn:air:aws.amazon.com:finance/trader` | `https://api.aws.amazon.com/agents/trader` | Fully supported (SPIFFE/mTLS/DID) |
+| **Solo Developer (Public)** | Registered user namespace / free subdomain | `urn:air:gitlab.com:johndoe/weather-tool` | `https://gitlab.com/johndoe/weather-tool` | Basic signatures / web DID |
+| **Local / Private Dev** | Non-resolvable placeholder domain | `urn:air:agent.localhost:testing/analyzer` | `http://localhost:8080/analyzer` | None (Syntax verification only) |

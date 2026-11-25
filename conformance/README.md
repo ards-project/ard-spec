@@ -80,7 +80,7 @@ When checking an ARD manifest (`ard.json`), the tool executes the following vali
 * **JSON Structural Integrity**: Parses the manifest payload to ensure it is valid, uncorrupted JSON.
 * **JSON Schema Draft 2020-12 Conformance**: If the Python `jsonschema` library is installed (`pip install jsonschema`), the tool validates the document against `ArdManifest` and then every entry against `ArdEntry`, both from the authoritative [ard-entry.schema.json](../spec/schemas/ard-entry.schema.json).
 * **Strict URN Pattern Matching**: Enforces that each entry's `identifier` adheres strictly to the domain-anchored URN namespace format defined in the spec:
-  `urn:air:<publisher>:<namespace>:<agent-name>` (RFC 8141).
+  `urn:air:<publisher>:<name>[:<kind>]` (RFC 8141, Appendix C).
 * **Value-or-Reference Delivery**: Enforces the mutual exclusivity constraint of the specification. Each entry **MUST** contain precisely one of either `"url"` (remote reference) or `"data"` (embedded payload), and will fail if both or neither are provided.
 * **Media Type Diagnostics**:
   * Accepts the standard discovery media types without a diagnostic.

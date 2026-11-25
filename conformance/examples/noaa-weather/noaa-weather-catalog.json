@@ -7,7 +7,7 @@
   },
   "entries": [
     {
-      "identifier": "urn:air:noaa.gov:api:climate-data-online",
+      "identifier": "urn:air:noaa.gov:api/climate-data-online",
       "displayName": "NOAA Climate Data Online (CDO) API",
       "type": "application/mcp-server-card+json",
       "url": "https://www.ncdc.noaa.gov/cdo-web/api/v2/metadata.json",

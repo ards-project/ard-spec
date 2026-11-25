@@ -1,7 +1,7 @@
 {
   "entries": [
     {
-      "identifier": "urn:air:tools.example.com:server:invoice-reader",
+      "identifier": "urn:air:tools.example.com:server/invoice-reader",
       "displayName": "Invoice Reader",
       "type": "application/mcp-server-card+json",
       "url": "https://tools.example.com/mcp/invoice-reader.json",

@@ -99,7 +99,7 @@ The default namespace supplies definitions for the terms below; ARD determines w
 
 | Term | Requirement | Notes |
 | :--- | :--- | :--- |
-| identifier | MUST | Discovery handle for the resource, which SHOULD stay the same across its versions; with `version` it names one entry (§4.6). Domain-anchored URN form (`urn:air:<publisher>:[<namespace>:]<agent-name>`, where `<namespace>` is optional and MAY span several segments); see Appendix C. The JSON-LD `@id` MAY mirror it. |
+| identifier | MUST | Discovery handle for the resource, which SHOULD stay the same across its versions; with `version` it names one entry (§4.6). Domain-anchored URN in AI Catalog's grammar, `urn:air:<publisher>:<name>[:<kind>]`, where `<name>` has publisher-defined structure and `<kind>` is optional; see Appendix C. The JSON-LD `@id` MAY mirror it. |
 | displayName | MUST | Human-readable name. |
 | type | MUST | Artifact type as an IANA Media Type (§3.3). |
 | url _or_ data | MUST (exactly one) | Value-or-reference (§4.3). |
@@ -129,7 +129,7 @@ A plain entry — no `@context`, so its terms resolve to the default namespace:
 
 ```json
 {
-  "identifier": "urn:air:acme.com:server:weather",
+  "identifier": "urn:air:acme.com:server/weather",
   "displayName": "Weather Data Node",
   "type": "application/mcp-server-card+json",
   "url": "https://api.acme.com/mcp/weather.json",
@@ -149,7 +149,7 @@ The same entry enriched with terms from an additional namespace via `@context`. 
   "@context": {
     "acme": "https://acme.com/vocab#"
   },
-  "identifier": "urn:air:acme.com:server:weather",
+  "identifier": "urn:air:acme.com:server/weather",
   "displayName": "Weather Data Node",
   "type": "application/mcp-server-card+json",
   "url": "https://api.acme.com/mcp/weather.json",
@@ -168,7 +168,7 @@ A skill entry from a solo developer, no trust ceremony required:
 
 ```json
 {
-  "identifier": "urn:air:github.com:alice-dev:pptx-creator",
+  "identifier": "urn:air:github.com:alice-dev/pptx-creator",
   "displayName": "pptx-creator",
   "type": "application/agent-skills+md",
   "url": "https://github.com/alice-dev/pptx-creator",
@@ -316,7 +316,7 @@ In a response, an entry MUST carry `identifier`, and MUST carry `version` and `u
 {
   "results": [
     {
-      "identifier": "urn:air:acme.com:agent:assistant",
+      "identifier": "urn:air:acme.com:agent/assistant",
       "displayName": "Corporate Assistant (A2A)",
       "type": "application/a2a-agent-card+json",
       "url": "https://api.acme.com/agents/assistant.json",
@@ -335,7 +335,7 @@ In a response, an entry MUST carry `identifier`, and MUST carry `version` and `u
   ],
   "referrals": [
     {
-      "identifier": "urn:air:nlweb.ai:registry:public",
+      "identifier": "urn:air:nlweb.ai:registry/public",
       "displayName": "Public Agent Finder",
       "type": "application/ai-registry+json",
       "url": "https://finder.nlweb.ai/search"
@@ -471,7 +471,7 @@ This gives the client full control over the federation topology without requirin
 {
   "results": [
     {
-      "identifier": "urn:air:acme.com:agent:expense",
+      "identifier": "urn:air:acme.com:agent/expense",
       "displayName": "Corporate Expenses",
       "type": "application/a2a-agent-card+json",
       "url": "https://internal.corp/agents/expense.json",
@@ -481,13 +481,13 @@ This gives the client full control over the federation topology without requirin
   ],
   "referrals": [
     {
-      "identifier": "urn:air:nlweb.ai:registry:public",
+      "identifier": "urn:air:nlweb.ai:registry/public",
       "displayName": "Public Agent Finder",
       "type": "application/ai-registry+json",
       "url": "https://finder.nlweb.ai/search"
     },
     {
-      "identifier": "urn:air:example.com:registry:travel",
+      "identifier": "urn:air:example.com:registry/travel",
       "displayName": "Travel Agent Finder",
       "type": "application/ai-registry+json",
       "url": "https://travel.finder.example/search"
@@ -547,12 +547,28 @@ Logical AND is used across different parameters; OR is used within a single para
 
 ## Appendix C: Agent Naming URN Format {#appendix-c:-agent-naming-urn-format}
 
-The discovery identifier uses a domain-anchored URN form, `urn:air:<publisher>:[<namespace>:]<agent-name>`, where `<publisher>` is a fully qualified domain name. `<namespace>` is optional and MAY contain more than one colon-separated segment, so `urn:air:example.com:weather-server` and `urn:air:example.com:finance:trading:trader` are both valid; only `<publisher>` and the terminal `<agent-name>` are required (ADR-0007). Restricting the discovery identifier to this form, rather than allowing arbitrary URIs, provides fundamental architectural benefits for federated discovery:
+The discovery identifier is an AI Catalog `urn:air` identifier ([AI Catalog, Catalog Entry](https://github.com/Agent-Card/ai-catalog/blob/main/specification/ai-catalog.md#catalog-entry); ADR-0011):
+
+```text
+urn:air:<publisher>:<name>[:<kind>]
+```
+
+- `<publisher>` is the fully qualified domain name of the publisher, and is everything between `urn:air:` and the next colon.
+- `<name>` is the stable logical name the publisher assigns. Its internal structure is the publisher's: a publisher MAY use `/` or `.` to organize names, as in `urn:air:example.com:finance/trading/trader`.
+- `<kind>` is an OPTIONAL single-component suffix describing the conceptual kind of resource, assigned by the publisher. This specification defines no vocabulary of kinds; an entry's `type` continues to say how to process it.
+
+Colons separate only these three components, and neither `<name>` nor `<kind>` contains a literal colon. Both are otherwise drawn from the characters RFC 8141 permits in a namespace-specific string. `urn:air:example.com:weather-server`, `urn:air:example.com:engineering/code-review` and `urn:air:example.com:engineering/code-review:skill` are all valid; the last two are different identifiers.
+
+Identifiers are compared as complete strings, case-sensitively and without normalization, kind included, so a registry MUST NOT strip or ignore `<kind>` when matching, deduplicating or filtering on `identifier`. This is AI Catalog's comparison rule, and it is stricter than RFC 8141 §3.1 equivalence, which ignores the case of `urn` and the NID and of percent-encoding hex digits; a registry MUST NOT substitute a generic URN equivalence function. So that one resource has one spelling, a publisher writes `urn:air:` in lowercase, SHOULD write `<publisher>` in lowercase, and writes percent-encodings with uppercase hex digits. A registry incorporating an entry under a publisher-authorized `urn:air` identifier MUST preserve it exactly, as AI Catalog's Catalog Projection requires.
+
+An identifier written to the grammar ADR-0007 described, `urn:air:<publisher>:[<namespace>:]<agent-name>`, reads differently under this one. `urn:air:acme.com:finance:trader` is name `finance` and kind `trader`, and an identifier with more than three components after `urn:air:` is invalid. A publisher that used colon-separated namespaces SHOULD move the namespace into the name, as `urn:air:acme.com:finance/trader`.
+
+Restricting the discovery identifier to this form, rather than allowing arbitrary URIs, provides fundamental architectural benefits for federated discovery:
 
 1. **Nomenclature Stability (Immutable Noun vs. Mutable Location)**: Arbitrary URIs, particularly HTTP URLs, conflate the logical identity of a capability with its physical network location. The `urn:air:` identifier acts as an abstract, permanent contract; physical distribution and transport bindings are decoupled into the `url` or `data` term, allowing infrastructure to evolve without breaking client discovery, indexing, or orchestration code.
 2. **Strict Separation of Concerns**: Federated registries require a stable primary key to index capabilities; zero-trust runtimes require dynamic cryptographic tokens (SPIFFE IDs, DIDs, X.509 certificates) to authenticate workloads. The `urn:air:` form cleanly decouples the searchable discovery handle from the security principal, allowing the discovery index and the security mesh to operate independently.
 3. **Decentralized Trust and Authority Binding**: Mandating that `<publisher>` be a valid FQDN establishes a verifiable authority anchor. Registries extract the domain and cross-reference it with the cryptographic claim in `trustManifest.identity` (§4.5.1); a workload that cannot produce a valid attestation issued by that domain is rejected, without a centralized naming committee.
-4. **Search and Discovery Ergonomics (The @ Resolution Pattern)**: The structured hierarchy lets registries parse publisher and terminal short name deterministically (e.g. `Assistant@Acme`), enabling high-performance semantic filtering, aggregation, and conflict resolution (e.g. displaying `Assistant` with a verified `Acme` shield).
+4. **Search and Discovery Ergonomics (The @ Resolution Pattern)**: The fixed component boundaries let registries parse the publisher and the name deterministically (e.g. `Assistant@Acme`), enabling high-performance semantic filtering, aggregation, and conflict resolution (e.g. displaying `Assistant` with a verified `Acme` shield). When a display name is derived from the identifier, it is the entire `<name>`, taken verbatim without interpreting its internal structure, as AI Catalog's display-name resolution specifies.
 5. **Cross-Network Uniqueness and Federation Scalability**: Domain-anchored URNs guarantee global uniqueness across federated registries without centralized registration, because domain names are already globally unique via the DNS root — eliminating collision risks when merging catalogs in auto or referrals federation modes.
 
 The JSON-LD `@id` of an entry MAY be set to the same identifier (or to an IRI that resolves to the resource); when both are present they MUST denote the same resource.

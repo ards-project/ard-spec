@@ -15,7 +15,7 @@
         "pay": "https://agenticresourcediscovery.org/ns/payment#",
         "schema": "https://schema.org/"
       },
-      "identifier": "urn:air:nevermined.app:agent:legal-analyzer",
+      "identifier": "urn:air:nevermined.app:agent/legal-analyzer",
       "displayName": "Legal Document Analyzer",
       "type": "application/a2a-agent-card+json",
       "description": "Reviews contracts and legal documents, flags risky clauses, and summarizes obligations. Pay-per-call over x402 in USDC on Base.",
@@ -77,7 +77,7 @@
         "pay": "https://agenticresourcediscovery.org/ns/payment#",
         "schema": "https://schema.org/"
       },
-      "identifier": "urn:air:nevermined.app:agent:financial-summarizer",
+      "identifier": "urn:air:nevermined.app:agent/financial-summarizer",
       "displayName": "Financial Report Summarizer",
       "type": "application/a2a-agent-card+json",
       "description": "Summarizes earnings reports and financial filings into plain-language briefs. Pay-per-call by card, settled off-chain.",
@@ -123,7 +123,7 @@
       }
     },
     {
-      "identifier": "urn:air:nevermined.app:agent:weather-lookup",
+      "identifier": "urn:air:nevermined.app:agent/weather-lookup",
       "displayName": "Open Weather Lookup",
       "type": "application/a2a-agent-card+json",
       "description": "Free current-conditions and forecast lookup by city or coordinates. No payment required.",
