@@ -11,6 +11,7 @@ import re
 import json
 import urllib.request
 import urllib.error
+from datetime import datetime, timezone
 
 # Ensure UTF-8 output on Windows (cp1252 default cannot encode ✓/✗/⚠)
 if hasattr(sys.stdout, 'reconfigure'):
@@ -22,6 +23,21 @@ if hasattr(sys.stdout, 'reconfigure'):
 URN_COMPONENT = r"(?:[a-zA-Z0-9._~!$&'()*+,;=@/-]|%[0-9a-fA-F]{2})+"
 URN_REGEX = re.compile(
     r"^urn:air:(?P<publisher>[a-zA-Z0-9.-]+):(?P<name>" + URN_COMPONENT + r")(?::(?P<kind>" + URN_COMPONENT + r"))?$"
+)
+
+# Semantic Versioning 2.0.0 (semver.org), used to decide whether versions of one
+# identifier can be ordered by precedence (§4.6). ASCII digits only, whole string.
+SEMVER_NUMERIC = r"(?:0|[1-9][0-9]*)"
+SEMVER_PRERELEASE_ID = r"(?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)"
+SEMVER_REGEX = re.compile(
+    rf"{SEMVER_NUMERIC}\.{SEMVER_NUMERIC}\.{SEMVER_NUMERIC}"
+    rf"(?:-{SEMVER_PRERELEASE_ID}(?:\.{SEMVER_PRERELEASE_ID})*)?"
+    r"(?:\+[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)?"
+)
+
+# RFC 3339 §5.6 date-time, which needs a UTC offset (§4.6).
+RFC3339_REGEX = re.compile(
+    r"([0-9]{4}-[0-9]{2}-[0-9]{2})[Tt]([0-9]{2}:[0-9]{2}:[0-9]{2})(?:\.([0-9]+))?([Zz]|[+-][0-9]{2}:[0-9]{2})"
 )
 
 # RFC 6838 restricted-name for type/subtype plus RFC 9110 parameters.
@@ -97,6 +113,28 @@ COLOR_RED = "\033[31m"
 COLOR_GREEN = "\033[32m"
 COLOR_YELLOW = "\033[33m"
 COLOR_CYAN = "\033[36m"
+
+def parse_timestamp(value):
+    """Parse an RFC 3339 date-time with a UTC offset (§4.6) into a comparable key, or return None.
+
+    The pattern is checked first so the result doesn't depend on which
+    forms the running Python's datetime.fromisoformat accepts, and the
+    fraction is kept apart because some versions accept only 3 or 6 digits.
+    """
+    if not isinstance(value, str):
+        return None
+    match = RFC3339_REGEX.fullmatch(value)
+    if match is None:
+        return None
+    date, time, fraction, offset = match.groups()
+    offset = "+00:00" if offset in ("Z", "z") else offset
+    try:
+        seconds = datetime.fromisoformat(f"{date}T{time}{offset}").astimezone(timezone.utc)
+    except ValueError:
+        return None
+    # The fraction is kept as its digits, without trailing zeros, so instants
+    # that differ past the microsecond stay distinct.
+    return seconds, (fraction or "").rstrip("0")
 
 def print_header(title):
     print(f"\n{COLOR_BOLD}{COLOR_CYAN}=== {title} ==={COLOR_RESET}")
@@ -388,11 +426,58 @@ class ConformanceTester:
                     if not trust_id:
                         self.add_error(f"[{label}] 'trustManifest' is missing required 'identity' field.")
 
+        self.check_versions(entries)
+
         # Top-level deprecated property check
         if "collections" in data:
             self.add_warning("Found 'collections' at root. Top-level collections were removed; ARD ignores unrecognized top-level members, so this does not invalidate the manifest, but hierarchies should be modeled inside 'entries'.")
 
         return len(self.errors) == 0
+
+    def check_versions(self, entries):
+        """Check version uniqueness and ordering across a manifest's entries (§4.6)."""
+        by_identifier = {}
+        for entry in entries:
+            if isinstance(entry, dict) and isinstance(entry.get("identifier"), str):
+                by_identifier.setdefault(entry["identifier"], []).append(entry)
+
+        for ident, group in by_identifier.items():
+            invalid = [entry for entry in group if "version" in entry and not isinstance(entry["version"], str)]
+            for entry in invalid:
+                self.add_error(f"[{ident}] 'version' {json.dumps(entry['version'])} MUST be a string (§4.6).")
+            if len(group) < 2:
+                continue
+            if any("version" not in entry for entry in group):
+                self.add_error(f"[{ident}] Listed {len(group)} times and at least one entry has no 'version'. An entry without 'version' MUST be the only entry with its identifier (§4.6).")
+                continue
+            if invalid:
+                continue
+            counts = {}
+            for entry in group:
+                counts[entry["version"]] = counts.get(entry["version"], 0) + 1
+            duplicates = sorted(version for version, count in counts.items() if count > 1)
+            for version in duplicates:
+                self.add_error(f"[{ident}] Version {json.dumps(version)} is listed {counts[version]} times. 'identifier' and 'version' together MUST be unique within a document (§4.6).")
+            if duplicates:
+                continue
+            semver = all(SEMVER_REGEX.fullmatch(entry["version"]) for entry in group)
+            if semver:
+                # Precedence ignores build metadata (SemVer §10), so 1.0.0+a and 1.0.0+b tie.
+                keys = [entry["version"].split("+", 1)[0] for entry in group]
+                if len(set(keys)) == len(keys):
+                    print_success(f"[{ident}] {len(group)} versions, ordered by Semantic Versioning precedence (§4.6).")
+                else:
+                    self.add_warning(f"[{ident}] {len(group)} versions that cannot be ordered: two have equal Semantic Versioning precedence once build metadata is ignored, so a registry cannot tell which is the latest (§4.6).")
+                continue
+            if any(SEMVER_REGEX.fullmatch(entry["version"]) for entry in group):
+                self.add_warning(f"[{ident}] Some versions are Semantic Versioning 2.0.0 strings and some are not, so every version is ordered by 'updatedAt' instead of precedence (§4.6).")
+            times = [parse_timestamp(entry.get("updatedAt")) for entry in group]
+            if None in times:
+                self.add_warning(f"[{ident}] {len(group)} versions that cannot be ordered: not every version is a Semantic Versioning 2.0.0 string and some entry has no valid 'updatedAt' with a UTC offset, so a registry cannot tell which is the latest (§4.6).")
+            elif len(set(times)) != len(times):
+                self.add_warning(f"[{ident}] {len(group)} versions that cannot be ordered: not every version is a Semantic Versioning 2.0.0 string and two entries have the same 'updatedAt', so a registry cannot tell which is the latest (§4.6).")
+            else:
+                print_success(f"[{ident}] {len(group)} versions, not all Semantic Versioning strings, so ordered by 'updatedAt' (§4.6).")
 
     def resolve_publisher(self, target):
         """Resolve a publisher's entries the way a conformant consumer does (§5.1).
