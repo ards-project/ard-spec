@@ -5,7 +5,8 @@ info:
   description: |
     Universal federated discovery API specification for AI agents, tools, and capabilities.
     Allows LLM orchestrators to semantically search and discover registries for relevant capabilities
-    and enables registry-to-registry federated query routing.
+    and enables registry-to-registry federation: at query time through routed searches, and at
+    index time through a change feed of identifiers.
 paths:
   /search:
     post:
@@ -118,6 +119,59 @@ paths:
           $ref: '#/components/responses/401Unauthorized'
         '429':
           $ref: '#/components/responses/429TooManyRequests'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
+  /changes:
+    get:
+      summary: Change Feed
+      description: |
+        Ordered, cursor-driven, replayable feed of the identifiers this registry added, updated,
+        or removed. Carries identifiers only: a consumer fetches each entry from the identifier's
+        authority and confirms every delete there. Optional; a registry that does not implement
+        it returns 501.
+      operationId: listChanges
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          description: |
+            Opaque position returned by a previous response from this registry. Absent, the feed
+            is read from the start of the retention window, which yields every identifier the
+            registry currently holds.
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9._~-]{1,256}$'
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of changes per page. The registry MAY return fewer.
+          schema:
+            type: integer
+            default: 500
+            minimum: 1
+            maximum: 1000
+      responses:
+        '200':
+          description: One page of changes, oldest to newest.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeFeedResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '410':
+          $ref: '#/components/responses/410CursorExpired'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+        '501':
+          description: The change feed is not implemented by this server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           $ref: '#/components/responses/500InternalError'
 
@@ -347,6 +401,9 @@ components:
           type: string
           description: Token for paginating subsequent results.
 
+    ChangeFeedResponse:
+      $ref: './ard-change.schema.json#/$defs/ChangeFeedResponse'
+
     Error:
       type: object
       required:
@@ -371,6 +428,12 @@ components:
             $ref: '#/components/schemas/Error'
     401Unauthorized:
       description: Credentials missing or rejected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    410CursorExpired:
+      description: The cursor predates the retention window; replay from an absent cursor.
       content:
         application/json:
           schema:

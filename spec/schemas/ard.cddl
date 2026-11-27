@@ -1,8 +1,9 @@
 ; CDDL Specification for Agentic Resource Discovery (ARD entry, manifest & Registry schemas)
 ; Compliant with IETF RFC 8610 (Concise Data Definition Language)
 ;
-; This file is a restatement of spec/schemas/ard-entry.schema.json for CBOR/CDDL
-; consumers. Where the two disagree, the JSON Schema is authoritative.
+; This file is a restatement of spec/schemas/ard-entry.schema.json and
+; spec/schemas/ard-change.schema.json for CBOR/CDDL consumers. Where they
+; disagree, the JSON Schema is authoritative.
 
 start = ard-manifest
 
@@ -178,6 +179,26 @@ list-response = {
 error-response = {
   errorCode: tstr,
   message: tstr
+}
+
+; --- The Change Feed (GET /changes) ---
+; A change carries an identifier and nothing about the entry; a consumer
+; fetches the entry from the identifier's authority and confirms deletes there.
+
+cursor = tstr .regexp "[-A-Za-z0-9._~]{1,256}" ; opaque; compared for equality only
+
+change = {
+  cursor: cursor,          ; later than every earlier change in the same registry
+  op: "upsert" / "delete", ; a consumer skips an op it does not recognize and still advances
+  time: tstr,              ; ISO 8601 timestamp from the producer's clock; informational
+  identifier: tstr         ; URN pattern: urn:air:<publisher>:[<namespace>:]<agent-name>
+}
+
+changes-response = {
+  changes: [*1000 change], ; oldest to newest; MAY be empty
+  cursor: cursor,          ; present even when changes is empty
+  more: bool,
+  ? retention: tstr        ; ISO 8601 duration; absent when retention is unbounded
 }
 
 ; Helper generic value type
